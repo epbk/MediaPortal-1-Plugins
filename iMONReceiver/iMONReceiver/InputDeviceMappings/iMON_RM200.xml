@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<mappings version="3">
+	<remote family="iMON">
+		<button name="Power" code="RC_BTN_POWER">
+			<action layer="0" condition="*" conproperty="-1" command="POWER" cmdproperty="SHUTDOWN" sound="back.wav" />
+		</button>
+		<button name="App Exit" code="RC_BTN_APP_EXIT">
+			<action layer="0" condition="*" conproperty="-1" command="POWER" cmdproperty="EXIT" />
+		</button>
+		<button name="Record" code="RC_BTN_RECORD">
+			<action layer="0" condition="WINDOW" conproperty="501" command="ACTION" cmdproperty="113" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="89" sound="click.wav" />
+		</button>
+		<button name="Play" code="RC_BTN_PLAY">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="105" sound="click.wav" />
+			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="12" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="68" sound="click.wav" />
+		</button>
+		<button name="Pause" code="RC_BTN_PAUSE">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="105" sound="click.wav" />
+			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="12" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="68" sound="click.wav" />
+		</button>
+		<button name="Stop" code="RC_BTN_STOP">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="13" sound="click.wav" />
+		</button>
+		<button name="Rewind" code="RC_BTN_REW">
+			<action layer="0" condition="WINDOW" conproperty="600" command="ACTION" cmdproperty="87" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="29" sound="cursor.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="17" sound="cursor.wav" />
+		</button>
+		<button name="Forward" code="RC_BTN_FF">
+			<action layer="0" condition="WINDOW" conproperty="600" command="ACTION" cmdproperty="86" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="28" sound="cursor.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="16" sound="cursor.wav" />
+		</button>
+		<button name="Prev" code="RC_BTN_PREV">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9980" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9980" sound="click.wav" />
+			<action layer="0" condition="PLAYER" conproperty="DVD" command="ACTION" cmdproperty="92" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="600" command="ACTION" cmdproperty="6" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="29" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2005" command="ACTION" cmdproperty="92" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="15" sound="cursor.wav" />
+		</button>
+		<button name="Next" code="RC_BTN_NEXT">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9979" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9979" sound="click.wav" />
+			<action layer="0" condition="PLAYER" conproperty="DVD" command="ACTION" cmdproperty="91" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="600" command="ACTION" cmdproperty="5" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="28" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2005" command="ACTION" cmdproperty="91" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="14" sound="cursor.wav" />
+		</button>
+		<button name="Eject" code="RC_BTN_EJECT" />
+		<button name="1" code="RC_BTN_NUM1" />
+		<button name="2" code="RC_BTN_NUM2" />
+		<button name="3" code="RC_BTN_NUM3" />
+		<button name="4" code="RC_BTN_NUM4" />
+		<button name="5" code="RC_BTN_NUM5" />
+		<button name="6" code="RC_BTN_NUM6" />
+		<button name="7" code="RC_BTN_NUM7" />
+		<button name="8" code="RC_BTN_NUM8" />
+		<button name="9" code="RC_BTN_NUM9" />
+		<button name="0" code="RC_BTN_NUM0" />
+		<button name="Shift+Tab" code="RC_BTN_SHIFT_TAB" />
+		<button name="Tab" code="RC_BTN_TAB" />
+		<button name="Up" code="RC_BTN_A_UP">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="31" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="3" sound="cursor.wav" />
+		</button>
+		<button name="Down" code="RC_BTN_A_DOWN">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="30" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="4" sound="cursor.wav" />
+		</button>
+		<button name="Left" code="RC_BTN_A_LEFT">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="29" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="1" sound="cursor.wav" />
+		</button>
+		<button name="Right" code="RC_BTN_A_RIGHT">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="28" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="2" sound="cursor.wav" />
+		</button>
+		<button name="Enter" code="RC_BTN_ENTER" />
+		<button name="Quick launch" code="RC_BTN_QUICK_LAUNCH" />
+		<button name="Backspace" code="RC_BTN_BACKSPACE" />
+		<button name="Mouse/Keyboard" code="RC_BTN_MOUSEKBD" />
+		<button name="Select space" code="RC_BTN_SPACE" />
+		<button name="Windows start" code="RC_BTN_WINDOWS" />
+		<button name="Windows menu" code="RC_BTN_MENU" />
+		<button name="Left click" code="LEFTCLICK" />
+		<button name="Right click" code="RIGHTCLICK" />
+		<button name="File open" code="RC_BTN_FILE_OPEN" />
+		<button name="Escape" code="RC_BTN_ESC" />
+		<button name="App launcher" code="RC_BTN_LAUNCHER" />
+		<button name="Task switcher" code="RC_BTN_SWITCHER" />
+		<button name="Timer" code="RC_BTN_TIMER" />
+		<button name="Mute" code="RC_BTN_MUTE">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="9982" />
+		</button>
+		<button name="Volume +" code="RC_BTN_VOL_UP">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="103" />
+		</button>
+		<button name="Volume -" code="RC_BTN_VOL_DOWN">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="102" />
+		</button>
+		<button name="Channel Up" code="RC_BTN_CH_UP">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9984" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9984" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="31" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="1" command="ACTION" cmdproperty="95" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="602" command="ACTION" cmdproperty="95" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="3003" command="ACTION" cmdproperty="95" sound="cursor.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="5" sound="cursor.wav" />
+		</button>
+		<button name="Channel Down" code="RC_BTN_CH_DOWN">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9985" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9985" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="30" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="1" command="ACTION" cmdproperty="94" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="602" command="ACTION" cmdproperty="94" sound="cursor.wav" />
+			<action layer="0" condition="WINDOW" conproperty="3003" command="ACTION" cmdproperty="94" sound="cursor.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="6" sound="cursor.wav" />
+		</button>
+		<button name="Language" code="RC_BTN_LANG">
+			<action layer="0" condition="WINDOW" conproperty="602" command="ACTION" cmdproperty="26" />
+			<action layer="0" condition="WINDOW" conproperty="2005" command="ACTION" cmdproperty="26" />
+		</button>
+		<button name="My Movie" code="RC_BTN_MYMOVIE">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9975" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9975" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="WINDOW" cmdproperty="6" sound="click.wav" />
+		</button>
+		<button name="My Music" code="RC_BTN_MYMUSIC">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9976" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9976" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="WINDOW" cmdproperty="501" sound="click.wav" />
+		</button>
+		<button name="My Photo" code="RC_BTN_MYPHOTO">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9977" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9977" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="WINDOW" cmdproperty="2" sound="click.wav" />
+		</button>
+		<button name="My TV" code="RC_BTN_MYTV">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="WINDOW" cmdproperty="602" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="1" command="ACTION" cmdproperty="18" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="602" command="ACTION" cmdproperty="18" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="18" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="WINDOW" cmdproperty="1" sound="click.wav" />
+		</button>
+		<button name="My DVD" code="RC_BTN_MYDVD">
+			<action layer="0" condition="WINDOW" conproperty="7701" command="ACTION" cmdproperty="9978" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="ACTION" cmdproperty="9978" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="WINDOW" cmdproperty="4755" sound="click.wav" />
+		</button>
+		<button name="Menu" code="RC_BTN_DVD_MENU">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="106" sound="click.wav" />
+		</button>
+		<button name="Caption" code="RC_BTN_CAPTION">
+			<action layer="0" condition="WINDOW" conproperty="602" command="WINDOW" cmdproperty="7701" />
+			<action layer="0" condition="WINDOW" conproperty="1" command="WINDOW" cmdproperty="7700" />
+			<action layer="0" condition="WINDOW" conproperty="7701" command="WINDOW" cmdproperty="7700" />
+			<action layer="0" condition="WINDOW" conproperty="7700" command="WINDOW" cmdproperty="7701" />
+			<action layer="0" condition="WINDOW" conproperty="2005" command="ACTION" cmdproperty="119" />
+		</button>
+		<button name="Full Screen" code="RC_BTN_FULLSCR">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="18" sound="click.wav" />
+		</button>
+		<button name="Aspect Ratio" code="RC_BTN_ASPECT">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="19" sound="click.wav" />
+		</button>
+		<button name="Bookmark" code="RC_BTN_BOOKMARK">
+			<action layer="0" condition="FULLSCREEN" conproperty="TRUE" command="ACTION" cmdproperty="24" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="106" sound="click.wav" />
+		</button>
+		<button name="Thumbnail" code="RC_BTN_THUMBNAIL">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="101" sound="click.wav" />
+		</button>
+		<button name="FRONT Play/Pause" code="RC_BTN_PLAY_PAUSE">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="105" sound="click.wav" />
+			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="12" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="68" sound="click.wav" />
+		</button>
+		<button name="RC_BTN_STAR" code="RC_BTN_STAR" />
+		<button name="RC_BTN_SHARP" code="RC_BTN_SHARP" />
+		<button name="RC_BTN_RADIO" code="RC_BTN_RADIO" />
+		<button name="RC_BTN_LIVE_TV" code="RC_BTN_LIVE_TV" />
+		<button name="RC_BTN_RECORDED_TV" code="RC_BTN_RECORDED_TV" />
+		<button name="RC_BTN_GUIDEH" code="RC_BTN_GUIDE" />
+		<button name="RC_BTN_NUM_CLEAR" code="RC_BTN_NUM_CLEAR" />
+		<button name="RC_BTN_NUM_PRINT" code="RC_BTN_NUM_PRINT" />
+		<button name="RC_BTN_NUM_ENTER" code="RC_BTN_NUM_ENTER" />
+		<button name="RC_BTN_MESSENGER" code="RC_BTN_MESSENGER" />
+		<button name="RC_BTN_VIDEOTEXT" code="RC_BTN_VIDEOTEXT" />
+		<button name="RC_BTN_VT_RED" code="RC_BTN_VT_RED" />
+		<button name="RC_BTN_VT_GREEN" code="RC_BTN_VT_GREEN" />
+		<button name="RC_BTN_VT_YELLOW" code="RC_BTN_VT_YELLOW" />
+		<button name="RC_BTN_VT_BLUE" code="RC_BTN_VT_BLUE" />
+		<button name="RC_BTN_USER_01" code="RC_BTN_USER_01" />
+		<button name="RC_BTN_USER_02" code="RC_BTN_USER_02" />
+		<button name="RC_BTN_USER_03" code="RC_BTN_USER_03" />
+		<button name="RC_BTN_USER_04" code="RC_BTN_USER_04" />
+		<button name="RC_BTN_USER_05" code="RC_BTN_USER_05" />
+		<button name="RC_BTN_USER_06" code="RC_BTN_USER_06" />
+		<button name="RC_BTN_USER_07" code="RC_BTN_USER_07" />
+		<button name="RC_BTN_USER_08" code="RC_BTN_USER_08" />
+		<button name="RC_BTN_USER_09" code="RC_BTN_USER_09" />
+		<button name="RC_BTN_USER_10" code="RC_BTN_USER_10" />
+		<button name="RC_BTN_VISUALIZATION" code="RC_BTN_VISUALIZATION" />
+		<button name="RC_BTN_SLIDESHOW" code="RC_BTN_SLIDESHOW" />
+		<button name="RC_BTN_ANGLE" code="RC_BTN_ANGLE" />
+		<button name="FRONT Volume Knob Push" code="RC_VKNOB_PUSH">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="9982" />
+		</button>
+		<button name="FRONT Volume Knob Push Long" code="RC_VKNOB_LONG" />
+		<button name="FRONT Volume Knob Rotate Left" code="RC_VKNOB_ROTATE_L">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="102" />
+		</button>
+		<button name="FRONT Volume Knob Rotate Right" code="RC_VKNOB_ROTATE_R">
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="103" />
+		</button>
+		<button name="FRONT Navigation Knob Push" code="RC_NKNOB_PUSH">
+			<action layer="0" condition="WINDOW" conproperty="11" command="ACTION" cmdproperty="47" sound="click.wav" />
+			<action layer="0" condition="WINDOW" conproperty="10" command="ACTION" cmdproperty="10" sound="back.wav" />
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="105" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="7" sound="click.wav" />
+		</button>
+		<button name="FRONT Navigation Knob Push Long" code="RC_NKNOB_LONG" />
+		<button name="FRONT Navigation Knob Rotate Left" code="RC_NKNOB_ROTATE_L">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="31" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="3" sound="cursor.wav" />
+		</button>
+		<button name="FRONT Navigation Knob Rotate Right" code="RC_NKNOB_ROTATE_R">
+			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="30" sound="click.wav" />
+			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="4" sound="cursor.wav" />
+		</button>
+	</remote>
+</mappings>
