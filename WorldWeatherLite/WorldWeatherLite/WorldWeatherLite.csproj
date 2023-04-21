@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8F4FB259-59EC-4A69-BDA0-2066678F257A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MediaPortal.Plugins.WorldWeatherLite</RootNamespace>
+    <AssemblyName>WorldWeatherLite</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release MS_DirectX|x86'">
+    <OutputPath>bin\x86\Release MS_DirectX\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release MS_DirectX|AnyCPU'">
+    <OutputPath>bin\Release MS_DirectX\</OutputPath>
+    <DefineConstants>TRACE;MS_DIRECTX</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug MS_DirectX|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug MS_DirectX\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug MS_DirectX|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug MS_DirectX\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MS_DIRECTX</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Debug'">
+    <Reference Include="Core">
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Release MS_DirectX' Or '$(Configuration)'=='Debug MS_DirectX'">
+    <Reference Include="Core">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Common.Utils">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Common.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="CoordinateSharp">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\CoordinateSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Dialogs, Version=1.30.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Dialogs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MediaPortal.Pbk">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\MediaPortal.Pbk.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\NLog.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Utils">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConfigurationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfigurationForm.Designer.cs">
+      <DependentUpon>ConfigurationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Database\dbHoliday.cs" />
+    <Compile Include="Database\dbWeatherImage.cs" />
+    <Compile Include="Database\dbSettings.cs" />
+    <Compile Include="Database\dbTable.cs" />
+    <Compile Include="Database\dbWeatherLoaction.cs" />
+    <Compile Include="FullscreenVideoBehaviorEnum.cs" />
+    <Compile Include="GUIWorldWeaterLite.cs" />
+    <Compile Include="GUI\GUIDistanceUnitEnum.cs" />
+    <Compile Include="GUI\GUIImageFrame.cs" />
+    <Compile Include="GUI\GUIPrecipitationUnitEnum.cs" />
+    <Compile Include="GUI\GUIPressureUnitEnum.cs" />
+    <Compile Include="GUI\GUITemperatureUnitEnum.cs" />
+    <Compile Include="GUI\GUIWeatherImage.cs" />
+    <Compile Include="GUI\GUIWindUnitEnum.cs" />
+    <Compile Include="ImageViewModeEnum.cs" />
+    <Compile Include="Log\Log.cs" />
+    <Compile Include="MediaHelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MediaHelpForm.Designer.cs">
+      <DependentUpon>MediaHelpForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Providers\ForecastDay.cs" />
+    <Compile Include="Providers\IWeatherProvider.cs" />
+    <Compile Include="Providers\ProviderAccuWeather.cs" />
+    <Compile Include="Providers\ProviderBase.cs" />
+    <Compile Include="Providers\ProviderForeca.cs" />
+    <Compile Include="Providers\ProviderMsn.cs" />
+    <Compile Include="Providers\ProviderTypeEnum.cs" />
+    <Compile Include="Providers\WeatherData.cs" />
+    <Compile Include="Language\LanguageEnum.cs" />
+    <Compile Include="Language\Translation.cs" />
+    <Compile Include="Language\TranslationEnum.cs" />
+    <Compile Include="UserControls\DayMonthTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\DayMonthTextBox.Designer.cs">
+      <DependentUpon>DayMonthTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\HolidayTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\HolidayTextBox.Designer.cs">
+      <DependentUpon>HolidayTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\Calendar.cs" />
+    <Compile Include="Utils\HemisphereTypeEnum.cs" />
+    <Compile Include="Utils\GeoClock.cs" />
+    <Compile Include="Utils\Moon.cs" />
+    <Compile Include="Utils\MoonPhaseEnum.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\Sun.cs" />
+    <Compile Include="Utils\UnitHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConfigurationForm.resx">
+      <DependentUpon>ConfigurationForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\strings_en.xml" />
+    <EmbeddedResource Include="MediaHelpForm.resx">
+      <DependentUpon>MediaHelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\DayMonthTextBox.resx">
+      <DependentUpon>DayMonthTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\HolidayTextBox.resx">
+      <DependentUpon>HolidayTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\WorldWeather-disabled.png" />
+    <EmbeddedResource Include="Graphics\WorldWeather-enabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\help.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\help_alpha.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"
+Copy "$(TargetDir)$(TargetName).pdb" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"
+Copy "$(TargetDir)$(TargetName).pdb" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release MS_DirectX'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
+Copy "$(TargetDir)$(TargetName).pdb" ""c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
+Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Shared\MediaPortal\Shared\Plugins\</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug MS_DirectX'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
+Copy "$(TargetDir)$(TargetName).pdb" ""c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

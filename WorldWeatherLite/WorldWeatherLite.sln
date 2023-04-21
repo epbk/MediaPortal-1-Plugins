@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldWeatherLite", "WorldWeatherLite\WorldWeatherLite.csproj", "{8F4FB259-59EC-4A69-BDA0-2066678F257A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug MS_DirectX|Any CPU = Debug MS_DirectX|Any CPU
+		Debug MS_DirectX|x86 = Debug MS_DirectX|x86
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release MS_DirectX|Any CPU = Release MS_DirectX|Any CPU
+		Release MS_DirectX|x86 = Release MS_DirectX|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug MS_DirectX|Any CPU.ActiveCfg = Debug MS_DirectX|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug MS_DirectX|Any CPU.Build.0 = Debug MS_DirectX|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug MS_DirectX|x86.ActiveCfg = Debug MS_DirectX|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug MS_DirectX|x86.Build.0 = Debug MS_DirectX|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug|x86.ActiveCfg = Debug|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Debug|x86.Build.0 = Debug|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release MS_DirectX|Any CPU.ActiveCfg = Release MS_DirectX|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release MS_DirectX|Any CPU.Build.0 = Release MS_DirectX|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release MS_DirectX|x86.ActiveCfg = Release MS_DirectX|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release MS_DirectX|x86.Build.0 = Release MS_DirectX|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release|x86.ActiveCfg = Release|x86
+		{8F4FB259-59EC-4A69-BDA0-2066678F257A}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
