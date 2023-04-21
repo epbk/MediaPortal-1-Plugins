@@ -331,6 +331,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         //private Dictionary<string, string> _Translation = new Dictionary<string, string>();
 
         private int _WeatherIsRefreshing = 0;
+        private int _WeatherRefreshAttempts = 0;
         private System.Timers.Timer _TimerRefreshWeather;
         private System.Timers.Timer _TimerRefreshLocation;
         private DateTime _RefreshLast = DateTime.MinValue;
@@ -1741,11 +1742,15 @@ mset:
 
                 //Next refresh time
                 if (!bResult)
-                    this._TimerRefreshWeather.Interval = 60 * 1000; //1min
+                {
+                    this._TimerRefreshWeather.Interval = Math.Min(_REFRESH_INTERVAL, Math.Pow(2, this._WeatherRefreshAttempts) * 60) * 1000;
+                    this._WeatherRefreshAttempts++;
+                }
                 else
                 {
                     this._RefreshLast = DateTime.Now;
                     this._TimerRefreshWeather.Interval = _REFRESH_INTERVAL * 1000;
+                    this._WeatherRefreshAttempts = 0;
                 }
 
                 //Moon phase
