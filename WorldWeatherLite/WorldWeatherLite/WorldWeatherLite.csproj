@@ -267,22 +267,8 @@
     <None Include="Resources\help_alpha.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"
-Copy "$(TargetDir)$(TargetName).pdb" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"
-Copy "$(TargetDir)$(TargetName).pdb" "c:\Program Files\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release MS_DirectX'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
-Copy "$(TargetDir)$(TargetName).pdb" ""c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
-Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Shared\MediaPortal\Shared\Plugins\</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug MS_DirectX'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"
-Copy "$(TargetDir)$(TargetName).pdb" ""c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
+  <PropertyGroup>
+    <PostBuildEvent />
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
