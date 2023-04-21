@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaPortal.Pbk", "MediaPortal.Pbk\MediaPortal.Pbk.csproj", "{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Latest|Any CPU = Latest|Any CPU
+		Latest|x64 = Latest|x64
+		Latest|x86 = Latest|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|x64.ActiveCfg = Debug|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|x64.Build.0 = Debug|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|x86.ActiveCfg = Debug|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|x86.Build.0 = Debug|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|Any CPU.ActiveCfg = Latest|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|Any CPU.Build.0 = Latest|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|x64.ActiveCfg = Latest|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|x64.Build.0 = Latest|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|x86.ActiveCfg = Latest|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Latest|x86.Build.0 = Latest|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x64.ActiveCfg = Release|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x64.Build.0 = Release|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x86.ActiveCfg = Release|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

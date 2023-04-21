@@ -1,0 +1,634 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MediaPortal.Pbk</RootNamespace>
+    <AssemblyName>MediaPortal.Pbk</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FX40</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;FX40 NET_4_0</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <DocumentationFile>bin\x86\Release\MediaPortal.Pbk.XML</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Latest|AnyCPU'">
+    <OutputPath>bin\Latest\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Latest|x86'">
+    <OutputPath>bin\x86\Latest\</OutputPath>
+    <DefineConstants>TRACE;latest; FX40</DefineConstants>
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FX40</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;FX40 NET_4_0</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\x86\Release\MediaPortal.Pbk.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Latest|x64'">
+    <OutputPath>bin\x64\Latest\</OutputPath>
+    <DefineConstants>TRACE;latest; FX40</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'x64' ">
+    <Reference Include="ManagedOpenSsl-x64, Version=0.6.0.0, Culture=neutral, processorArchitecture=x64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal\ManagedOpenSsl-x64.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'x86' ">
+    <Reference Include="ManagedOpenSsl, Version=0.6.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\ManagedOpenSsl.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="BrotliSharpLib">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\BrotliSharpLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Common.GUIPlugins">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Common.GUIPlugins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Databases">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Databases.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DokanNet">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\DokanNet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DotNetZip">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\DotNetZip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\HtmlAgilityPack.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Lucene.Net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MetadataExtractor">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\MetadataExtractor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\NLog.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SgmlReaderDll">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\SgmlReaderDll.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Latest'">
+    <Reference Include="Common.Utils">
+      <HintPath>f:\Install\MediaPortal\Latest\Common.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>f:\Install\MediaPortal\Latest\Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Dialogs">
+      <HintPath>f:\Install\MediaPortal\Latest\plugins\Windows\Dialogs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Utils">
+      <HintPath>f:\Install\MediaPortal\Latest\Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Debug'">
+    <Reference Include="Common.Utils">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Common.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Dialogs">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Dialogs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Utils">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="3rdParty\Cornerstone\Collections\CachedDictionary.cs" />
+    <Compile Include="3rdParty\Cornerstone\Collections\DiskCachedDictionary.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\ByteArray.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\DBObjectList.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\DynamicList.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\IDynamic.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\IStringSourcedObject.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\RelationList.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\CustomTypes\StringList.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\DatabaseCache.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\DatabaseManager.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\DBField.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\DBRelation.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\IAttributeOwner.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\IDynamicFilterHelper.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\SettingsManager.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DatabaseTable.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBAttribute.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBCriteria.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBFilter.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBMenu.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\DBSetting.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\GenericDatabaseTable.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\IFilter.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\Tables\NodeListExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\ByteExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\Collections\IListExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\DateTimeExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\IO\DirectoryInfoExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\IO\DriveInfoExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\IO\FileInfoExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\IO\FileSystemInfoExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\IO\PathStringExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\JsonExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\Extensions\StringExtensions.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\AdvancedSettingsPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\AdvancedSettingsPane.Designer.cs">
+      <DependentUpon>AdvancedSettingsPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\AttributesEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\AttributesEditor.Designer.cs">
+      <DependentUpon>AttributesEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\DBComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\DBObjectEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\DBObjectListEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\DBTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\FieldDisplaySettings.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\FilterComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\IDBBackedControl.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\IDBFieldBackedControl.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\SettingCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\SettingsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Controls\SettingsTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\DesignMode\DatabaseTableTypeConverter.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\DesignMode\DBFieldTypeConverter.cs" />
+    <Compile Include="3rdParty\Cornerstone\GUI\DesignMode\DBObjectFieldEditorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\DesignMode\DBObjectFieldEditorDialog.Designer.cs">
+      <DependentUpon>DBObjectFieldEditorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Dialogs\AttributeTypeEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Dialogs\AttributeTypeEditor.Designer.cs">
+      <DependentUpon>AttributeTypeEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Dialogs\ProgressPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Dialogs\ProgressPopup.Designer.cs">
+      <DependentUpon>ProgressPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\FilterEditorPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\FilterEditorPopup.Designer.cs">
+      <DependentUpon>FilterEditorPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\AddNodePopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\AddNodePopup.Designer.cs">
+      <DependentUpon>AddNodePopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CategorySettingsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CategorySettingsPanel.Designer.cs">
+      <DependentUpon>CategorySettingsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CriteriaInputField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CriteriaListPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CriteriaPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\CriteriaPanel.Designer.cs">
+      <DependentUpon>CriteriaPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\FilterEditorPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericCriteriaListPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericCriteriaListPanel.Designer.cs">
+      <DependentUpon>GenericCriteriaListPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericFilterEditorPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericFilterEditorPane.Designer.cs">
+      <DependentUpon>GenericFilterEditorPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericMenuTreePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericMenuTreePanel.Designer.cs">
+      <DependentUpon>GenericMenuTreePanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericNodeSettingsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\GenericNodeSettingsPanel.Designer.cs">
+      <DependentUpon>GenericNodeSettingsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\MenuTreePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\Filtering\NodeSettingsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\ItemSelectionPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\GUI\ItemSelectionPopup.Designer.cs">
+      <DependentUpon>ItemSelectionPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\DateModifier.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\HtmlDecodeModifier.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\IValueModifier.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\SafeModifier.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\StripTagsModifier.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Modifiers\ValueModifierAttribute.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\ActionNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\DistanceNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\IfNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\LogNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\LoopNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\MathNodes.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\ParseNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\ReplaceNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\RetrieveNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\SetNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\SleepNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\Nodes\SortNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\ScraperNode.cs" />
+    <Compile Include="3rdParty\Cornerstone\ScraperEngine\ScriptableScraper.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\AbstractBackgroundProcess.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\AdvancedStringComparer.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\BackgroundProcessManager.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\DriveInfoHelper.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Search\AbstractSearcher.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Search\LevenshteinSubstringSearcher.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Search\LuceneSearcher.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Search\SearchException.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Translator\LanguageUtility.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\Translator\Translator.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\WebGrabber.cs" />
+    <Compile Include="3rdParty\Cornerstone\Tools\WildcardParser.cs" />
+    <Compile Include="Controls\DateTimePickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\DateTimePickerForm.Designer.cs">
+      <DependentUpon>DateTimePickerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\IPropertyObject.cs" />
+    <Compile Include="Controls\PropertyControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\PropertyControl.Designer.cs">
+      <DependentUpon>PropertyControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PropertyObjectAttributeModeEnum .cs" />
+    <Compile Include="Controls\PropertyObjectConfig.cs" />
+    <Compile Include="Controls\PropertyObjectWrapper.cs" />
+    <Compile Include="Controls\Renderer\Renderer.cs" />
+    <Compile Include="Controls\Renderer\ToolStripRendererCustom.cs" />
+    <Compile Include="Controls\TextQueryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\TextQueryForm.Designer.cs">
+      <DependentUpon>TextQueryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ToolStripButtonClose.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ToolStripButtonMinMax.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ToolStripMenuItemCustom.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ToolStripSpringTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\UIEditor\CheckBoxUIEditor.cs" />
+    <Compile Include="Controls\UIEditor\EnumValueConverter.cs" />
+    <Compile Include="Controls\UIEditor\FlagEnumUIEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\UIEditor\FlagsEnumConverter.cs" />
+    <Compile Include="Controls\UIEditor\SelectDirectoryUIEditor.cs" />
+    <Compile Include="Controls\UIEditor\SelectFileUIEditor.cs" />
+    <Compile Include="Controls\UIEditor\SelectorUIEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Extensions\JsonExtensions.cs" />
+    <Compile Include="Extensions\StringBuilderExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\XmlExtensions.cs" />
+    <Compile Include="GUI\Extensions\GUIFacadeControlExtensions.cs" />
+    <Compile Include="GUI\Extensions\GUIWindowExtensions.cs" />
+    <Compile Include="GUI\GUIDialogMenuWide.cs" />
+    <Compile Include="GUI\GUIGeneralRating.cs" />
+    <Compile Include="GUI\GUIItem.cs" />
+    <Compile Include="GUI\GUIPinCodeDialog.cs" />
+    <Compile Include="GUI\SkinSettings.cs" />
+    <Compile Include="ImageLoader\AsyncImageResource.cs" />
+    <Compile Include="ImageLoader\ImageLoadEventArgs.cs" />
+    <Compile Include="ImageLoader\ImageLoadEventHandler.cs" />
+    <Compile Include="ImageLoader\ImageLoadHandler.cs" />
+    <Compile Include="ImageLoader\ImageSwapper.cs" />
+    <Compile Include="ImageLoader\ImageWatcher.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoLogger.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoStream.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoVirtualDrive.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoVirtualDriveMountResultEnum.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoVirtualDriveOperations.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoVirtualDriveShared.cs" />
+    <Compile Include="IO\VirtualDrive\CryptoVirtualDriveSource.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\Common.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\Directory.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\DirectoryInfo.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\File.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\FileInfo.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\FileSystemInfo.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\JunctionPoint.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\NativeMethods.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\Path.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\Priviledge.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\SafeFindHandle.cs" />
+    <Compile Include="IO\VirtualDrive\LongPath\SafeTokenHandle.cs" />
+    <Compile Include="Log\Log.cs" />
+    <Compile Include="Messenger\IMessage.cs" />
+    <Compile Include="Messenger\MessageHandler.cs" />
+    <Compile Include="Messenger\MessangerEventArgs.cs" />
+    <Compile Include="Messenger\MessangerEventTypeEnum.cs" />
+    <Compile Include="Net\Http\BufferHandler.cs" />
+    <Compile Include="Net\Http\Caching.cs" />
+    <Compile Include="Net\Http\ChunkedStream.cs" />
+    <Compile Include="Net\Http\GetResponseResultEnum.cs" />
+    <Compile Include="Net\Http\HtmlDocument.cs" />
+    <Compile Include="Net\Http\HttpHeaderField.cs" />
+    <Compile Include="Net\Http\HttpMethodEnum.cs" />
+    <Compile Include="Net\Http\HttpUserServer.cs" />
+    <Compile Include="Net\Http\HttpUserServerEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserServerEventHandler.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeDownloadEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeDownloadEventHandler.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeRequestEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeRequestEventHandler.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventHandler.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequest.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequestEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequestEventHandler.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequestEventType.cs" />
+    <Compile Include="Net\Http\HttpUserWebResponseStream.cs" />
+    <Compile Include="Net\Http\WebTools.cs" />
+    <Compile Include="Net\ServerUtils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs" />
+    <Compile Include="Tasks\TaskActionHandler.cs" />
+    <Compile Include="Tasks\TaskActionResultEnum.cs" />
+    <Compile Include="Tasks\TaskCompletation.cs" />
+    <Compile Include="Tasks\TaskPriority.cs" />
+    <Compile Include="Tasks\TaskQueue.cs" />
+    <Compile Include="Tasks\TaskThreadInitHandler.cs" />
+    <Compile Include="Tasks\TaskThreadDisposeHandler.cs" />
+    <Compile Include="Utils\Buffering\ArrayBuffer.cs" />
+    <Compile Include="Utils\Buffering\BufferArgs.cs" />
+    <Compile Include="Utils\Buffering\BufferDataHandler.cs" />
+    <Compile Include="Utils\Buffering\IBuffer.cs" />
+    <Compile Include="Utils\Buffering\RingBuffer.cs" />
+    <Compile Include="Utils\Country.cs" />
+    <Compile Include="Utils\Encryption\Crypto.cs" />
+    <Compile Include="Utils\Encryption\CryptoDirectory.cs" />
+    <Compile Include="Utils\Encryption\CryptoFile.cs" />
+    <Compile Include="Utils\Encryption\CryptoItem.cs" />
+    <Compile Include="Tasks\GuiTaskHandler.cs" />
+    <Compile Include="Utils\MemoryImage.cs" />
+    <Compile Include="Utils\Json.cs" />
+    <Compile Include="Utils\MD5Crypt.cs" />
+    <Compile Include="Utils\OptionEnum.cs" />
+    <Compile Include="Utils\Synchronization\Sync.cs" />
+    <Compile Include="Utils\Synchronization\SyncDirection.cs" />
+    <Compile Include="Utils\Tools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\AdvancedSettingsPane.resx">
+      <DependentUpon>AdvancedSettingsPane.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Controls\AttributesEditor.resx">
+      <DependentUpon>AttributesEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Controls\DBObjectEditor.resx">
+      <DependentUpon>DBObjectEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Controls\DBObjectListEditor.resx">
+      <DependentUpon>DBObjectListEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\DesignMode\DBObjectFieldEditorDialog.resx">
+      <DependentUpon>DBObjectFieldEditorDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Dialogs\AttributeTypeEditor.resx">
+      <DependentUpon>AttributeTypeEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Dialogs\ProgressPopup.resx">
+      <DependentUpon>ProgressPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\FilterEditorPopup.resx">
+      <DependentUpon>FilterEditorPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\AddNodePopup.resx">
+      <DependentUpon>AddNodePopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\CategorySettingsPanel.resx">
+      <DependentUpon>CategorySettingsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\CriteriaPanel.resx">
+      <DependentUpon>CriteriaPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\GenericCriteriaListPanel.resx">
+      <DependentUpon>GenericCriteriaListPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\GenericFilterEditorPane.resx">
+      <DependentUpon>GenericFilterEditorPane.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\GenericMenuTreePanel.resx">
+      <DependentUpon>GenericMenuTreePanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\Filtering\GenericNodeSettingsPanel.resx">
+      <DependentUpon>GenericNodeSettingsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="3rdParty\Cornerstone\GUI\ItemSelectionPopup.resx">
+      <DependentUpon>ItemSelectionPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\DateTimePickerForm.resx">
+      <DependentUpon>DateTimePickerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\PropertyControl.resx">
+      <DependentUpon>PropertyControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TextQueryForm.resx">
+      <DependentUpon>TextQueryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="3rdParty\Cornerstone\Images\arrow_down.png" />
+    <Content Include="3rdParty\Cornerstone\Images\arrow_up.png" />
+    <Content Include="3rdParty\Cornerstone\Images\blank.png" />
+    <Content Include="3rdParty\Cornerstone\Images\bullet_black.png" />
+    <Content Include="3rdParty\Cornerstone\Images\bullet_error.png" />
+    <Content Include="3rdParty\Cornerstone\Images\bullet_go.png" />
+    <Content Include="3rdParty\Cornerstone\Images\cog.png" />
+    <Content Include="3rdParty\Cornerstone\Images\folder.png" />
+    <Content Include="3rdParty\Cornerstone\Images\folder_explore.png" />
+    <Content Include="3rdParty\Cornerstone\Images\help.png" />
+    <Content Include="3rdParty\Cornerstone\Images\list-add.png" />
+    <Content Include="3rdParty\Cornerstone\Images\list-remove.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
+Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
+Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Shared\MediaPortal\Shared\Plugins\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
+Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Latest|x86'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "F:\Install\MediaPortal\Plugins\myStreamCinema2\MediaPortal\"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\"
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
