@@ -608,21 +608,8 @@
     <Content Include="3rdParty\Cornerstone\Images\list-remove.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
-Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
-Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Shared\MediaPortal\Shared\Plugins\"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal\"
-Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal\plugins\Windows\"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Latest|x86'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "F:\Install\MediaPortal\Plugins\myStreamCinema2\MediaPortal\"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal\"
-</PostBuildEvent>
+  <PropertyGroup>
+    <PostBuildEvent />
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
