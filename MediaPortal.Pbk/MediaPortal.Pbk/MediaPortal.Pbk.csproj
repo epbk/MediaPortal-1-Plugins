@@ -525,6 +525,7 @@
     <Compile Include="Utils\Encryption\CryptoFile.cs" />
     <Compile Include="Utils\Encryption\CryptoItem.cs" />
     <Compile Include="Tasks\GuiTaskHandler.cs" />
+    <Compile Include="Utils\Enums.cs" />
     <Compile Include="Utils\MemoryImage.cs" />
     <Compile Include="Utils\Json.cs" />
     <Compile Include="Utils\MD5Crypt.cs" />
