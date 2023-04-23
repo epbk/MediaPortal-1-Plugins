@@ -95,11 +95,25 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //Holidays
             List<Database.dbHoliday> listHolidays = Database.dbHoliday.GetAll();
-            this.holidayTextBox0.Init(listHolidays[0]);
-            this.holidayTextBox1.Init(listHolidays[1]);
-            this.holidayTextBox2.Init(listHolidays[2]);
-            this.holidayTextBox3.Init(listHolidays[3]);
-            this.holidayTextBox4.Init(listHolidays[4]);
+            int iIdx = 0;
+            this.holidayTextBoxNewYear.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxEpiphany.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxHolyThurstday.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxGoodFriday.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxEasterSunday.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxAscensionDay.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxWhitSunday.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxCorpusChristi.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxAssumptionDay.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxReformationDay.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxAllSaintsDay.Init(listHolidays[iIdx++]);
+            this.holidayTextBoxChristmasDay.Init(listHolidays[iIdx++]);
+
+            this.holidayTextBox0.Init(listHolidays[iIdx++]);
+            this.holidayTextBox1.Init(listHolidays[iIdx++]);
+            this.holidayTextBox2.Init(listHolidays[iIdx++]);
+            this.holidayTextBox3.Init(listHolidays[iIdx++]);
+            this.holidayTextBox4.Init(listHolidays[iIdx++]);
             this.checkBoxCalendarEn.Checked = this._Settings.GUICalendarEnable;
         }
 
@@ -181,6 +195,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
 
             //Holidays
+            this.holidayTextBoxNewYear.Commit();
+            this.holidayTextBoxEpiphany.Commit();
+            this.holidayTextBoxHolyThurstday.Commit();
+            this.holidayTextBoxGoodFriday.Commit();
+            this.holidayTextBoxEasterSunday.Commit();
+            this.holidayTextBoxAscensionDay.Commit();
+            this.holidayTextBoxWhitSunday.Commit();
+            this.holidayTextBoxCorpusChristi.Commit();
+            this.holidayTextBoxAssumptionDay.Commit();
+            this.holidayTextBoxReformationDay.Commit();
+            this.holidayTextBoxAllSaintsDay.Commit();
+            this.holidayTextBoxChristmasDay.Commit();
             this.holidayTextBox0.Commit();
             this.holidayTextBox1.Commit();
             this.holidayTextBox2.Commit();

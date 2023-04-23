@@ -271,8 +271,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private const string _TAG_TRANSLATION_HOLIDAY = _TAG_PREFFIX + ".TranslationHoliday";
         private const string _TAG_TRANSLATION_SEASON = _TAG_PREFFIX + ".TranslationSeason";
         private const string _TAG_TRANSLATION_NEW_YEAR = _TAG_PREFFIX + ".TranslationNewYear";
-        private const string _TAG_TRANSLATION_ERIPHANY = _TAG_PREFFIX + ".TranslationEpiphany";
-        private const string _TAG_TRANSLATION_HOLY_THURSTDAY = _TAG_PREFFIX + ".TranslationHolyThursday";
+        private const string _TAG_TRANSLATION_EPIPHANY = _TAG_PREFFIX + ".TranslationEpiphany";
+        private const string _TAG_TRANSLATION_HOLY_THURSDAY = _TAG_PREFFIX + ".TranslationHolyThursday";
         private const string _TAG_TRANSLATION_GOOD_FRIDAY = _TAG_PREFFIX + ".TranslationGoodFriday";
         private const string _TAG_TRANSLATION_EASTER_SUNDAY = _TAG_PREFFIX + ".TranslationEasterSunday";
         private const string _TAG_TRANSLATION_ASCENSION_DAY = _TAG_PREFFIX + ".TranslationAscensionDay";
@@ -281,6 +281,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private const string _TAG_TRANSLATION_ASSUMPTION_DAY = _TAG_PREFFIX + ".TranslationAssumptionDay";
         private const string _TAG_TRANSLATION_REFORMATION_DAY = _TAG_PREFFIX + ".TranslationReformationDay";
         private const string _TAG_TRANSLATION_ALL_SAINTS_DAY = _TAG_PREFFIX + ".TranslationAllSaintsDay";
+        private const string _TAG_TRANSLATION_CHRISTMAS_DAY = _TAG_PREFFIX + ".TranslationChristmasDay";
         private const string _TAG_TRANSLATION_SPRING_SEASON = _TAG_PREFFIX + ".TranslationSpringSeason";
         private const string _TAG_TRANSLATION_SUMMER_SEASON = _TAG_PREFFIX + ".TranslationSummerSeason";
         private const string _TAG_TRANSLATION_AUTUMN_SEASON = _TAG_PREFFIX + ".TranslationAutumnSeason";
@@ -911,8 +912,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 new object[]{_TAG_TRANSLATION_HOLIDAY, (int)Language.TranslationEnum.translationHoliday },
                 new object[]{_TAG_TRANSLATION_SEASON, (int)Language.TranslationEnum.translationSeason },
                 new object[]{_TAG_TRANSLATION_NEW_YEAR, (int)Language.TranslationEnum.translationNewYear },
-                new object[]{_TAG_TRANSLATION_ERIPHANY, (int)Language.TranslationEnum.translationEpiphany },
-                new object[]{_TAG_TRANSLATION_HOLY_THURSTDAY, (int)Language.TranslationEnum.translationHolyThursday },
+                new object[]{_TAG_TRANSLATION_EPIPHANY, (int)Language.TranslationEnum.translationEpiphany },
+                new object[]{_TAG_TRANSLATION_HOLY_THURSDAY, (int)Language.TranslationEnum.translationHolyThursday },
                 new object[]{_TAG_TRANSLATION_GOOD_FRIDAY, (int)Language.TranslationEnum.translationGoodFriday },
                 new object[]{_TAG_TRANSLATION_EASTER_SUNDAY, (int)Language.TranslationEnum.translationEasterSunday },
                 new object[]{_TAG_TRANSLATION_ASCENSION_DAY, (int)Language.TranslationEnum.translationAscensionDay },
@@ -921,6 +922,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 new object[]{_TAG_TRANSLATION_ASSUMPTION_DAY, (int)Language.TranslationEnum.translationAssumptionDay },
                 new object[]{_TAG_TRANSLATION_REFORMATION_DAY, (int)Language.TranslationEnum.translationReformationDay },
                 new object[]{_TAG_TRANSLATION_ALL_SAINTS_DAY, (int)Language.TranslationEnum.translationAllSaintsDay },
+                new object[]{_TAG_TRANSLATION_CHRISTMAS_DAY, (int)Language.TranslationEnum.translationChristmasDay },
                 new object[]{_TAG_TRANSLATION_SPRING_SEASON, (int)Language.TranslationEnum.translationSpringSeason },
                 new object[]{_TAG_TRANSLATION_SUMMER_SEASON, (int)Language.TranslationEnum.translationSummerSeason },
                 new object[]{_TAG_TRANSLATION_AUTUMN_SEASON, (int)Language.TranslationEnum.translationAutumnSeason },
@@ -1076,7 +1078,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 }
                 else
                     strText = string.Empty;
-mset:
+            mset:
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_SET_TIME, strText);
 
 
@@ -1221,71 +1223,190 @@ mset:
         {
             GUIPropertyManager.SetProperty(_TAG_CALENDAR_ENABLED, set.GUICalendarEnable ? "1" : string.Empty);
 
-            DateTime dtTemp = Utils.Calendar.GetNewYearDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_NEW_YEAR, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_NEW_YEAR_WEEKDAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetEpiphanyDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_EPIPHANY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_EPIPHANY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetAssumptionDayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASSUMPTION_DAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASSUMPTION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetReformationDayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_REFORMATION_DAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_REFORMATION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetAllSaintsDayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ALL_SAINTS_DAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ALL_SAINTS_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetEasterSundayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_EASTER, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_EASTER_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetHolyThursdayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_HOLY_THURSDAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_HOLY_THURSDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetGoodFridayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_GOOD_FRIDAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_GOOD_FRIDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetAscensionDayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASCENSION_DAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASCENSION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetWhitSundayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_WHIT_SUNDAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_WHIT_SUNDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetCorpusChristiDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_CORPUS_CHRISTI, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_CORPUS_CHRISTI_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
-
-            dtTemp = Utils.Calendar.GetChristmasDayDate(dt);
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_CHRISTMAS_DAY, dtTemp.ToShortDateString());
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_CHRISTMAS_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+            DateTime dtEasterSunday = Utils.Calendar.GetEasterSundayDate(dt);
+            DateTime dtTemp;
 
             int iYear = dt.ToLocalTime().Year;
+            string str;
+            Database.dbHoliday hol;
             for (int i = 0; i < holidays.Count; i++)
             {
-                Database.dbHoliday h = holidays[i];
-                if (!string.IsNullOrWhiteSpace(h.Description))
+                hol = holidays[i];
+                str = string.Empty;
+
+                #region Get date & descripton
+                switch (hol.HolidayType)
                 {
-                    dtTemp = new DateTime(iYear, h.Month, h.Day);
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY_DESCRIPTION, i), h.Description);
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY, i), dtTemp.ToShortDateString());
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_WEEK_DAY, i), getTranslatedWeekDay(language, dtTemp));
+                    default:
+                        dtTemp = DateTime.MinValue;
+                        break;
+
+                    case Utils.HolidayTypeEnum.NewYear:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationNewYear);
+                        dtTemp = Utils.Calendar.GetNewYearDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.Epiphany:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationEpiphany);
+                        dtTemp = Utils.Calendar.GetEpiphanyDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.HolyThurstday:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationHolyThursday);
+                        dtTemp = Utils.Calendar.GetHolyThursdayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.GoodFriday:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationGoodFriday);
+                        dtTemp = Utils.Calendar.GetGoodFridayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.EasterSunday:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationEasterSunday);
+                        dtTemp = dtEasterSunday;
+                        break;
+
+                    case Utils.HolidayTypeEnum.AscensionDay:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationAscensionDay);
+                        dtTemp = Utils.Calendar.GetAscensionDayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.WhitSunday:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationWhitSunday);
+                        dtTemp = Utils.Calendar.GetWhitSundayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.CorpusChristi:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationCorpusChristi);
+                        dtTemp = Utils.Calendar.GetCorpusChristiDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.AssumptionDay:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationAssumptionDay);
+                        dtTemp = Utils.Calendar.GetAssumptionDayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.ReformationDay:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationReformationDay);
+                        dtTemp = Utils.Calendar.GetReformationDayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.AllSaintsDay:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationAllSaintsDay);
+                        dtTemp = Utils.Calendar.GetAllSaintsDayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.ChristmasDay:
+                        str = Language.Translation.GetLanguageString(language, (int)Language.TranslationEnum.translationChristmasDay);
+                        dtTemp = Utils.Calendar.GetChristmasDayDate(dt);
+                        break;
+
+                    case Utils.HolidayTypeEnum.Custom:
+                        str = hol.Description;
+                        dtTemp = new DateTime(iYear, hol.Month, hol.Day);
+                        break;
+
+                    case Utils.HolidayTypeEnum.EasterMonday:
+                        str = hol.Description;
+                        dtTemp = dtEasterSunday.AddDays(1);
+                        break;
                 }
-                else
+                #endregion
+
+                #region Assign date & description to the tags
+                Utils.HolidayTypeEnum hType = (Utils.HolidayTypeEnum)(i + 1);
+
+                switch (hType)
                 {
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY_DESCRIPTION, i), string.Empty);
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY, i), string.Empty);
-                    GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_WEEK_DAY, i), string.Empty);
+                    case Utils.HolidayTypeEnum.NewYear:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_NEW_YEAR, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_NEW_YEAR, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_NEW_YEAR_WEEKDAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.Epiphany:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_EPIPHANY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_EPIPHANY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_EPIPHANY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.HolyThurstday:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_HOLY_THURSDAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_HOLY_THURSDAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_HOLY_THURSDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.GoodFriday:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_GOOD_FRIDAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_GOOD_FRIDAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_GOOD_FRIDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.EasterSunday:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_EASTER_SUNDAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_EASTER, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_EASTER_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.AscensionDay:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_ASCENSION_DAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASCENSION_DAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASCENSION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.WhitSunday:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_WHIT_SUNDAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_WHIT_SUNDAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_WHIT_SUNDAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.CorpusChristi:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_CORPUS_CHRISTI, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_CORPUS_CHRISTI, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_CORPUS_CHRISTI_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.AssumptionDay:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_ASSUMPTION_DAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASSUMPTION_DAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ASSUMPTION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.ReformationDay:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_REFORMATION_DAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_REFORMATION_DAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_REFORMATION_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.AllSaintsDay:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_ALL_SAINTS_DAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ALL_SAINTS_DAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_ALL_SAINTS_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    case Utils.HolidayTypeEnum.ChristmasDay:
+                        GUIPropertyManager.SetProperty(_TAG_TRANSLATION_CHRISTMAS_DAY, str);
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_CHRISTMAS_DAY, dtTemp.ToShortDateString());
+                        GUIPropertyManager.SetProperty(_TAG_CALENDAR_CHRISTMAS_DAY_WEEK_DAY, getTranslatedWeekDay(language, dtTemp));
+                        break;
+
+                    default:
+                        //Custom specific
+                        if (dtTemp > DateTime.MinValue)
+                        {
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY_DESCRIPTION, i - 12), str);
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY, i - 12), dtTemp.ToShortDateString());
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_WEEK_DAY, i - 12), getTranslatedWeekDay(language, dtTemp));
+                        }
+                        else
+                        {
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY_DESCRIPTION, i - 12), string.Empty);
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_DAY, i - 12), string.Empty);
+                            GUIPropertyManager.SetProperty(string.Format(_TAG_CALENDAR_SELF_DEFINED_WEEK_DAY, i - 12), string.Empty);
+                        }
+                        break;
                 }
+                #endregion
             }
 
             Utils.HemisphereTypeEnum type = loc.Latitude >= 0.0 ? Utils.HemisphereTypeEnum.NorthernHemisphere : Utils.HemisphereTypeEnum.SouthernHemisphere;

@@ -221,6 +221,7 @@
     <Compile Include="Utils\Calendar.cs" />
     <Compile Include="Utils\HemisphereTypeEnum.cs" />
     <Compile Include="Utils\GeoClock.cs" />
+    <Compile Include="Utils\HolidayTypeEnum.cs" />
     <Compile Include="Utils\Moon.cs" />
     <Compile Include="Utils\MoonPhaseEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

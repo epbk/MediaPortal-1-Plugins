@@ -92,11 +92,31 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.holidayTextBoxChristmasDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxAllSaintsDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxReformationDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxAssumptionDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxCorpusChristi = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxWhitSunday = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxAscensionDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxNewYear = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxEasterSunday = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxEpiphany = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxGoodFriday = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBoxHolyThurstday = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBox0 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBox4 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
+            this.holidayTextBox1 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBox3 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBox2 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
-            this.holidayTextBox1 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
-            this.holidayTextBox0 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.tabControlMain.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
@@ -114,6 +134,8 @@
             this.tabPage3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxId
@@ -679,11 +701,8 @@
             // 
             // tabPage4
             // 
-            this.tabPage4.Controls.Add(this.holidayTextBox4);
-            this.tabPage4.Controls.Add(this.holidayTextBox3);
-            this.tabPage4.Controls.Add(this.holidayTextBox2);
-            this.tabPage4.Controls.Add(this.holidayTextBox1);
-            this.tabPage4.Controls.Add(this.holidayTextBox0);
+            this.tabPage4.Controls.Add(this.groupBox3);
+            this.tabPage4.Controls.Add(this.groupBox2);
             this.tabPage4.Controls.Add(this.checkBoxCalendarEn);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
@@ -778,40 +797,219 @@
             this.dataGridViewTextBoxColumn6.HeaderText = "Decription";
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label16);
+            this.groupBox2.Controls.Add(this.label15);
+            this.groupBox2.Controls.Add(this.label14);
+            this.groupBox2.Controls.Add(this.holidayTextBox0);
+            this.groupBox2.Controls.Add(this.holidayTextBox4);
+            this.groupBox2.Controls.Add(this.holidayTextBox1);
+            this.groupBox2.Controls.Add(this.holidayTextBox3);
+            this.groupBox2.Controls.Add(this.holidayTextBox2);
+            this.groupBox2.Location = new System.Drawing.Point(380, 43);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(338, 195);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Custom Holidays";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(17, 29);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(60, 13);
+            this.label14.TabIndex = 6;
+            this.label14.Text = "Description";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(152, 29);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(31, 13);
+            this.label15.TabIndex = 7;
+            this.label15.Text = "Type";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(274, 29);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(30, 13);
+            this.label16.TabIndex = 8;
+            this.label16.Text = "Date";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.holidayTextBoxChristmasDay);
+            this.groupBox3.Controls.Add(this.holidayTextBoxAllSaintsDay);
+            this.groupBox3.Controls.Add(this.holidayTextBoxReformationDay);
+            this.groupBox3.Controls.Add(this.holidayTextBoxAssumptionDay);
+            this.groupBox3.Controls.Add(this.holidayTextBoxCorpusChristi);
+            this.groupBox3.Controls.Add(this.holidayTextBoxWhitSunday);
+            this.groupBox3.Controls.Add(this.holidayTextBoxAscensionDay);
+            this.groupBox3.Controls.Add(this.label17);
+            this.groupBox3.Controls.Add(this.label18);
+            this.groupBox3.Controls.Add(this.label19);
+            this.groupBox3.Controls.Add(this.holidayTextBoxNewYear);
+            this.groupBox3.Controls.Add(this.holidayTextBoxEasterSunday);
+            this.groupBox3.Controls.Add(this.holidayTextBoxEpiphany);
+            this.groupBox3.Controls.Add(this.holidayTextBoxGoodFriday);
+            this.groupBox3.Controls.Add(this.holidayTextBoxHolyThurstday);
+            this.groupBox3.Location = new System.Drawing.Point(22, 43);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(338, 363);
+            this.groupBox3.TabIndex = 9;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Holidays";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(274, 29);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(30, 13);
+            this.label17.TabIndex = 8;
+            this.label17.Text = "Date";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(153, 29);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(31, 13);
+            this.label18.TabIndex = 7;
+            this.label18.Text = "Type";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(17, 29);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(60, 13);
+            this.label19.TabIndex = 6;
+            this.label19.Text = "Description";
+            // 
+            // holidayTextBoxChristmasDay
+            // 
+            this.holidayTextBoxChristmasDay.Location = new System.Drawing.Point(20, 325);
+            this.holidayTextBoxChristmasDay.Name = "holidayTextBoxChristmasDay";
+            this.holidayTextBoxChristmasDay.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxChristmasDay.TabIndex = 15;
+            // 
+            // holidayTextBoxAllSaintsDay
+            // 
+            this.holidayTextBoxAllSaintsDay.Location = new System.Drawing.Point(20, 300);
+            this.holidayTextBoxAllSaintsDay.Name = "holidayTextBoxAllSaintsDay";
+            this.holidayTextBoxAllSaintsDay.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxAllSaintsDay.TabIndex = 14;
+            // 
+            // holidayTextBoxReformationDay
+            // 
+            this.holidayTextBoxReformationDay.Location = new System.Drawing.Point(20, 275);
+            this.holidayTextBoxReformationDay.Name = "holidayTextBoxReformationDay";
+            this.holidayTextBoxReformationDay.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxReformationDay.TabIndex = 13;
+            // 
+            // holidayTextBoxAssumptionDay
+            // 
+            this.holidayTextBoxAssumptionDay.Location = new System.Drawing.Point(20, 250);
+            this.holidayTextBoxAssumptionDay.Name = "holidayTextBoxAssumptionDay";
+            this.holidayTextBoxAssumptionDay.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxAssumptionDay.TabIndex = 12;
+            // 
+            // holidayTextBoxCorpusChristi
+            // 
+            this.holidayTextBoxCorpusChristi.Location = new System.Drawing.Point(20, 225);
+            this.holidayTextBoxCorpusChristi.Name = "holidayTextBoxCorpusChristi";
+            this.holidayTextBoxCorpusChristi.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxCorpusChristi.TabIndex = 11;
+            // 
+            // holidayTextBoxWhitSunday
+            // 
+            this.holidayTextBoxWhitSunday.Location = new System.Drawing.Point(20, 200);
+            this.holidayTextBoxWhitSunday.Name = "holidayTextBoxWhitSunday";
+            this.holidayTextBoxWhitSunday.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxWhitSunday.TabIndex = 10;
+            // 
+            // holidayTextBoxAscensionDay
+            // 
+            this.holidayTextBoxAscensionDay.Location = new System.Drawing.Point(20, 175);
+            this.holidayTextBoxAscensionDay.Name = "holidayTextBoxAscensionDay";
+            this.holidayTextBoxAscensionDay.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxAscensionDay.TabIndex = 9;
+            // 
+            // holidayTextBoxNewYear
+            // 
+            this.holidayTextBoxNewYear.Location = new System.Drawing.Point(20, 46);
+            this.holidayTextBoxNewYear.Name = "holidayTextBoxNewYear";
+            this.holidayTextBoxNewYear.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxNewYear.TabIndex = 1;
+            // 
+            // holidayTextBoxEasterSunday
+            // 
+            this.holidayTextBoxEasterSunday.Location = new System.Drawing.Point(20, 150);
+            this.holidayTextBoxEasterSunday.Name = "holidayTextBoxEasterSunday";
+            this.holidayTextBoxEasterSunday.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxEasterSunday.TabIndex = 5;
+            // 
+            // holidayTextBoxEpiphany
+            // 
+            this.holidayTextBoxEpiphany.Location = new System.Drawing.Point(20, 72);
+            this.holidayTextBoxEpiphany.Name = "holidayTextBoxEpiphany";
+            this.holidayTextBoxEpiphany.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxEpiphany.TabIndex = 2;
+            // 
+            // holidayTextBoxGoodFriday
+            // 
+            this.holidayTextBoxGoodFriday.Location = new System.Drawing.Point(20, 124);
+            this.holidayTextBoxGoodFriday.Name = "holidayTextBoxGoodFriday";
+            this.holidayTextBoxGoodFriday.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxGoodFriday.TabIndex = 4;
+            // 
+            // holidayTextBoxHolyThurstday
+            // 
+            this.holidayTextBoxHolyThurstday.Location = new System.Drawing.Point(20, 98);
+            this.holidayTextBoxHolyThurstday.Name = "holidayTextBoxHolyThurstday";
+            this.holidayTextBoxHolyThurstday.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBoxHolyThurstday.TabIndex = 3;
+            // 
+            // holidayTextBox0
+            // 
+            this.holidayTextBox0.Location = new System.Drawing.Point(20, 46);
+            this.holidayTextBox0.Name = "holidayTextBox0";
+            this.holidayTextBox0.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBox0.TabIndex = 1;
+            // 
             // holidayTextBox4
             // 
-            this.holidayTextBox4.Location = new System.Drawing.Point(22, 145);
+            this.holidayTextBox4.Location = new System.Drawing.Point(20, 150);
             this.holidayTextBox4.Name = "holidayTextBox4";
-            this.holidayTextBox4.Size = new System.Drawing.Size(371, 20);
+            this.holidayTextBox4.Size = new System.Drawing.Size(298, 20);
             this.holidayTextBox4.TabIndex = 5;
+            // 
+            // holidayTextBox1
+            // 
+            this.holidayTextBox1.Location = new System.Drawing.Point(20, 72);
+            this.holidayTextBox1.Name = "holidayTextBox1";
+            this.holidayTextBox1.Size = new System.Drawing.Size(298, 20);
+            this.holidayTextBox1.TabIndex = 2;
             // 
             // holidayTextBox3
             // 
-            this.holidayTextBox3.Location = new System.Drawing.Point(22, 119);
+            this.holidayTextBox3.Location = new System.Drawing.Point(20, 124);
             this.holidayTextBox3.Name = "holidayTextBox3";
-            this.holidayTextBox3.Size = new System.Drawing.Size(371, 20);
+            this.holidayTextBox3.Size = new System.Drawing.Size(298, 20);
             this.holidayTextBox3.TabIndex = 4;
             // 
             // holidayTextBox2
             // 
-            this.holidayTextBox2.Location = new System.Drawing.Point(22, 93);
+            this.holidayTextBox2.Location = new System.Drawing.Point(20, 98);
             this.holidayTextBox2.Name = "holidayTextBox2";
-            this.holidayTextBox2.Size = new System.Drawing.Size(371, 20);
+            this.holidayTextBox2.Size = new System.Drawing.Size(298, 20);
             this.holidayTextBox2.TabIndex = 3;
-            // 
-            // holidayTextBox1
-            // 
-            this.holidayTextBox1.Location = new System.Drawing.Point(22, 67);
-            this.holidayTextBox1.Name = "holidayTextBox1";
-            this.holidayTextBox1.Size = new System.Drawing.Size(371, 20);
-            this.holidayTextBox1.TabIndex = 2;
-            // 
-            // holidayTextBox0
-            // 
-            this.holidayTextBox0.Location = new System.Drawing.Point(22, 41);
-            this.holidayTextBox0.Name = "holidayTextBox0";
-            this.holidayTextBox0.Size = new System.Drawing.Size(371, 20);
-            this.holidayTextBox0.TabIndex = 1;
             // 
             // ConfigurationForm
             // 
@@ -853,6 +1051,10 @@
             this.groupBox1.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -923,5 +1125,25 @@
         private UserControls.HolidayTextBox holidayTextBox3;
         private UserControls.HolidayTextBox holidayTextBox2;
         private UserControls.HolidayTextBox holidayTextBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private UserControls.HolidayTextBox holidayTextBoxNewYear;
+        private UserControls.HolidayTextBox holidayTextBoxEasterSunday;
+        private UserControls.HolidayTextBox holidayTextBoxEpiphany;
+        private UserControls.HolidayTextBox holidayTextBoxGoodFriday;
+        private UserControls.HolidayTextBox holidayTextBoxHolyThurstday;
+        private UserControls.HolidayTextBox holidayTextBoxAllSaintsDay;
+        private UserControls.HolidayTextBox holidayTextBoxReformationDay;
+        private UserControls.HolidayTextBox holidayTextBoxAssumptionDay;
+        private UserControls.HolidayTextBox holidayTextBoxCorpusChristi;
+        private UserControls.HolidayTextBox holidayTextBoxWhitSunday;
+        private UserControls.HolidayTextBox holidayTextBoxAscensionDay;
+        private UserControls.HolidayTextBox holidayTextBoxChristmasDay;
     }
 }

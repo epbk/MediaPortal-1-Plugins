@@ -29,12 +29,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite.UserControls
         public HolidayTextBox()
         {
             InitializeComponent();
+
+            this.comboBoxType.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(Utils.HolidayTypeEnum)));
         }
 
         public void Init(Database.dbHoliday holiday)
         {
             this.textBoxDescription.Text = holiday.Description;
             this.dayMonthTextBox.Init(holiday.Day, holiday.Month);
+            this.comboBoxType.SelectedIndex = (int)holiday.HolidayType;
 
             this.Tag = holiday;
         }
@@ -46,9 +49,16 @@ namespace MediaPortal.Plugins.WorldWeatherLite.UserControls
             tag.Description = this.Description;
             tag.Day = this.Day;
             tag.Month = this.Month;
+            tag.HolidayType = (Utils.HolidayTypeEnum)this.comboBoxType.SelectedIndex;
 
             tag.CommitNeeded = true;
             tag.Commit();
+        }
+
+        private void comboBoxType_SelectedValueChanged(object sender, EventArgs e)
+        {
+            this.dayMonthTextBox.Enabled = this.comboBoxType.SelectedIndex == (int)Utils.HolidayTypeEnum.Custom;
+            this.textBoxDescription.Enabled = this.comboBoxType.SelectedIndex >= (int)Utils.HolidayTypeEnum.Custom;
         }
 
     }

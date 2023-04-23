@@ -22,15 +22,45 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         public int Month
         { get; set; }
 
+        [DBFieldAttribute(FieldName = "holidayType", Default = "Unused")]
+        public Utils.HolidayTypeEnum HolidayType
+        { get; set; }
+
         public static List<dbHoliday> GetAll()
         {
             List<dbHoliday> list = Manager.Get<dbHoliday>(null);
 
-            if (list.Count < 5)
+            if (list.Count < 17)
             {
-                while (list.Count < 5)
+                list.ForEach(h =>
+                    h.Delete());
+
+                list.Clear();
+
+                dbHoliday db;
+
+                //Default holidays
+                for (int i = (int)Utils.HolidayTypeEnum.NewYear; i <= (int)Utils.HolidayTypeEnum.ChristmasDay; i++)
                 {
-                    dbHoliday db = new dbHoliday();
+                    db = new dbHoliday()
+                    {
+                        HolidayType = (Utils.HolidayTypeEnum)i
+                    };
+
+                    list.Add(db);
+                    db.CommitNeeded = true;
+                    db.Commit();
+                }
+
+
+                //Custom specific holidays
+                while (list.Count < 17)
+                {
+                    db = new dbHoliday()
+                        {
+                             HolidayType = Utils.HolidayTypeEnum.Unused
+                        };
+
                     list.Add(db);
                     db.CommitNeeded = true;
                     db.Commit();
