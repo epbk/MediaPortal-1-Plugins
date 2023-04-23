@@ -43,13 +43,13 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this.labelVersion.Text = "Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             //Init comboboxes
-            this.comboBoxFullScreenOption.Items.AddRange(getEnumNames(typeof(FullscreenVideoBehaviorEnum)));
-            this.comboBoxProvider.Items.AddRange(getEnumNames(typeof(Providers.ProviderTypeEnum)));
-            this.comboBoxUnitTemp.Items.AddRange(getEnumNames(typeof(GUI.GUITemperatureUnitEnum)));
-            this.comboBoxUnitPress.Items.AddRange(getEnumNames(typeof(GUI.GUIPressureUnitEnum)));
-            this.comboBoxUnitWind.Items.AddRange(getEnumNames(typeof(GUI.GUIWindUnitEnum)));
-            this.comboBoxUnitDist.Items.AddRange(getEnumNames(typeof(GUI.GUIDistanceUnitEnum)));
-            this.comboBoxUnitPrecip.Items.AddRange(getEnumNames(typeof(GUI.GUIPrecipitationUnitEnum)));
+            this.comboBoxFullScreenOption.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(FullscreenVideoBehaviorEnum)));
+            this.comboBoxProvider.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(Providers.ProviderTypeEnum)));
+            this.comboBoxUnitTemp.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUITemperatureUnitEnum)));
+            this.comboBoxUnitPress.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUIPressureUnitEnum)));
+            this.comboBoxUnitWind.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUIWindUnitEnum)));
+            this.comboBoxUnitDist.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUIDistanceUnitEnum)));
+            this.comboBoxUnitPrecip.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUIPrecipitationUnitEnum)));
 
             //Load settings
 
@@ -141,35 +141,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                 this.dataGridViewSearch.Rows.Add(row);
             }
-        }
-
-        private static string[] getEnumNames(Type tEnum)
-        {
-            FieldInfo[] fields = tEnum.GetFields();
-            string[] result = tEnum.GetEnumNames();
-
-            for (int iN = 0; iN < result.Length; iN++)
-            {
-                string strName = result[iN];
-
-                for (int iF = 0; iF < fields.Length; iF++)
-                {
-                    FieldInfo fi = fields[iF];
-
-                    if (fi.Name.Equals(strName))
-                    {
-                        DescriptionAttribute attr = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
-
-                        if (attr != null)
-                        {
-                            result[iN] = attr.Description;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return result;
         }
 
 
