@@ -24,7 +24,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         private System.Timers.Timer _TimerAnimation = null;
         private int _CurrentFrameIdx = -1;
         private List<GUIImageFrame> _ImageFrames = null;
+        private int _RefreshActive = 0;
 
+        
         public string Id
         { get; private set; }
 
@@ -100,12 +102,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
                     this._TimerAnimation = null;
                 }
 
-                DestroyFrames(this._ImageFrames);
-
-
                 this._CurrentImageFrame = null;
-                this._ImageFrames = null;
 
+                DestroyFrames(this._ImageFrames);
+                
+                this._ImageFrames = null;
             }
 
             this.LastRefresh = DateTime.MinValue;
@@ -238,6 +239,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
 
         }
 
+        public bool RefreshBegin()
+        {
+            return System.Threading.Interlocked.CompareExchange(ref this._RefreshActive, 1, 0) == 0;
+        }
+
+        public void RefreshEnd()
+        {
+            this._RefreshActive = 0;
+        }
 
         /// <summary>
         /// Callback from frame animation timer

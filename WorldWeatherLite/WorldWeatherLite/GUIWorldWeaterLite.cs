@@ -2090,6 +2090,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private Pbk.Tasks.TaskActionResultEnum imageRefresh(GUI.GUIWeatherImage wi, Pbk.Net.Http.HttpUserWebRequest wr)
         {
+            //Test to avoid multiple refresh of the same image
+            if (!wi.RefreshBegin())
+                return Pbk.Tasks.TaskActionResultEnum.Complete;
+
             Image img = null;
             Image imgBck = null;
             Image imgOver = null;
@@ -2402,6 +2406,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 wr.Close();
                 wr.BeforeSaveToFile = null;
                 wr.Tag = null;
+
+                wi.RefreshEnd();
             }
 
             return Pbk.Tasks.TaskActionResultEnum.Complete;
