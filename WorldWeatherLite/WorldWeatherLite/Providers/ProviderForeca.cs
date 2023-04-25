@@ -360,7 +360,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
                 case 130: //130:Mostly clear, slight possibility of rain,
                 case 210: //210:Partly cloudy and light rain,
                     translCode = Language.TranslationEnum.labelConditionLightRain;
-                    return bNight ? 45 : 39;
+                    //return bNight ? 45 : 39;
+                    return 11;
 
                 case 111: //111:Mostly clear, slight possibility of wet snow
                 case 121: //121:Mostly clear, slight possibility of wet snow,
@@ -381,7 +382,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
                 case 230: //230:Partly cloudy and rain,
                     //strCondition = Přeháňky;
                     translCode = Language.TranslationEnum.labelConditionScatteredShowers;
-                    return bNight ? 45 : 39;
+                    //return bNight ? 45 : 39;
+                    return 11;
 
                 case 221: //221:Partly cloudy and wet snow showers, //221 Polojasno, přeháňky, déšť se sněhem
                 case 231: //231:Partly cloudy and wet snow\n,
@@ -408,7 +410,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
                 case 320: //320:Cloudy and showers, //320 Oblačno, přeháňky
                     //strCondition = Přeháňky;
                     translCode = Language.TranslationEnum.labelConditionScatteredShowers;
-                    return bNight ? 45 : 39;
+                    //return bNight ? 45 : 39;
+                    return 11;
 
                 case 311: //311:Cloudy and light wet snow, //Oblačno, slabý déšť se sněhem
                     //strCondition = Slabý déšť se sněhem;
