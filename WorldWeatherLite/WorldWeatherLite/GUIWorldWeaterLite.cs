@@ -1573,6 +1573,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             );
 
                     this._GUIbuttonView.IsEnabled = false;
+                    this._GUIbuttonRefresh.IsEnabled = true;
                     break;
 
                 case ViewMode.Image:
@@ -1596,6 +1597,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             );
 
                     this._GUIbuttonView.IsEnabled = true;
+                    this._GUIbuttonRefresh.IsEnabled = true;
                     break;
 
                 case ViewMode.GeoClock:
@@ -1621,6 +1623,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     }
 
                     this._GUIbuttonView.IsEnabled = false;
+                    this._GUIbuttonRefresh.IsEnabled = true;
                     break;
 
                 case ViewMode.Calendar:
@@ -1633,6 +1636,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             );
 
                     this._GUIbuttonView.IsEnabled = false;
+                    this._GUIbuttonRefresh.IsEnabled = false;
                     break;
             }
 
