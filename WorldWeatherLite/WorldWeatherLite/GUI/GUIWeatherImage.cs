@@ -22,10 +22,20 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         private static Regex _RegexTag = new Regex("\\{((yyyy)|(MM)|(dd)|(hh)|(mm))\\}", RegexOptions.Compiled);
 
         private System.Timers.Timer _TimerAnimation = null;
-        private int _CurrentFrameIdx = -1;
-        private List<GUIImageFrame> _ImageFrames = null;
+        private int _CurrentFrameIdx = 0;
         private int _RefreshActive = 0;
+        private int _FramesCount = 0;
 
+
+        public System.Drawing.Size ImageSize
+        {
+            get { return this._ImageSize; }
+        }private System.Drawing.Size _ImageSize;
+
+        public System.Drawing.RectangleF FullscreenRectangle
+        {
+            get { return this._FullscreenRectangle; }
+        }private System.Drawing.RectangleF _FullscreenRectangle;
         
         public string Id
         { get; private set; }
@@ -36,18 +46,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         public DateTime LastRefresh = DateTime.MinValue;
 
         public bool FramesAvailable
-        { get { return this._ImageFrames != null; } }
+        { get { return _FramesCount > 0; } }
 
         /// <summary>
         /// Gets current image frame to be visible
         /// </summary>
-        public GUIImageFrame CurrentImageFrame
+        public Texture CurrentTexture
         {
             get
             {
-                return this._CurrentImageFrame;
+                return this._CurrentTexture;
             }
-        }private GUIImageFrame _CurrentImageFrame = null;
+        }private Texture _CurrentTexture = null;
 
         /// <summary>
         /// Gets weather image properties
@@ -69,19 +79,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         }
         #endregion
 
-        public static void DestroyFrames(List<GUIImageFrame> frames)
-        {
-            if (frames != null)
-            {
-                frames.ForEach(o =>
-                {
-                    GUITextureManager.ReleaseTexture(o.ID);
-                    o.Texture = null;
-                });
-
-                frames.Clear();
-            }
-        }
 
         /// <summary>
         /// Destroy the image and release all textures
@@ -92,22 +89,19 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         {
             GUIPropertyManager.SetProperty(this.GuiTag, string.Empty);
 
-            if (this._ImageFrames != null)
+            if (this._TimerAnimation != null)
             {
-                if (this._TimerAnimation != null)
-                {
-                    this._TimerAnimation.Stop();
+                this._TimerAnimation.Stop();
 
-                    this._TimerAnimation.Dispose();
-                    this._TimerAnimation = null;
-                }
-
-                this._CurrentImageFrame = null;
-
-                DestroyFrames(this._ImageFrames);
-                
-                this._ImageFrames = null;
+                this._TimerAnimation.Dispose();
+                this._TimerAnimation = null;
             }
+
+            this._FramesCount = 0;
+            this._CurrentTexture = null;
+            this._CurrentFrameIdx = 0;
+
+            GUITextureManager.ReleaseTexture(this.Id);
 
             this.LastRefresh = DateTime.MinValue;
         }
@@ -175,54 +169,91 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         }
 
         /// <summary>
-        /// Initialize the image
+        /// Set new image
         /// </summary>
+        /// <param name="images">images to set</param>
+        /// <param name="durations">duration of each image in ms</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void SetImage(List<GUIImageFrame> frames)
+        public void SetImage(System.Drawing.Image[] images, int[] durations)
         {
-            lock (GUIGraphicsContext.RenderLock)
+            try
             {
-                if (this._ImageFrames != null)
+                lock (GUIGraphicsContext.RenderLock)
+                {
+                    //Destroy current image if exists
                     this.Destroy();
 
-                if (GUIWindowManager.ActiveWindow != GUIWorldWeaterLite.PLUGIN_ID)
-                {
-                    //If we aren't active then destroy images and return
-                    DestroyFrames(frames);
-                    return;
-                }
+                    if (GUIWindowManager.ActiveWindow != GUIWorldWeaterLite.PLUGIN_ID)
+                        return; //If we aren't active then destroy images and return
 
-                if (frames != null && frames.Count > 0)
-                {
-                    this._CurrentFrameIdx = 0;
-
-                    if (frames.Count > 1)
+                    if (images != null && images.Length > 0)
                     {
-                        //Frame rotation timer init
-
-                        if (this._TimerAnimation == null)
+                        //Create multiframe cached texture
+                        if (GUITextureManager.LoadFromMemoryEx(images, durations, this.Id, 0) != images.Length)
                         {
-                            this._TimerAnimation = new System.Timers.Timer();
-                            this._TimerAnimation.Elapsed += this.cbTimerAnimation;
+                            this._FramesCount = 0;
+                            this.SetEmptyImage();
                         }
+                        else
+                        {
+                            this._ImageSize = images[0].Size;
+                            this._FramesCount = images.Length;
 
-                        this._TimerAnimation.Interval = frames[0].Duration;
-                        this._TimerAnimation.AutoReset = true;
-                        this._TimerAnimation.Enabled = true;
+                            //Calculate fullscreen destination rectangle
+                            float fWidthSource = this._ImageSize.Width;
+                            float fHeightSource = this._ImageSize.Height;
+                            float fZoom = calculateBestZoom(fWidthSource, fHeightSource);
+                            float fX, fY, fWidth, fHeight;
+
+                            //Calculate target rectangle
+                            getOutputRect(fWidthSource, fHeightSource, fZoom, out fX, out fY, out fWidth, out fHeight);
+                            this._FullscreenRectangle = new System.Drawing.RectangleF(fX, fY, fWidth, fHeight);
+
+                            //get texture from first frame
+                            int iDur;
+                            Texture tx = GUITextureManager.GetTexture(this.Id, 0, out iDur);
+
+                            //Frame rotation timer init
+                            if (images.Length > 1)
+                            {
+                                if (this._TimerAnimation == null)
+                                {
+                                    this._TimerAnimation = new System.Timers.Timer();
+                                    this._TimerAnimation.Elapsed += this.cbTimerAnimation;
+                                }
+
+                                this._TimerAnimation.Interval = iDur;
+                                this._TimerAnimation.AutoReset = true;
+                                this._TimerAnimation.Enabled = true;
+                            }
+
+                            //Set first frame to GUI
+                            this._CurrentTexture = tx;
+                            GUIPropertyManager.SetProperty(this.GuiTag, this.Id);
+                            this.ThumbnailImage = this.Id;
+                        }
+                    }
+                    else
+                        this.SetEmptyImage();
+                }
+            }
+            finally
+            {
+                //Dispose all images
+                if (images != null)
+                {
+                    for (int i = 0; i < images.Length; i++)
+                    {
+                        System.Drawing.Image im = images[i];
+                        if (im != null)
+                            im.Dispose();
                     }
 
-                    //Set first frame to GUI
-                    this._CurrentImageFrame = frames[0];
-                    GUIPropertyManager.SetProperty(this.GuiTag, this._CurrentImageFrame.ID);
-                    this.ThumbnailImage = this._CurrentImageFrame.ID;
-
-                    this._ImageFrames = frames;
+                    images = null;
                 }
-                else
-                    this.SetEmptyImage();
-            }
 
-            this.LastRefresh = DateTime.Now;
+                this.LastRefresh = DateTime.Now;
+            }
         }
 
         /// <summary>
@@ -231,8 +262,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void SetEmptyImage()
         {
-            if (this._ImageFrames != null)
-                this.Destroy();
+            this.Destroy();
 
             this.ThumbnailImage = _EmptyImage;
             GUIPropertyManager.SetProperty(this.GuiTag, _EmptyImage);
@@ -249,6 +279,39 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
             this._RefreshActive = 0;
         }
 
+
+        private static void getOutputRect(float fSourceWidth, float fSourceHeight, float fZoomLevel, out float fX, out float fY,
+                       out float fWidth, out float fHeight)
+        {
+            float fOffsetX1 = GUIGraphicsContext.OverScanLeft;
+            float fOffsetY1 = GUIGraphicsContext.OverScanTop;
+            float fScreenWidth = GUIGraphicsContext.OverScanWidth;
+            float fScreenHeight = GUIGraphicsContext.OverScanHeight;
+            float fPixelRatio = GUIGraphicsContext.PixelRatio;
+
+            float fSourceFrameAR = ((float)fSourceWidth) / ((float)fSourceHeight);
+            float fOutputFrameAR = fSourceFrameAR / fPixelRatio;
+
+            fWidth = (fSourceWidth / fPixelRatio) * fZoomLevel;
+            fHeight = fSourceHeight * fZoomLevel;
+
+            fX = (fScreenWidth - fWidth) / 2 + fOffsetX1;
+            fY = (fScreenHeight - fHeight) / 2 + fOffsetY1;
+        }
+
+        private static float calculateBestZoom(float fWidth, float fHeight)
+        {
+            float fPixelRatio = GUIGraphicsContext.PixelRatio;
+            float fZoomFactorX = (float)(GUIGraphicsContext.OverScanWidth * fPixelRatio) / fWidth;
+            float fZoomFactorY = (float)GUIGraphicsContext.OverScanHeight / fHeight;
+
+            if (fZoomFactorY < fZoomFactorX)
+                return fZoomFactorY;
+            else
+                return fZoomFactorX;
+        }
+
+
         /// <summary>
         /// Callback from frame animation timer
         /// </summary>
@@ -257,19 +320,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void cbTimerAnimation(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (this._CurrentFrameIdx++ >= this._ImageFrames.Count)
+            if (this._CurrentFrameIdx++ >= this._FramesCount)
                 this._CurrentFrameIdx = 0; //reset to begining
 
-            if (this._CurrentFrameIdx < this._ImageFrames.Count)
+            if (this._CurrentFrameIdx < this._FramesCount)
             {
-                GUIImageFrame frame = this._ImageFrames[this._CurrentFrameIdx];
+                int iDur;
+                Texture tx = GUITextureManager.GetTexture(this.Id, this._CurrentFrameIdx, out iDur);
 
                 lock (GUIGraphicsContext.RenderLock)
                 {
-                    this.ThumbnailImage = frame.ID;
-                    GUIPropertyManager.SetProperty(this.GuiTag, frame.ID);
-                    this._CurrentImageFrame = frame;
-                    this._TimerAnimation.Interval = frame.Duration;
+                    this._CurrentTexture = tx;
+                    this._TimerAnimation.Interval = iDur;
                     this._TimerAnimation.Start();
                 }
             }

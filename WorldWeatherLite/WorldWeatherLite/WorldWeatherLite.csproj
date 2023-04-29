@@ -176,7 +176,6 @@
     <Compile Include="FullscreenVideoBehaviorEnum.cs" />
     <Compile Include="GUIWorldWeaterLite.cs" />
     <Compile Include="GUI\GUIDistanceUnitEnum.cs" />
-    <Compile Include="GUI\GUIImageFrame.cs" />
     <Compile Include="GUI\GUIPrecipitationUnitEnum.cs" />
     <Compile Include="GUI\GUIPressureUnitEnum.cs" />
     <Compile Include="GUI\GUITemperatureUnitEnum.cs" />

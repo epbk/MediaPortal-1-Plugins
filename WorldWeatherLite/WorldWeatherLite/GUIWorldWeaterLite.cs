@@ -738,20 +738,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 GUI.GUIWeatherImage wi = this._FullScreenMediaImage;
                 if (wi != null)
                 {
-                    GUI.GUIImageFrame frame = wi.CurrentImageFrame;
+                    Texture tx = wi.CurrentTexture;
 
-                    if (frame != null && frame.Size != System.Drawing.Size.Empty && frame.Texture != null)
+                    Size size = wi.ImageSize;
+                    if (tx != null && size != System.Drawing.Size.Empty && tx != null)
                     {
-                        float fWidthSource = frame.Size.Width;
-                        float fHeightSource = frame.Size.Height;
-                        float fZoom = calculateBestZoom(fWidthSource, fHeightSource);
-                        float fX, fY, fWidth, fHeight;
-
-                        //Calculate target rectangle
-                        getOutputRect(fWidthSource, fHeightSource, fZoom, out fX, out fY, out fWidth, out fHeight);
-
                         //Render the texture
-                        Util.Picture.RenderImage(frame.Texture, fX, fY, fWidth, fHeight, fWidthSource, fHeightSource, 0, 0, false);
+                        RectangleF rect = wi.FullscreenRectangle;
+                        Util.Picture.RenderImage(tx, rect.X, rect.Y, rect.Width, rect.Height, size.Width, size.Height, 0, 0, false);
                         return;
                     }
                 }
@@ -1476,36 +1470,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         #endregion
 
         #region FullScreenMode methods
-        private static void getOutputRect(float fSourceWidth, float fSourceHeight, float fZoomLevel, out float fX, out float fY,
-                               out float fWidth, out float fHeight)
-        {
-            float fOffsetX1 = GUIGraphicsContext.OverScanLeft;
-            float fOffsetY1 = GUIGraphicsContext.OverScanTop;
-            float fScreenWidth = GUIGraphicsContext.OverScanWidth;
-            float fScreenHeight = GUIGraphicsContext.OverScanHeight;
-            float fPixelRatio = GUIGraphicsContext.PixelRatio;
 
-            float fSourceFrameAR = ((float)fSourceWidth) / ((float)fSourceHeight);
-            float fOutputFrameAR = fSourceFrameAR / fPixelRatio;
-
-            fWidth = (fSourceWidth / fPixelRatio) * fZoomLevel;
-            fHeight = fSourceHeight * fZoomLevel;
-
-            fX = (fScreenWidth - fWidth) / 2 + fOffsetX1;
-            fY = (fScreenHeight - fHeight) / 2 + fOffsetY1;
-        }
-
-        private static float calculateBestZoom(float fWidth, float fHeight)
-        {
-            float fPixelRatio = GUIGraphicsContext.PixelRatio;
-            float fZoomFactorX = (float)(GUIGraphicsContext.OverScanWidth * fPixelRatio) / fWidth;
-            float fZoomFactorY = (float)GUIGraphicsContext.OverScanHeight / fHeight;
-
-            if (fZoomFactorY < fZoomFactorX)
-                return fZoomFactorY;
-            else
-                return fZoomFactorX;
-        }
 
         private bool setNextGuiImage(bool bBackward)
         {
@@ -1549,7 +1514,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private void onClick(GUI.GUIWeatherImage image)
         {
-            if (image != null && image.CurrentImageFrame != null)
+            if (image != null && image.CurrentTexture != null)
             {
                 this._FullScreenMediaImage = image;
                 this._FullScreenMediaViewMode = true;
@@ -2158,16 +2123,17 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             step2:
 
-                List<GUI.GUIImageFrame> frames = new List<GUI.GUIImageFrame>();
-
                 if (wi.WeatherImage.MultiImage)
                 {
                     #region MultiImage
 
+                    List<Image> images = new List<Image>();
+                    List<int> durations = new List<int>();
+
                     //Max total time
                     int iTime = wi.WeatherImage.MultiImageMaxPeriod;
 
-                    while (iTime >= 0 && frames.Count < wi.WeatherImage.MultiImageMaxImages)
+                    while (iTime >= 0 && images.Count < wi.WeatherImage.MultiImageMaxImages)
                     {
                         iAttempts = 3;
 
@@ -2185,23 +2151,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         }
 
                         //Failed
-                        GUI.GUIWeatherImage.DestroyFrames(frames);
+                        images.ForEach(im => im.Dispose());
+                        images = null;
                         return Pbk.Tasks.TaskActionResultEnum.Complete;
 
                     mi3:
-                        //Image Id
-                        string strId = wi.Id + frames.Count;
-
-                        Size size;
-                        Texture text;
-
                         if (imgBck != null || imgOver != null)
                         {
                             if (imgBck != null)
                             {
                                 //Merge with background
-                                using (Bitmap bmp = new Bitmap(imgBck.Width, imgBck.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                                {
+                                Bitmap bmp = new Bitmap(imgBck.Width, imgBck.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                
                                     using (Graphics g = Graphics.FromImage(bmp))
                                     {
                                         g.DrawImage(imgBck, 0, 0, imgBck.Width, imgBck.Height);
@@ -2211,44 +2172,32 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                                         if (imgOver != null)
                                             g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
-                                        GUITextureManager.LoadFromMemoryEx(bmp, strId, 0, out text);
-                                        size = bmp.Size;
+                                        
                                     }
-                                }
+
+                                    img = bmp;
+                                
                             }
                             else
                             {
                                 //Merge with overlayer
-                                using (Bitmap bmp = new Bitmap(img.Width, img.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                                {
+                                Bitmap bmp = new Bitmap(img.Width, img.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                
                                     using (Graphics g = Graphics.FromImage(bmp))
                                     {
                                         g.DrawImage(img, 0, 0, img.Width, img.Height);
                                         g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
-                                        GUITextureManager.LoadFromMemoryEx(bmp, strId, 0, out text);
-                                        size = bmp.Size;
+                                        
                                     }
-                                }
+
+                                    img = bmp;
+                                
                             }
                         }
-                        else
-                        {
-                            GUITextureManager.LoadFromMemoryEx(img, strId, 0, out text);
-                            size = img.Size;
-                        }
 
-                        //Clear the image
-                        img.Dispose();
-                        img = null;
-
-                        //Add new image to the list
-                        GUI.GUIImageFrame frame = new GUI.GUIImageFrame(strId, size)
-                        {
-                            Texture = text,
-                            Duration = wi.WeatherImage.GUIMediaImageFrameDuration,
-                        };
-                        frames.Insert(0, frame);
+                        images.Insert(0, img);
+                        durations.Add(wi.WeatherImage.GUIMediaImageFrameDuration);
 
                         //New time (history)
                         iTime -= wi.WeatherImage.Period;
@@ -2256,11 +2205,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     }
 
                     //Add aditional time for last frame duration
-                    if (frames.Count > 0)
-                        frames[frames.Count - 1].Duration += wi.WeatherImage.GUIMediaImageLastFrameAddTime;
+                    if (durations.Count > 0)
+                        durations[durations.Count - 1] += wi.WeatherImage.GUIMediaImageLastFrameAddTime;
 
                     //OK
-                    wi.SetImage(frames);
+                    wi.SetImage(images.ToArray(), durations.ToArray());
+
+                    images.ForEach(im => im.Dispose());
+                    images = null;
 
                     #endregion
                 }
@@ -2268,11 +2220,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 {
                     #region Single image
                     Bitmap bmp = null;
+                    Image[] images = null;
+                    
                     try
                     {
-                        GUI.GUIImageFrame frame;
-                        Texture texture;
-
                         //Download the main image
                         iAttempts = 3;
                         while (iAttempts-- > 0)
@@ -2298,6 +2249,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             const int PROPERTY_ID_DELAY = 20736;
                             System.Drawing.Imaging.PropertyItem item = iFrames > 1 ? img.GetPropertyItem(PROPERTY_ID_DELAY) : null;
                             byte[] data = item != null ? data = item.Value : null;
+
+                            images = new Image[iFrames];
+                            int[] durations = new int[iFrames];
 
                             //Load all frames
                             for (int i = 0; i < iFrames; ++i)
@@ -2331,39 +2285,27 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                                     }
 
                                 }
-
-                                //Frame
-                                frame = new GUI.GUIImageFrame(wi.Id + i, new System.Drawing.Size(img.Width, img.Height));
-                                frames.Add(frame);
+                                else
+                                    bmp = new Bitmap(img);
 
                                 //Duration
                                 if (data == null || wi.WeatherImage.GUIGifFrameDurationOverride)
-                                    frame.Duration = wi.WeatherImage.GUIMediaImageFrameDuration + (i == iFrames - 1 ? wi.WeatherImage.GUIMediaImageLastFrameAddTime : 0);
+                                    durations[i] = wi.WeatherImage.GUIMediaImageFrameDuration + (i == iFrames - 1 ? wi.WeatherImage.GUIMediaImageLastFrameAddTime : 0);
                                 else
-                                    frame.Duration = BitConverter.ToInt16(data, i * 4) * 10; //base is 10ms
+                                    durations[i] = BitConverter.ToInt16(data, i * 4) * 10; //base is 10ms
 
-                                //Load and set texture
-                                if (bmp != null)
-                                {
-                                    GUITextureManager.LoadFromMemoryEx(bmp, frame.ID, 0, out texture);
-
-                                    bmp.Dispose();
-                                    bmp = null;
-                                }
-                                else
-                                    GUITextureManager.LoadFromMemoryEx(img, frame.ID, 0, out texture);
-
-                                frame.Texture = texture;
+                                
+                                images[i] = bmp;
+                                bmp = null;
                             }
 
                             //Sucess
-                            wi.SetImage(frames);
+                            wi.SetImage(images, durations);
                         }
                     }
                     catch (Exception ex)
                     {
                         _Logger.Error("[imageRefresh] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
-                        GUI.GUIWeatherImage.DestroyFrames(frames);
                     }
                     finally
                     {
@@ -2377,6 +2319,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         {
                             bmp.Dispose();
                             bmp = null;
+                        }
+
+                        if (images != null)
+                        {
+                            for (int i = 0; i < images.Length; i++ )
+                            {
+                                Image im = images[i];
+                                if (im != null)
+                                    im.Dispose();
+                            }
+
+                            images = null;
                         }
                     }
 
