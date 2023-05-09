@@ -3814,7 +3814,7 @@ namespace MediaPortal.Pbk.Net.Http
                 sb.Append(HttpHeaderField.HTTP_FIELD_COOKIE);
                 sb.Append(HttpHeaderField.HTTP_FIELD_COLON);
 
-                foreach (Cookie c in WebTools.GetAllCookies(this.Cookies))
+                foreach (Cookie c in this.Cookies.GetCookies(this._ServerUri))
                 {
                     sb.Append(c.Name);
                     sb.Append('=');
