@@ -3529,14 +3529,16 @@ namespace MediaPortal.Pbk.Net.Http
                                                     case "gzip":
                                                         //GZip
                                                         if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][getResponseStream] GZip encoding detected.", this._Id);
-                                                        this._Stream = new Ionic.Zlib.GZipStream(this._Stream, Ionic.Zlib.CompressionMode.Decompress);
+                                                        //this._Stream = new Ionic.Zlib.GZipStream(this._Stream, Ionic.Zlib.CompressionMode.Decompress);
+                                                        this._Stream = new GZipStream(this._Stream, CompressionMode.Decompress);
                                                         this._IsResponseStreamCompressed = true;
                                                         break;
 
                                                     case "deflate":
                                                         //Deflate
                                                         if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][getResponseStream] Deflate encoding detected.", this._Id);
-                                                        this._Stream = new Ionic.Zlib.DeflateStream(this._Stream, Ionic.Zlib.CompressionMode.Decompress);
+                                                        //this._Stream = new Ionic.Zlib.DeflateStream(this._Stream, Ionic.Zlib.CompressionMode.Decompress);
+                                                        this._Stream = new DeflateStream(this._Stream, CompressionMode.Decompress);
                                                         this._IsResponseStreamCompressed = true;
                                                         break;
 
