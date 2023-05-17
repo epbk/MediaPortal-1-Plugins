@@ -45,6 +45,9 @@ namespace MediaPortal.Pbk.Net.Http
         private int _Id = -1;
         private static int _IdCounter = -1;
 
+        private static StringBuilder _SbHash = new StringBuilder(128);
+        private static System.Security.Cryptography.MD5 _Md5Hash = System.Security.Cryptography.MD5.Create();
+
         public string CachePath
         {
             get
@@ -579,7 +582,7 @@ namespace MediaPortal.Pbk.Net.Http
                 throw new ArgumentException("Both url and webrequest is null");
 
             if (string.IsNullOrWhiteSpace(strFilename))
-                strFilename = GetFileNameHash(!string.IsNullOrWhiteSpace(strUrl) ? strUrl : wr.Url);
+                strFilename = GetFileNameHash(!string.IsNullOrWhiteSpace(strUrl) ? strUrl : wr.Url, wr != null ? wr.Post : null);
         
             FileInfo fi;
 
@@ -841,8 +844,22 @@ namespace MediaPortal.Pbk.Net.Http
         {
             if (string.IsNullOrWhiteSpace(strUrl))
                 return string.Empty;
-            return GetFileNameHash(new Uri(strUrl));
+            return GetFileNameHash(new Uri(strUrl), null);
         }
+
+        /// <summary>
+        /// Get filename hash based on url
+        /// </summary>
+        /// <param name="strUrl"></param>
+        /// <param name="data">Additional data to final hash. Can be null.</param>
+        /// <returns>Filename hash</returns>
+        public static string GetFileNameHash(string strUrl, byte[] data)
+        {
+            if (string.IsNullOrWhiteSpace(strUrl))
+                return string.Empty;
+            return GetFileNameHash(new Uri(strUrl), data);
+        }
+
         /// <summary>
         /// Get filename hash based on uri
         /// </summary>
@@ -850,32 +867,66 @@ namespace MediaPortal.Pbk.Net.Http
         /// <returns>Filename hash</returns>
         public static string GetFileNameHash(Uri uri)
         {
+            return GetFileNameHash(uri, null);
+        }
+
+        /// <summary>
+        /// Get filename hash based on uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="data">Additional data to final hash. Can be null.</param>
+        /// <returns>Filename hash</returns>
+        public static string GetFileNameHash(Uri uri, byte[] data)
+        {
+            byte[] toHash = Encoding.ASCII.GetBytes(uri.AbsoluteUri);
+            if (data != null && data.Length > 0)
+            {
+                //Concat uri & data
+                byte[] tmp = new byte[toHash.Length + data.Length];
+                Buffer.BlockCopy(toHash, 0, tmp, 0, toHash.Length);
+                Buffer.BlockCopy(data, 0, tmp, toHash.Length, data.Length);
+                toHash = tmp;
+            }
 
             //Create hash string
-            System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-            byte[] hash = md5.ComputeHash(Encoding.ASCII.GetBytes(uri.AbsoluteUri));
-
-            StringBuilder sb = new StringBuilder(128);
-            sb.Append(uri.Host);
-            sb.Append('_');
-            foreach (byte b in hash)
+            lock (_Md5Hash)
             {
-                int iDiv = b / 16;
-                int iRem = b % 16;
-                if (iDiv >= 10)
-                    sb.Append((char)(iDiv + 87));
-                else
-                    sb.Append((char)(iDiv + 48));
+                _SbHash.Clear();
+                _SbHash.Append(uri.Host);
+                _SbHash.Append('_');
 
-                if (iRem >= 10)
-                    sb.Append((char)(iRem + 87));
-                else
-                    sb.Append((char)(iRem + 48));
+                PrintHash(_SbHash, _Md5Hash.ComputeHash(toHash));
+
+                //Append file extension
+                _SbHash.Append('.');
+                _SbHash.Append(CACHE_FILENAME_EXT);
+
+                return _SbHash.ToString();
             }
-            sb.Append('.');
-            sb.Append(CACHE_FILENAME_EXT);
+        }
 
-            return sb.ToString();
+        /// <summary>
+        /// Print hash data in hex format
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="hash"></param>
+        public static void PrintHash(StringBuilder sb, byte[] hash)
+        {
+            //Print hash
+            byte b;
+            int iVal;
+            for (int i = 0; i < hash.Length; i++)
+            {
+                b = hash[i];
+
+                iVal = b >> 4;
+                iVal += iVal >= 10 ? 87 : 48;
+                _SbHash.Append((char)iVal);
+
+                iVal = b & 0x0F;
+                iVal += iVal >= 10 ? 87 : 48;
+                _SbHash.Append((char)iVal);
+            }
         }
     }
 }
