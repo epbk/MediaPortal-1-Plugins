@@ -3467,12 +3467,6 @@ namespace MediaPortal.Pbk.Net.Http
                                     case HttpStatusCode.PartialContent:
                                     case HttpStatusCode.Created:
                                     ok:
-                                        if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{3}][getResponseStream] HTTP Response: Length:{0} Received:{1}\r\n{2}",
-                                            iHttpLength,
-                                            iReceived,
-                                            Encoding.ASCII.GetString(this._BufferReceive, 0, iHttpLength),
-                                            this._Id);
-
                                         if (this.Method == HttpMethodEnum.HEAD || this._ContentLength == 0)
                                             goto ext; //no content to receive
 
