@@ -89,18 +89,18 @@ namespace MediaPortal.Pbk.Utils
                 return iValue.ToString() + " b/s";
         }
 
-        public static string PrintDataToHex(byte[] data, bool bSpace = true, string strFormat = "X2" )
+        public static string PrintDataToHex(byte[] data, bool bSpace = true, string strFormat = "X2")
         {
             if (data == null || data.Length < 1)
                 return string.Empty;
 
             StringBuilder sb = new StringBuilder(1024);
-            foreach (byte uc in data)
+            for (int i = 0; i < data.Length; i++)
             {
                 if (bSpace && sb.Length > 0)
                     sb.Append(' ');
 
-                sb.Append(uc.ToString(strFormat));
+                sb.Append(data[i].ToString(strFormat));
             }
 
             return sb.ToString();
@@ -124,20 +124,21 @@ namespace MediaPortal.Pbk.Utils
 
         public static Dictionary<string, string> GetUrlParams(string strQuery)
         {
-            return GetUrlParams(strQuery, true);
+            return GetUrlParams(strQuery, true, false);
         }
         public static Dictionary<string, string> GetUrlParams(string strQuery, bool bUrlDecode)
         {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-
-            GetUrlParams(result, strQuery, bUrlDecode);
-
-            return result;
+            return GetUrlParams(strQuery, bUrlDecode, false);
         }
-        public static void GetUrlParams(Dictionary<string, string> prms, string strQuery, bool bUrlDecode)
+        public static Dictionary<string, string> GetUrlParams(string strQuery, bool bUrlDecode, bool bKeyToLower)
+        {
+            Dictionary<string, string> prms = new Dictionary<string, string>();
+            GetUrlParams(prms, strQuery, bUrlDecode, bKeyToLower);
+            return prms;
+        }
+        public static void GetUrlParams(Dictionary<string, string> prms, string strQuery, bool bUrlDecode, bool bKeyToLower)
         {
             prms.Clear();
-
             if (!string.IsNullOrWhiteSpace(strQuery))
             {
                 string[] items;
@@ -148,12 +149,19 @@ namespace MediaPortal.Pbk.Utils
                 else
                     items = strQuery.Trim().Split('&');
 
-                foreach (string strItem in items)
+                for (int i = 0; i < items.Length; i++)
                 {
+                    string strItem = items[i];
                     string[] parts = strItem.Split('=');
-                    string s;
-                    if (parts.Length == 2 && !prms.TryGetValue(parts[0], out s))
-                        prms.Add(parts[0], bUrlDecode ? System.Web.HttpUtility.UrlDecode(parts[1]) : parts[1]);
+
+                    if (parts.Length == 2)
+                    {
+                        string strKey = bKeyToLower ? parts[0].ToLower() : parts[0];
+                        string strValue;
+
+                        if (!prms.TryGetValue(strKey, out strValue))
+                            prms.Add(strKey, bUrlDecode ? System.Web.HttpUtility.UrlDecode(parts[1]) : parts[1]);
+                    }
                 }
             }
         }
