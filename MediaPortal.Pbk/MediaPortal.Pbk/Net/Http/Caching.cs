@@ -104,7 +104,8 @@ namespace MediaPortal.Pbk.Net.Http
                 if (_Instance == null)
                 {
                     _Instance = new Caching();
-                    _Instance.CachePath = MediaPortal.Configuration.Config.GetFolder(MediaPortal.Configuration.Config.Dir.Thumbs) + "\\Pbk\\Cache\\";
+                    _Instance.CachePath =  (Utils.Tools.IsTvServer ? TvLibrary.Log.Log.GetPathName() 
+                        : MediaPortal.Configuration.Config.GetFolder(MediaPortal.Configuration.Config.Dir.Thumbs)) + "\\Pbk\\Cache\\";
                 }
 
                 return _Instance;

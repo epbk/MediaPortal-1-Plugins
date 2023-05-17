@@ -88,6 +88,14 @@
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\DotNetZip.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Gentle.Common">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Gentle.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Gentle.Framework">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Gentle.Framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\HtmlAgilityPack.dll</HintPath>
       <Private>False</Private>
@@ -126,6 +134,18 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TvBusinessLayer">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\TvBusinessLayer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TVDatabase">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\TVDatabase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TvLibrary.Interfaces">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\TvLibrary.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common.Utils">

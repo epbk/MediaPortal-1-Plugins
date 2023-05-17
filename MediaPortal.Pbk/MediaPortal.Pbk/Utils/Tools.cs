@@ -383,6 +383,15 @@ namespace MediaPortal.Pbk.Utils
             return sb.ToString();
         }
 
+        public static bool IsTvServer
+        {
+            get
+            {
+                string strApplication = AppDomain.CurrentDomain.FriendlyName;
+                return strApplication == "TVService.exe" || strApplication == "SetupTv.exe";
+            }
+        }
+
        
     }
 }

@@ -1429,48 +1429,74 @@ namespace MediaPortal.Pbk.Net.Http
         {
             Log.Init();
 
-            using (Settings settings = new MPSettings())
+            Utils.OptionEnum optionSsl = Utils.OptionEnum.Default;
+            Utils.OptionEnum optionProxy = Utils.OptionEnum.Default;
+
+            if (Utils.Tools.IsTvServer)
             {
-                Utils.OptionEnum option;
                 try
                 {
-                    option = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "UseOpenSSL", "Default"), true);
-                    _Logger.Debug("[ctor][Config] UseOpenSSL: " + option);
-                    switch (option)
+                    string strConfigPath = TvLibrary.Log.Log.GetPathName() + @"\MediaPortal.Pbk.xml";
+                    if (File.Exists(strConfigPath))
                     {
-                        case Utils.OptionEnum.Yes:
-                            UseOpenSSLDefault = true;
-                            break;
+                        XmlDocument xmldoc = new XmlDocument();
+                        xmldoc.Load(strConfigPath);
 
-                        case Utils.OptionEnum.No:
-                            UseOpenSSLDefault = false;
-                            break;
+                        XmlNode node = xmldoc.SelectSingleNode("//Config/Http/UseOpenSSL/text()");
+                        if (node != null)
+                            optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
+
+                        node = xmldoc.SelectSingleNode("//Config/Http/AllowSystemProxy/text()");
+                        if (node != null)
+                            optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
                     }
-
-                }
-                catch (Exception ex)
-                { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
-
-                try
-                {
-                    option = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "AllowSystemProxy", "Default"), true);
-                    _Logger.Debug("[ctor][Config] AllowSystemProxy: " + option);
-                    switch (option)
-                    {
-                        case Utils.OptionEnum.Yes:
-                            AllowSystemProxyDefault = true;
-                            break;
-
-                        case Utils.OptionEnum.No:
-                            AllowSystemProxyDefault = false;
-                            break;
-                    }
-
                 }
                 catch (Exception ex)
                 { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
             }
+            else
+            {
+                using (Settings settings = new MPSettings())
+                {
+                    try
+                    {
+                        optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "UseOpenSSL", "Default"), true);
+                    }
+                    catch (Exception ex)
+                    { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
 
+                    try
+                    {
+                        optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "AllowSystemProxy", "Default"), true);
+                    }
+                    catch (Exception ex)
+                    { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
+                }
+            }
+
+            _Logger.Debug("[ctor][Config] UseOpenSSL: " + optionSsl);
+            switch (optionSsl)
+            {
+                case Utils.OptionEnum.Yes:
+                    UseOpenSSLDefault = true;
+                    break;
+
+                case Utils.OptionEnum.No:
+                    UseOpenSSLDefault = false;
+                    break;
+            }
+
+            _Logger.Debug("[ctor][Config] AllowSystemProxy: " + optionProxy);
+            switch (optionProxy)
+            {
+                case Utils.OptionEnum.Yes:
+                    AllowSystemProxyDefault = true;
+                    break;
+
+                case Utils.OptionEnum.No:
+                    AllowSystemProxyDefault = false;
+                    break;
+            }
         }
         public HttpUserWebRequest()
         {
