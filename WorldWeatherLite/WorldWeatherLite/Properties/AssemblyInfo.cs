@@ -9,9 +9,9 @@ using MediaPortal.Common.Utils;
 [assembly: AssemblyTitle("WorldWeatherLite")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Team MediaPortal")]
 [assembly: AssemblyProduct("WorldWeatherLite")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2023")]
+[assembly: AssemblyCopyright("Copyright © Team MediaPortal 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,6 +33,6 @@ using MediaPortal.Common.Utils;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.*")]
-[assembly: AssemblyFileVersion("0.9.0")]
-[assembly: CompatibleVersion("1.11.0.0")]
+[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0")]
+[assembly: CompatibleVersion("1.31.0.0")]
