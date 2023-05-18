@@ -9,9 +9,9 @@ using MediaPortal.Common.Utils;
 [assembly: AssemblyTitle("mySkinInfo")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("PBK")]
+[assembly: AssemblyCompany("Team MediaPortal")]
 [assembly: AssemblyProduct("mySkinInfo")]
-[assembly: AssemblyCopyright("Copyright © PBK 2023")]
+[assembly: AssemblyCopyright("Copyright © Team MediaPortal 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
