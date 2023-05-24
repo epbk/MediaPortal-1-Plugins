@@ -1432,47 +1432,44 @@ namespace MediaPortal.Pbk.Net.Http
             Utils.OptionEnum optionSsl = Utils.OptionEnum.Default;
             Utils.OptionEnum optionProxy = Utils.OptionEnum.Default;
 
-            if (Utils.Tools.IsTvServer)
+#if TV_SERVER
+            try
+            {
+                string strConfigPath = TvLibrary.Log.Log.GetPathName() + @"\MediaPortal.Pbk.xml";
+                if (File.Exists(strConfigPath))
+                {
+                    XmlDocument xmldoc = new XmlDocument();
+                    xmldoc.Load(strConfigPath);
+
+                    XmlNode node = xmldoc.SelectSingleNode("//Config/Http/UseOpenSSL/text()");
+                    if (node != null)
+                        optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
+
+                    node = xmldoc.SelectSingleNode("//Config/Http/AllowSystemProxy/text()");
+                    if (node != null)
+                        optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
+                }
+            }
+            catch (Exception ex)
+            { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
+#else
+            using (Settings settings = new MPSettings())
             {
                 try
                 {
-                    string strConfigPath = TvLibrary.Log.Log.GetPathName() + @"\MediaPortal.Pbk.xml";
-                    if (File.Exists(strConfigPath))
-                    {
-                        XmlDocument xmldoc = new XmlDocument();
-                        xmldoc.Load(strConfigPath);
+                    optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "UseOpenSSL", "Default"), true);
+                }
+                catch (Exception ex)
+                { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
 
-                        XmlNode node = xmldoc.SelectSingleNode("//Config/Http/UseOpenSSL/text()");
-                        if (node != null)
-                            optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
-
-                        node = xmldoc.SelectSingleNode("//Config/Http/AllowSystemProxy/text()");
-                        if (node != null)
-                            optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), node.Value, true);
-                    }
+                try
+                {
+                    optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "AllowSystemProxy", "Default"), true);
                 }
                 catch (Exception ex)
                 { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
             }
-            else
-            {
-                using (Settings settings = new MPSettings())
-                {
-                    try
-                    {
-                        optionSsl = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "UseOpenSSL", "Default"), true);
-                    }
-                    catch (Exception ex)
-                    { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
-
-                    try
-                    {
-                        optionProxy = (Utils.OptionEnum)Enum.Parse(typeof(Utils.OptionEnum), settings.GetValueAsString("Pbk.Http", "AllowSystemProxy", "Default"), true);
-                    }
-                    catch (Exception ex)
-                    { _Logger.Error("[ctor][Config] Error: " + ex.Message); }
-                }
-            }
+#endif            
 
             _Logger.Debug("[ctor][Config] UseOpenSSL: " + optionSsl);
             switch (optionSsl)
@@ -1510,9 +1507,9 @@ namespace MediaPortal.Pbk.Net.Http
         {
             this.init(strUrl);
         }
-        #endregion
+#endregion
 
-        #region Public methods
+#region Public methods
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual void Close()
@@ -1745,7 +1742,7 @@ namespace MediaPortal.Pbk.Net.Http
                     return false;
                 }
 
-                #region  Event: Before save to file (call the event to get filename)
+#region  Event: Before save to file (call the event to get filename)
                 if (this.BeforeSaveToFile != null)
                 {
                     try
@@ -1765,7 +1762,7 @@ namespace MediaPortal.Pbk.Net.Http
                         _Logger.Error("[{3}][getResponseStream] Error onEvent BeforeSaveToFile: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._Id);
                     }
                 }
-                #endregion
+#endregion
 
                 using (FileStream fs = new FileStream(strPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
@@ -2365,9 +2362,9 @@ namespace MediaPortal.Pbk.Net.Http
             return false;
         }
 
-        #endregion
+#endregion
 
-        #region Private methods
+#region Private methods
         private void init(string strUrl)
         {
             try
@@ -2619,7 +2616,7 @@ namespace MediaPortal.Pbk.Net.Http
                 if (this._TotalBytesWritten == 0)
                     return (T)(object)null;
 
-                #region Concat all buffers to single one
+#region Concat all buffers to single one
                 if (buffers != null)
                 {
                     if (this._TotalBytesWritten != iBufferCurrentWritten || typeof(T) == typeof(byte[]))
@@ -2657,9 +2654,9 @@ namespace MediaPortal.Pbk.Net.Http
 
                     buffers = null;
                 }
-                #endregion
+#endregion
 
-                #region Return requested data type
+#region Return requested data type
 
 
                 string strContentType;
@@ -2708,7 +2705,7 @@ namespace MediaPortal.Pbk.Net.Http
                 }
                 else
                     return (T)(object)null;
-                #endregion
+#endregion
             }
             catch (Exception ex)
             {
@@ -2738,7 +2735,7 @@ namespace MediaPortal.Pbk.Net.Http
 
             if (fsDest != null)
             {
-                #region Content range
+#region Content range
                 long lTo;
                 long lLength;
                 if (this._HttpResponseCode == HttpStatusCode.PartialContent && this.TryGetHttpResponseFieldContentRange(out this._ResumingFrom, out lTo, out lLength))
@@ -2775,7 +2772,7 @@ namespace MediaPortal.Pbk.Net.Http
                     if (this._FileOffset < 0)
                         fsDest.SetLength(0);
                 }
-                #endregion
+#endregion
             }
 
             while (!this.Abort)
@@ -2905,7 +2902,7 @@ namespace MediaPortal.Pbk.Net.Http
             if (this._ServerUri == null)
                 throw new Exception("[getResponseStream] Not initialized.");
 
-            #region Proxy
+#region Proxy
             try
             {
                 if ((this.AllowSystemProxy == Utils.OptionEnum.Yes || (this.AllowSystemProxy == Utils.OptionEnum.Default && _AllowSystemProxyDefault))
@@ -2932,9 +2929,9 @@ namespace MediaPortal.Pbk.Net.Http
                 }
             }
             catch { }
-            #endregion
+#endregion
 
-            #region Init
+#region Init
             byte[] httpHeader = Encoding.ASCII.GetBytes(this.createHttpHeader());
             //this.ServerUrlRedirect = null;
             this._HttpResponseFields = null;
@@ -2959,7 +2956,7 @@ namespace MediaPortal.Pbk.Net.Http
             }
 
             bool bClose = true;
-            #endregion
+#endregion
 
             try
             {
@@ -2976,7 +2973,7 @@ namespace MediaPortal.Pbk.Net.Http
                 this._ServerIpEndpoint = new IPEndPoint(ips[0], this._ServerUri.Port);
                 this._ServerAutority = this._ServerUri.Authority;
 
-                #region Connect
+#region Connect
                 //Try get existing available connection
                 Connection sc = _Connections.GetConnection(this);
                 if (sc != null)
@@ -2987,7 +2984,7 @@ namespace MediaPortal.Pbk.Net.Http
                 }
                 else
                 {
-                    #region Connect to the server
+#region Connect to the server
                     if (!string.IsNullOrEmpty(this.Proxy))
                     {
                         IPEndPoint ep = null;
@@ -3025,7 +3022,7 @@ namespace MediaPortal.Pbk.Net.Http
                     {
                         if (!string.IsNullOrEmpty(this.Proxy))
                         {
-                            #region Proxy CONNECT
+#region Proxy CONNECT
 
                             this._Stream = this._TcpClient.GetStream();
 
@@ -3059,7 +3056,7 @@ namespace MediaPortal.Pbk.Net.Http
                                     {
                                         iReceived += iCnt;
 
-                                        #region Http Response
+#region Http Response
 
                                         //Analyze HTTP response
                                         Dictionary<string, string> httpResponseFields = null;
@@ -3097,7 +3094,7 @@ namespace MediaPortal.Pbk.Net.Http
                                             }
                                         }
 
-                                        #endregion
+#endregion
 
                                     }
                                     else
@@ -3128,7 +3125,7 @@ namespace MediaPortal.Pbk.Net.Http
                             {
                             }
 
-                            #endregion
+#endregion
                         }
 
                     ssl:
@@ -3209,13 +3206,13 @@ namespace MediaPortal.Pbk.Net.Http
                     else
                         this._Stream = this._TcpClient.GetStream();
 
-                    #endregion
+#endregion
                 }
 
                 this._StreamSource = this._Stream;
-                #endregion
+#endregion
 
-                #region Send Http header
+#region Send Http header
                 byte[] header = httpHeader;
 
                 if (this.BeforeRequest != null)
@@ -3249,9 +3246,9 @@ namespace MediaPortal.Pbk.Net.Http
                 }
 
                 this._Stream.EndWrite(ia);
-                #endregion
+#endregion
 
-                #region Post data
+#region Post data
                 if (this.Method == HttpMethodEnum.POST)
                 {
                     if (this.Post != null && this.Post.Length > 0)
@@ -3329,9 +3326,9 @@ namespace MediaPortal.Pbk.Net.Http
                             _Logger.Debug("[{0}][getResponseStream] POST done. Uploaded: {1}  Url: {2}", this._Id, dwSent, this._ServerUrl);
                     }
                 }
-                #endregion
+#endregion
 
-                #region Response
+#region Response
                 iReceived = 0;
 
                 try
@@ -3360,7 +3357,7 @@ namespace MediaPortal.Pbk.Net.Http
                         {
                             iReceived += iCnt;
 
-                            #region Http Response
+#region Http Response
 
                             //Analyze HTTP response
                             int iHttpLength = GetHttpResponse(this._ServerUri, this._BufferReceive, 0, iReceived,
@@ -3385,7 +3382,7 @@ namespace MediaPortal.Pbk.Net.Http
                             }
                             else
                             {
-                                #region Response received
+#region Response received
 
                                 if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{3}][getResponseStream] HTTP Response: Length:{0} Received:{1}\r\n{2}",
                                            iHttpLength,
@@ -3404,7 +3401,7 @@ namespace MediaPortal.Pbk.Net.Http
                                 if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONTENT_DISPOSITION, out strValue))
                                     this._ContentFilename = GetHttpFilename(strValue);
 
-                                #region Keep-Alive
+#region Keep-Alive
                                 bool bKeepAlive = this._HttpResponseVersion >= 1.1;
                                 if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONNECTION, out strValue))
                                 {
@@ -3450,14 +3447,14 @@ namespace MediaPortal.Pbk.Net.Http
                                 }
                                 else
                                     this._ConnectionKeepAlive = false;
-                                #endregion
+#endregion
 
                                 //Chunked transfer
                                 this._ConnectionChunked = this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_TRANSFER_ENCODING, out strValue) &&
                                     strValue.Equals("chunked", StringComparison.CurrentCultureIgnoreCase);
 
 
-                                #region Analyze response code
+#region Analyze response code
                                 switch (this._HttpResponseCode)
                                 {
                                     case HttpStatusCode.NotModified:
@@ -3473,7 +3470,7 @@ namespace MediaPortal.Pbk.Net.Http
                                         if (this._ContentLength < 0 && !this._ConnectionChunked)
                                             this._ConnectionKeepAlive = false;// unknown length
 
-                                        #region  Event: Before download (call the event to check if we can proceed)
+#region  Event: Before download (call the event to check if we can proceed)
                                         if (this.BeforeDownload != null)
                                         {
                                             try
@@ -3493,27 +3490,27 @@ namespace MediaPortal.Pbk.Net.Http
                                                 _Logger.Error("[{3}][getResponseStream] Error onEvent BeforeDownload: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._Id);
                                             }
                                         }
-                                        #endregion
+#endregion
 
                                         //Stream chain
                                         // SocketStream <- SslStream <- HttpUserInterStream <- ChunkedStream <- CompressionStream <- HttpUserWebResponseStream
 
-                                        #region Inter Stream
+#region Inter Stream
                                         int iRem = iReceived - iHttpLength;
                                         //_logger.Debug("[getResponseStream] Creating user stream: RemainingData:{0} Url:{1}", iRem, this._ServerUrl);
                                         this._Stream = new InterStream(this._Stream, this._BufferReceive, iHttpLength, iRem, this);
-                                        #endregion
+#endregion
 
-                                        #region Chunked Stream
+#region Chunked Stream
                                         if (this._ConnectionChunked)
                                         {
                                             if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][getResponseStream] Chunked transfer detected.", this._Id);
                                             this._StreamChunked = new ChunkedStream(this._Stream, true) { CheckZeroChunk = false };
                                             this._Stream = this._StreamChunked;
                                         }
-                                        #endregion
+#endregion
 
-                                        #region Compression Stream
+#region Compression Stream
                                         if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONTENT_ENCODING, out strValue))
                                         {
                                             //If the previous stream is chunked then we need to set zero check flag
@@ -3555,7 +3552,7 @@ namespace MediaPortal.Pbk.Net.Http
                                                 }
                                             }
                                         }
-                                        #endregion
+#endregion
 
                                         //We need to use different connection: flush current stream to allow keep alive
                                         if (this._GetResponseResult == GetResponseResultEnum.ErrorOtherConnectionRequired)
@@ -3609,12 +3606,12 @@ namespace MediaPortal.Pbk.Net.Http
                                         goto ok;
 
                                 }
-                                #endregion
+#endregion
 
-                                #endregion
+#endregion
                             }
 
-                            #endregion
+#endregion
 
                         }
                         else
@@ -3658,7 +3655,7 @@ namespace MediaPortal.Pbk.Net.Http
                 finally
                 {
                 }
-                #endregion
+#endregion
 
             err:
                 this._GetResponseResult = GetResponseResultEnum.Error;
@@ -4262,7 +4259,7 @@ namespace MediaPortal.Pbk.Net.Http
 
             return X509KeyUsageFlags.None;
         }
-        #endregion
+#endregion
 
     }
 }

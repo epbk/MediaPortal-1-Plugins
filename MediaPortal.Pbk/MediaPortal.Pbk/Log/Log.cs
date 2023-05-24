@@ -63,7 +63,8 @@ namespace MediaPortal.Pbk.Logging
 
                 _LogLevel = value;
             }
-        }private static LogLevel _LogLevel;
+        }
+        private static LogLevel _LogLevel;
 
         internal static string LogFile
         {
@@ -99,61 +100,58 @@ namespace MediaPortal.Pbk.Logging
             {
                 LogLevel logLevel = LogLevel.Debug;
 
-                if (Utils.Tools.IsTvServer)
+#if TV_SERVER
+                TvDatabase.TvBusinessLayer layer = new TvDatabase.TvBusinessLayer();
+
+                int iLvl = Convert.ToInt32(layer.GetSetting("loglevel", "5").Value) - 2; // 0:error, 1:warn, 2:info, 3:debug,
+                switch (iLvl)
                 {
-                    TvDatabase.TvBusinessLayer layer = new TvDatabase.TvBusinessLayer();
+                    case 0:
+                        logLevel = LogLevel.Error;
+                        break;
 
-                    int iLvl = Convert.ToInt32(layer.GetSetting("loglevel", "5").Value) - 2; // 0:error, 1:warn, 2:info, 3:debug,
-                    switch (iLvl)
-                    {
-                        case 0:
-                            logLevel = LogLevel.Error;
-                            break;
+                    case 1:
+                        logLevel = LogLevel.Warn;
+                        break;
 
-                        case 1:
-                            logLevel = LogLevel.Warn;
-                            break;
+                    case 2:
+                        logLevel = LogLevel.Info;
+                        break;
 
-                        case 2:
-                            logLevel = LogLevel.Info;
-                            break;
-
-                        case 3:
-                        default:
-                            logLevel = LogLevel.Debug;
-                            break;
-                    }
+                    case 3:
+                    default:
+                        logLevel = LogLevel.Debug;
+                        break;
                 }
-                else
+#else
+                using (MPSettings xmlreader = new MPSettings())
                 {
-                    using (MPSettings xmlreader = new MPSettings())
+                    int iLvl;
+                    string strLogLevel = xmlreader.GetValueAsString("general", "loglevel", "2"); // 0:error, 1:warn, 2:info, 3:debug,
+                    if (int.TryParse(strLogLevel, out iLvl))
                     {
-                        int iLvl;
-                        string strLogLevel = xmlreader.GetValueAsString("general", "loglevel", "2"); // 0:error, 1:warn, 2:info, 3:debug,
-                        if (int.TryParse(strLogLevel, out iLvl))
+                        switch (iLvl)
                         {
-                            switch (iLvl)
-                            {
-                                case 0:
-                                    logLevel = LogLevel.Error;
-                                    break;
+                            case 0:
+                                logLevel = LogLevel.Error;
+                                break;
 
-                                case 1:
-                                    logLevel = LogLevel.Warn;
-                                    break;
+                            case 1:
+                                logLevel = LogLevel.Warn;
+                                break;
 
-                                case 2:
-                                    logLevel = LogLevel.Info;
-                                    break;
+                            case 2:
+                                logLevel = LogLevel.Info;
+                                break;
 
-                                case 3:
-                                default:
-                                    logLevel = LogLevel.Debug;
-                                    break;
-                            }
+                            case 3:
+                            default:
+                                logLevel = LogLevel.Debug;
+                                break;
                         }
                     }
                 }
+#endif                
 
                 //Set log level
                 _LogLevel = logLevel;
@@ -168,23 +166,29 @@ namespace MediaPortal.Pbk.Logging
             if ((LogManager.Configuration == null))
                 LogManager.Configuration = new LoggingConfiguration();
 
-            bool bIsTvServer = Utils.Tools.IsTvServer;
-
             _Target = new FileTarget();
             _Target.Name = "Log";
-            _Target.FileName = bIsTvServer ? TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_FILE_NAME : 
-                Config.GetFile(Config.Dir.Log, _LOG_FILE_NAME);
             _Target.Layout = _LOG_FILE_LAYOUT;
-            _Target.ArchiveFileName = bIsTvServer ? TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_ARCHIVE_SUBFOLDER + '\\' + _LOG_FILE_NAME_PREFIX + ".{#}.log" :
-                Config.GetFile(Config.Dir.Log, _LOG_ARCHIVE_SUBFOLDER, _LOG_FILE_NAME_PREFIX + ".{#}.log");
+#if TV_SERVER
+            _Target.FileName = TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_FILE_NAME;
+            _Target.ArchiveFileName = TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_ARCHIVE_SUBFOLDER + '\\' + _LOG_FILE_NAME_PREFIX + ".{#}.log";
+#else
+            _Target.FileName = Config.GetFile(Config.Dir.Log, _LOG_FILE_NAME);
+            _Target.ArchiveFileName = Config.GetFile(Config.Dir.Log, _LOG_ARCHIVE_SUBFOLDER, _LOG_FILE_NAME_PREFIX + ".{#}.log");
+#endif
             _Target.ArchiveEvery = FileTarget.ArchiveEveryMode.Day;
             _Target.MaxArchiveFiles = 10;
             _Target.ArchiveNumbering = FileTarget.ArchiveNumberingMode.Sequence;
             LogManager.Configuration.AddTarget("Log", _Target);
-            
+
             _TargetError = new FileTarget();
             _TargetError.Name = "LogError";
-            _TargetError.FileName = bIsTvServer ? TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_FILE_NAME_ERROR : Config.GetFile(Config.Dir.Log, _LOG_FILE_NAME_ERROR);
+#if TV_SERVER
+            _TargetError.FileName = TvLibrary.Log.Log.GetPathName() + @"\log\" + _LOG_FILE_NAME_ERROR;
+#else
+            _TargetError.FileName = Config.GetFile(Config.Dir.Log, _LOG_FILE_NAME_ERROR);
+#endif
+
             _TargetError.Layout = _LOG_FILE_LAYOUT;
             _TargetError.DeleteOldFileOnStartup = false;
             LogManager.Configuration.AddTarget("LogError", _TargetError);

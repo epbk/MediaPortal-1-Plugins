@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaPortal.Pbk", "MediaPortal.Pbk\MediaPortal.Pbk.csproj", "{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}"
 EndProject
 Global
@@ -11,6 +13,8 @@ Global
 		Latest|x86 = Latest|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		TvServer|x64 = TvServer|x64
+		TvServer|x86 = TvServer|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Debug|x64.ActiveCfg = Debug|x64
@@ -25,8 +29,15 @@ Global
 		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x64.Build.0 = Release|x64
 		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x86.ActiveCfg = Release|x86
 		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.Release|x86.Build.0 = Release|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.TvServer|x64.ActiveCfg = TvServer|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.TvServer|x64.Build.0 = TvServer|x64
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.TvServer|x86.ActiveCfg = TvServer|x86
+		{E727A10D-2E8E-4443-8BAB-A6943CDDDF7E}.TvServer|x86.Build.0 = TvServer|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83C3CEAF-FA65-4BB6-9249-51A284242492}
 	EndGlobalSection
 EndGlobal

@@ -107,8 +107,11 @@ namespace MediaPortal.Pbk.Net.Http
                 if (_Instance == null)
                 {
                     _Instance = new Caching();
-                    _Instance.CachePath =  (Utils.Tools.IsTvServer ? TvLibrary.Log.Log.GetPathName() 
-                        : MediaPortal.Configuration.Config.GetFolder(MediaPortal.Configuration.Config.Dir.Thumbs)) + "\\Pbk\\Cache\\";
+#if TV_SERVER
+                    _Instance.CachePath =  TvLibrary.Log.Log.GetPathName() + "\\Pbk\\Cache\\";
+#else
+                    _Instance.CachePath = MediaPortal.Configuration.Config.GetFolder(MediaPortal.Configuration.Config.Dir.Thumbs) + "\\Pbk\\Cache\\";
+#endif
                 }
 
                 return _Instance;
@@ -116,7 +119,7 @@ namespace MediaPortal.Pbk.Net.Http
         }private static Caching _Instance = null;
 
 
-        #region ctor
+#region ctor
         static Caching()
         {
             Logging.Log.Init();
@@ -126,7 +129,7 @@ namespace MediaPortal.Pbk.Net.Http
         {
             this._Id = Interlocked.Increment(ref _IdCounter);
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Delete expired cached files

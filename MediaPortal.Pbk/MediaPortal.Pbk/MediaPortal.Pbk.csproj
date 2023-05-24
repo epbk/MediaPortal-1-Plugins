@@ -55,6 +55,28 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TvServer|x86'">
+    <OutputPath>bin\x86\TvServer\</OutputPath>
+    <DefineConstants>TRACE;FX40 NET_4_0 TV_SERVER</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\x86\Release\MediaPortal.Pbk.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TvServer|x64'">
+    <OutputPath>bin\x64\TvServer\</OutputPath>
+    <DefineConstants>TRACE;FX40 NET_4_0 x64 TV_SERVER</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\x64\Release\MediaPortal.Pbk.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(Platform)' == 'x64' ">
     <Reference Include="ManagedOpenSsl, Version=0.6.0.0, Culture=neutral, processorArchitecture=x64">
       <SpecificVersion>False</SpecificVersion>
@@ -134,6 +156,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(Configuration)' == 'TvServer' ">
     <Reference Include="TvBusinessLayer">
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\TvBusinessLayer.dll</HintPath>
       <Private>False</Private>
