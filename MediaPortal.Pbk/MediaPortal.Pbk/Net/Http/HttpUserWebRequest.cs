@@ -3828,23 +3828,27 @@ namespace MediaPortal.Pbk.Net.Http
             //Cookies
             if (!this.AllowCookies)
                 this.Cookies = null;
-            else if (this.Cookies != null && this.Cookies.Count > 0)
+            else if (this.Cookies != null)
             {
-                sb.Append(HttpHeaderField.HTTP_FIELD_COOKIE);
-                sb.Append(HttpHeaderField.HTTP_FIELD_COLON);
-
-                foreach (Cookie c in this.Cookies.GetCookies(this._ServerUri))
+                CookieCollection cookies = this.Cookies.GetCookies(this._ServerUri);
+                if (cookies.Count > 0)
                 {
-                    sb.Append(c.Name);
-                    sb.Append('=');
-                    sb.Append(c.Value);
-                    sb.Append("; ");
+                    sb.Append(HttpHeaderField.HTTP_FIELD_COOKIE);
+                    sb.Append(HttpHeaderField.HTTP_FIELD_COLON);
+
+                    foreach (Cookie c in cookies)
+                    {
+                        sb.Append(c.Name);
+                        sb.Append('=');
+                        sb.Append(c.Value);
+                        sb.Append("; ");
+                    }
+
+                    sb.Remove(sb.Length - 2, 2);
+                    sb.Append(HttpHeaderField.EOL);
+
+                    fields.Add(HttpHeaderField.HTTP_FIELD_COOKIE);
                 }
-
-                sb.Remove(sb.Length - 2, 2);
-                sb.Append(HttpHeaderField.EOL);
-
-                fields.Add(HttpHeaderField.HTTP_FIELD_COOKIE);
             }
 
             //Content-Length
