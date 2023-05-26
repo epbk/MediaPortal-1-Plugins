@@ -924,11 +924,11 @@ namespace MediaPortal.Pbk.Net.Http
 
                 iVal = b >> 4;
                 iVal += iVal >= 10 ? 87 : 48;
-                _SbHash.Append((char)iVal);
+                sb.Append((char)iVal);
 
                 iVal = b & 0x0F;
                 iVal += iVal >= 10 ? 87 : 48;
-                _SbHash.Append((char)iVal);
+                sb.Append((char)iVal);
             }
         }
     }
