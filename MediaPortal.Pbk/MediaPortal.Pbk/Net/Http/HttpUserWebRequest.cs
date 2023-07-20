@@ -3742,7 +3742,7 @@ namespace MediaPortal.Pbk.Net.Http
             //Host
             sb.Append(HttpHeaderField.HTTP_FIELD_HOST);
             sb.Append(HttpHeaderField.HTTP_FIELD_COLON);
-            sb.Append(this._ServerUri.Authority);
+            sb.Append(this._ServerUri.Host);
             if (this._ServerUri.Port != 80 && this._ServerUri.Port != 443)
             {
                 sb.Append(':');
