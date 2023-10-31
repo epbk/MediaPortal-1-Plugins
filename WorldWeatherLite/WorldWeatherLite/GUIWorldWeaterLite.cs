@@ -30,7 +30,7 @@ using SharpDX.Direct3D9;
 namespace MediaPortal.Plugins.WorldWeatherLite
 {
     [PluginIcons("MediaPortal.Plugins.WorldWeatherLite.Graphics.WorldWeather-enabled.png", "MediaPortal.Plugins.WorldWeatherLite.Graphics.WorldWeather-disabled.png")]
-    public class GUIWorldWeaterLite : GUIWindow, ISetupForm
+    public class GUIWorldWeaterLite : GUIWindow, ISetupForm, IPluginReceiver
     {
         #region Constants
         internal const int PLUGIN_ID = 7977;
@@ -43,6 +43,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private const string _GEOCLOCK_IMAGE_ID = "[" + PLUGIN_NAME + ":MediaPortalWorldWeatherGeoClock]";
         private const string _MOON_IMAGE_ID = "[" + PLUGIN_NAME + ":MediaPortalWorldWeatherMoon]";
+
+        private const int WM_POWERBROADCAST = 0x0218;
+        private const int PBT_APMQUERYSUSPEND = 0x0000;
+        private const int PBT_APMQUERYSTANDBY = 0x0001;
+        private const int PBT_APMQUERYSUSPENDFAILED = 0x0002;
+        private const int PBT_APMQUERYSTANDBYFAILED = 0x0003;
+        private const int PBT_APMSUSPEND = 0x0004;
+        private const int PBT_APMSTANDBY = 0x0005;
+        private const int PBT_APMRESUMECRITICAL = 0x0006;
+        private const int PBT_APMRESUMESUSPEND = 0x0007;
+        private const int PBT_APMRESUMESTANDBY = 0x0008;
+        private const int PBT_APMRESUMEAUTOMATIC = 0x0012;
 
 
         #region Tags
@@ -332,10 +344,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         //private Dictionary<string, string> _Translation = new Dictionary<string, string>();
 
         private int _WeatherIsRefreshing = 0;
+        private int _LocationIsRefreshing = 0;
         private int _WeatherRefreshAttempts = 0;
         private System.Timers.Timer _TimerRefreshWeather;
         private System.Timers.Timer _TimerRefreshLocation;
         private DateTime _RefreshLast = DateTime.MinValue;
+        private bool _SystemSuspended = false;
 
         private Utils.GeoClock _GeoClock;
         private DateTime _GeoClockLastRefresh = DateTime.MinValue;
@@ -506,7 +520,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //Init tags
             tagsInit();
-            tagSetLocation(this._WeatherLocation, DateTime.UtcNow, this._Settings, this._Provider);
+            this.doLocationRefresh();
 
             //Refresh timer init
             this._TimerRefreshWeather = new System.Timers.Timer();
@@ -563,7 +577,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             this.setImageViewMode(this._ImageViewMode);
 
-            tagSetLocation(this._WeatherLocation, DateTime.UtcNow, this._Settings, this._Provider);
+            this.doLocationRefresh();
             tagsSetCalendar(this._Settings, this._WeatherLocation, DateTime.Today, this._Localisation, Database.dbHoliday.GetAll());
 
             this.moonImageRefresh();
@@ -756,6 +770,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             //Standart gui render
             base.Render(timePassed);
         }
+
         #endregion
 
         #region ISetupForm
@@ -821,6 +836,46 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         }
 
 
+        #endregion
+
+        #region IPluginReceiver
+        public void Start()
+        { }
+
+        public void Stop()
+        { }
+
+        public bool WndProc(ref System.Windows.Forms.Message msg)
+        {
+            if (msg.Msg == WM_POWERBROADCAST)
+            {
+                switch (msg.WParam.ToInt32())
+                {
+                    case PBT_APMSTANDBY:
+                        _Logger.Debug("[WndProc] Windows is going to standby");
+                        this.onSuspend();
+                        break;
+                    case PBT_APMSUSPEND:
+                        _Logger.Debug("[WndProc] Windows is suspending");
+                        this.onSuspend();
+                        break;
+                    case PBT_APMQUERYSUSPEND:
+                    case PBT_APMQUERYSTANDBY:
+                        _Logger.Debug("[WndProc] Windows is going into powerstate (hibernation/standby)");
+                        break;
+                    case PBT_APMRESUMESUSPEND:
+                    case PBT_APMRESUMEAUTOMATIC:
+                        _Logger.Debug("[WndProc] Windows has resumed from hibernate mode");
+                        this.onResume();
+                        break;
+                    case PBT_APMRESUMESTANDBY:
+                        _Logger.Debug("[WndProc] Windows has resumed from standby mode");
+                        this.onResume();
+                        break;
+                }
+            }
+            return false; // false = all other processes will handle the msg
+        }
         #endregion
 
         #region Tags
@@ -1831,16 +1886,22 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 }
 
                 //Next refresh time
-                if (!bResult)
+                lock (this._TimerRefreshWeather)
                 {
-                    this._TimerRefreshWeather.Interval = Math.Min(_REFRESH_INTERVAL, Math.Pow(2, this._WeatherRefreshAttempts) * 60) * 1000;
-                    this._WeatherRefreshAttempts++;
-                }
-                else
-                {
-                    this._RefreshLast = DateTime.Now;
-                    this._TimerRefreshWeather.Interval = _REFRESH_INTERVAL * 1000;
-                    this._WeatherRefreshAttempts = 0;
+                    if (!bResult)
+                    {
+                        double dTime = Math.Min(_REFRESH_INTERVAL, Math.Pow(2, this._WeatherRefreshAttempts) * 60);
+                        this._TimerRefreshWeather.Interval =  dTime * 1000;
+                        this._WeatherRefreshAttempts++;
+                        _Logger.Error("[doWeatherRefresh] Failed. Next refresh attempt in {0:0} seconds.", dTime);
+                    }
+                    else
+                    {
+                        this._RefreshLast = DateTime.Now;
+                        this._TimerRefreshWeather.Interval = _REFRESH_INTERVAL * 1000;
+                        this._WeatherRefreshAttempts = 0;
+                        _Logger.Debug("[doWeatherRefresh] Complete. Next refresh in {0} seconds.", _REFRESH_INTERVAL);
+                    }
                 }
 
                 //Moon phase
@@ -1858,6 +1919,50 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
 
             return bResult;
+        }
+
+        private void doLocationRefresh()
+        {
+            if (Interlocked.CompareExchange(ref this._LocationIsRefreshing, 1, 0) != 0)
+                return;
+
+            try
+            {
+                tagSetLocation(this._WeatherLocation, DateTime.UtcNow, this._Settings, this._Provider);
+            }
+            finally
+            {
+                this._LocationIsRefreshing = 0;
+            }
+        }
+
+        private void setWeatherRefresh(bool bEnable)
+        {
+            lock (this._TimerRefreshWeather)
+            {
+                if (bEnable || this._TimerRefreshWeather.Enabled)
+                {
+                    //Check next weather refresh time
+                    int iTime = this._RefreshLast > DateTime.MinValue ? (int)(DateTime.Now - this._RefreshLast).TotalSeconds : _REFRESH_INTERVAL;
+
+                    if (iTime >= _REFRESH_INTERVAL - 5)
+                    {
+                        _Logger.Debug("[setWeatherRefresh] Weather refresh is in due.");
+                        iTime = 2; //refresh is in due now
+                    }
+                    else
+                    {
+                        iTime = _REFRESH_INTERVAL - iTime;
+                        _Logger.Debug("[setWeatherRefresh] Next refresh in {0} seconds.", iTime);
+                    }
+
+                    this._TimerRefreshWeather.Interval = iTime * 1000;
+
+                    this._TimerRefreshWeather.Enabled = true;
+                }
+                else
+                    _Logger.Debug("[setWeatherRefresh] Weather refresh is currently suspended.");
+            }
         }
 
         private static string getIconCodeString(int iCode, bool bIsDay)
@@ -2382,43 +2487,41 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         {
             //_Logger.Debug("[cbVideoWindowChanged] FullScreen:{0} TV:{1}", GUIGraphicsContext.IsFullScreenVideo, g_Player.IsTV);
 
-            if (GUIGraphicsContext.IsFullScreenVideo)
+            lock (this._TimerRefreshWeather)
             {
-                //Going to fullscreen mode
-
-                switch (Database.dbSettings.Instance.FullscreenVideoBehavior)
+                if (GUIGraphicsContext.IsFullScreenVideo)
                 {
-                    case FullscreenVideoBehaviorEnum.Sleep:
-                        this._TimerRefreshWeather.Enabled = false;
-                        return;
+                    //Going to fullscreen mode
 
-                    case FullscreenVideoBehaviorEnum.RunWhenTvPlayback:
-                        if (!g_Player.IsTV)
-                        {
+                    switch (Database.dbSettings.Instance.FullscreenVideoBehavior)
+                    {
+                        case FullscreenVideoBehaviorEnum.Sleep:
                             this._TimerRefreshWeather.Enabled = false;
+                            _Logger.Debug("[cbVideoWindowChanged] Suspending weather refresh.");
                             return;
-                        }
-                        break;
 
-                    case FullscreenVideoBehaviorEnum.RunAlways:
-                        break;
+                        case FullscreenVideoBehaviorEnum.RunWhenTvPlayback:
+                            if (!g_Player.IsTV)
+                            {
+                                this._TimerRefreshWeather.Enabled = false;
+                                _Logger.Debug("[cbVideoWindowChanged] Suspending weather refresh.");
+                                return;
+                            }
+                            break;
+
+                        case FullscreenVideoBehaviorEnum.RunAlways:
+                            break;
+                    }
+                }
+
+
+                if (!this._TimerRefreshWeather.Enabled)
+                {
+                    _Logger.Debug("[cbVideoWindowChanged] Resuming weather refresh.");
+
+                    this.setWeatherRefresh(true);
                 }
             }
-
-
-            if (!this._TimerRefreshWeather.Enabled)
-            {
-                int iTime = (int)(DateTime.Now - this._RefreshLast).TotalSeconds;
-
-                if (iTime >= _REFRESH_INTERVAL - 2)
-                    iTime = 2; //refresh is in due now
-                else
-                    iTime = _REFRESH_INTERVAL - iTime;
-
-                this._TimerRefreshWeather.Interval = iTime * 1000;
-                this._TimerRefreshWeather.Enabled = true;
-            }
-
         }
 
         private void cbTimerRefreshWeather(object sender, System.Timers.ElapsedEventArgs e)
@@ -2428,7 +2531,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private void cbTimerRefreshLocation(object sender, System.Timers.ElapsedEventArgs e)
         {
-            tagSetLocation(this._WeatherLocation, DateTime.UtcNow, this._Settings, this._Provider);
+            this.doLocationRefresh();
         }
 
         private static void cbHttpBeforeDownload(object sender, MediaPortal.Pbk.Net.Http.HttpUserWebBeforeDownloadEventArgs e)
@@ -2459,5 +2562,24 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         #endregion
 
+        #region Power events
+        private void onResume()
+        {
+            if (this._SystemSuspended)
+            {
+                this._SystemSuspended = false;
+
+                this.setWeatherRefresh(false);   
+
+                //Refresh location tags
+                this.doLocationRefresh();
+            }
+        }
+
+        private void onSuspend()
+        {
+            this._SystemSuspended = true;
+        }
+        #endregion
     }
 }
