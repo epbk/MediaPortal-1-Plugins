@@ -172,7 +172,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
             if (string.IsNullOrWhiteSpace(strQuery))
                 yield break; ;
 
-            string strUrl = string.Format(_URL_SEARCH, System.Web.HttpUtility.UrlEncode(strQuery));
+            string strUrl = string.Format(_URL_SEARCH, System.Web.HttpUtility.UrlEncode(strQuery.Replace(' ', '_')));
             JToken j = MediaPortal.Pbk.Net.Http.HttpUserWebRequest.Download<JToken>(strUrl, iResponseTimout: 30000);
             if (j != null)
             {
