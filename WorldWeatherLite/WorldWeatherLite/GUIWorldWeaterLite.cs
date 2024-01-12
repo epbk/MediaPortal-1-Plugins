@@ -346,10 +346,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private int _WeatherIsRefreshing = 0;
         private int _LocationIsRefreshing = 0;
-
+        
         private System.Timers.Timer _TimerRefreshWeather;
         private System.Timers.Timer _TimerRefreshLocation;
-
+        
         private bool _SystemSuspended = false;
 
         private Utils.GeoClock _GeoClock;
@@ -514,7 +514,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //Init tags
             tagsInit();
-
+            
             //Refresh timer init
             this._TimerRefreshWeather = new System.Timers.Timer();
             this._TimerRefreshWeather.Interval = 1000;
@@ -765,7 +765,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
             else if (dlg.SelectedId == 2)
                 this.dialogShowLocationSelection();
-
+            
             base.OnShowContextMenu();
         }
 
@@ -1774,7 +1774,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 this._GUIbuttonRefresh.Label = Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.buttonRefresh);
         }
 
-         private bool doWeatherRefresh(bool bForce)
+        private bool doWeatherRefresh(bool bForce)
         {
             Database.dbWeatherLoaction loc;
             Providers.IWeatherProvider provider;
@@ -2385,6 +2385,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     dt = dt.AddMinutes((dt.Minute - iMin) * -1);
                 if (dt.Second > 0)
                     dt = dt.AddSeconds(dt.Second * -1);
+
+                //Max download attempts
                 int iAttempts = 3;
 
                 #region Background image
@@ -2436,6 +2438,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                     List<Image> images = new List<Image>();
                     List<int> durations = new List<int>();
+                    int iFailedImages = 0;
 
                     //Max total time
                     int iTime = wi.WeatherImage.MultiImageMaxPeriod;
@@ -2458,6 +2461,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         }
 
                         //Failed
+
+                        //Sometimes the most recent image is not available yet; proceed to the next image(older)
+                        if (++iFailedImages <= 2 && images.Count == 0)
+                            goto mi_nxt;
+
+                        //Destroy all images
                         images.ForEach(im => im.Dispose());
                         images = null;
                         return Pbk.Tasks.TaskActionResultEnum.Complete;
@@ -2469,41 +2478,41 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             {
                                 //Merge with background
                                 Bitmap bmp = new Bitmap(imgBck.Width, imgBck.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                                
-                                    using (Graphics g = Graphics.FromImage(bmp))
-                                    {
-                                        g.DrawImage(imgBck, 0, 0, imgBck.Width, imgBck.Height);
-                                        g.DrawImage(img, 0, 0, imgBck.Width, imgBck.Height);
 
-                                        //Merge with overlayer
-                                        if (imgOver != null)
-                                            g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
+                                using (Graphics g = Graphics.FromImage(bmp))
+                                {
+                                    g.DrawImage(imgBck, 0, 0, imgBck.Width, imgBck.Height);
+                                    g.DrawImage(img, 0, 0, imgBck.Width, imgBck.Height);
+
+                                    //Merge with overlayer
+                                    if (imgOver != null)
+                                        g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
                                     //DateTime watermark
                                     if (wi.WeatherImage.MultiImageDateImeWatermark != DateImeWatermarkEnum.None)
-                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);                                        
-                                    }
+                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);
+                                }
 
-                                    img = bmp;
-                                
+                                img = bmp;
+
                             }
                             else
                             {
                                 //Merge with overlayer
                                 Bitmap bmp = new Bitmap(img.Width, img.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                                
-                                    using (Graphics g = Graphics.FromImage(bmp))
-                                    {
-                                        g.DrawImage(img, 0, 0, img.Width, img.Height);
-                                        g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
+
+                                using (Graphics g = Graphics.FromImage(bmp))
+                                {
+                                    g.DrawImage(img, 0, 0, img.Width, img.Height);
+                                    g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
                                     //DateTime watermark
                                     if (wi.WeatherImage.MultiImageDateImeWatermark != DateImeWatermarkEnum.None)
-                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);                                        
-                                    }
+                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);
+                                }
 
-                                    img = bmp;
-                                
+                                img = bmp;
+
                             }
                         }
                         else
@@ -2518,11 +2527,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                             }
                         }
 
+
                         images.Insert(0, img);
                         durations.Add(wi.WeatherImage.GUIMediaImageFrameDuration);
 
                         //New time (history)
                         iTime -= wi.WeatherImage.Period;
+
+                    mi_nxt:
+                        //Update target datetime
                         dt = dt.AddMinutes(wi.WeatherImage.Period * -1);
                     }
 
