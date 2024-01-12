@@ -498,7 +498,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                     this._WaeatherImages[i] = wi;
 
-                    _Logger.Debug("[init] MediaWeatherImage:{0} '{1}'\r\nUrl: {2}\r\nUrlBck: {3}\r\nUrlOver: {4}\r\nPeriod: {5}\r\nPeriodSafe: {6}\r\nMultiimage: {7}\r\n",
+                    _Logger.Debug("[init] MediaWeatherImage:{0} '{1}'\r\nUrl: {2}\r\nUrlBck: {3}\r\nUrlOver: {4}\r\nPeriod: {5}\r\nPeriodSafe: {6}\r\nMultiimage: {7}\r\nDate&Time Watermark: {8}\r\n",
                         wi.Id,
                         dbImg.Description,
                         dbImg.Url,
@@ -506,7 +506,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         dbImg.UrlOverlay,
                         dbImg.Period,
                         dbImg.PeriodSafe,
-                        dbImg.MultiImage);
+                        dbImg.MultiImage,
+                        dbImg.MultiImageDateImeWatermark);
                 }
             }
             #endregion
@@ -2378,6 +2379,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 //Latest time
                 DateTime dt = DateTime.UtcNow.AddMinutes(wi.WeatherImage.PeriodSafe * -1);
 
+                //Rounding
+                int iMin = (int)(dt.Minute / wi.WeatherImage.Period) * wi.WeatherImage.Period;
+                if (iMin != dt.Minute)
+                    dt = dt.AddMinutes((dt.Minute - iMin) * -1);
+                if (dt.Second > 0)
+                    dt = dt.AddSeconds(dt.Second * -1);
                 int iAttempts = 3;
 
                 #region Background image
@@ -2472,7 +2479,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                                         if (imgOver != null)
                                             g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
-                                        
+                                    //DateTime watermark
+                                    if (wi.WeatherImage.MultiImageDateImeWatermark != DateImeWatermarkEnum.None)
+                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);                                        
                                     }
 
                                     img = bmp;
@@ -2488,11 +2497,24 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                                         g.DrawImage(img, 0, 0, img.Width, img.Height);
                                         g.DrawImage(imgOver, 0, 0, img.Width, img.Height);
 
-                                        
+                                    //DateTime watermark
+                                    if (wi.WeatherImage.MultiImageDateImeWatermark != DateImeWatermarkEnum.None)
+                                        printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);                                        
                                     }
 
                                     img = bmp;
                                 
+                            }
+                        }
+                        else
+                        {
+                            //DateTime watermark
+                            if (wi.WeatherImage.MultiImageDateImeWatermark != DateImeWatermarkEnum.None)
+                            {
+                                using (Graphics g = Graphics.FromImage(img))
+                                {
+                                    printDateTimeWatermark(g, img.Size, wi.WeatherImage.MultiImageDateImeWatermark, dt);
+                                }
                             }
                         }
 
@@ -2669,6 +2691,19 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
 
             return Pbk.Tasks.TaskActionResultEnum.Complete;
+        }
+
+        private static void printDateTimeWatermark(Graphics g, Size sizeImage, DateImeWatermarkEnum type, DateTime dt)
+        {
+            //Date&Time watermark
+            string strText = TimeZone.CurrentTimeZone.ToLocalTime(dt).ToString();
+            float fSize = Math.Max(9.0F, (int)(sizeImage.Width * 0.025F / 0.75F) * 0.75F);
+            System.Drawing.Font font = new System.Drawing.Font("Arial", fSize);
+            float fX = fSize;
+            float fY = type == DateImeWatermarkEnum.UpperLeft ? fSize : sizeImage.Height - (2 * fSize);
+            SizeF sizeText = g.MeasureString(strText, font);
+            g.FillRectangle(new SolidBrush(Color.FromArgb(128, Color.White)), fX, fY, sizeText.Width, sizeText.Height);
+            g.DrawString(strText, font, Brushes.Black, fX, fY);
         }
 
         #endregion

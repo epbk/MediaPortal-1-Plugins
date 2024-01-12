@@ -46,7 +46,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         public string UrlOverlay
         { get; set; }
 
-        [DisplayName("Multiimage: period")]
+        [DisplayName("Period")]
         [DBFieldAttribute(FieldName = "period", Default = "15")]
         [Description("Time period between each image (in mins).\r\nRepresents lifetime(cache) of image files including non multiimage.")]
         [Category("Multiimage")]
@@ -77,7 +77,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
             }
         }private int _Period = 15;
 
-        [DisplayName("Multiimage: period safe")]
+        [DisplayName("Period [safe]")]
         [Description("Time period substracted from current UTC time before generating the first image url (in mins)")]
         [DBFieldAttribute(FieldName = "periodSafe", Default = "5")]
         [Category("Multiimage")]
@@ -94,7 +94,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
             }
         }private int _PeriodSafe = 5;
 
-        [DisplayName("Multiimage: enabled")]
+        [DisplayName("Enabled")]
         [Description("When checked the image is considered as multiimage")]
         [DBFieldAttribute(FieldName = "multiimage", Default = "False")]
         [EditorAttribute(typeof(MediaPortal.Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
@@ -103,7 +103,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         public bool MultiImage
         { get; set; }
 
-        [DisplayName("Multiimage: max images")]
+        [DisplayName("Max images")]
         [Description("Maximum number of images to be generated.")]
         [DBFieldAttribute(FieldName = "multiImageMaxImages", Default = "10")]
         [Category("Multiimage")]
@@ -122,7 +122,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
             }
         }private int _MultiImageMaxImages = 10;
 
-        [DisplayName("Multiimage: max total period")]
+        [DisplayName("Max total period")]
         [Description("Maximum total time period for images to be generated (in minutes).")]
         [DBFieldAttribute(FieldName = "multiImageMaxPeriod", Default = "60")]
         [Category("Multiimage")]
@@ -140,6 +140,17 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
                     this._MultiImageMaxPeriod = value;
             }
         }private int _MultiImageMaxPeriod = 60;
+
+        [DisplayName("Date & time watermark")]
+        [Description("Print date & time text into the image.")]
+        [DBFieldAttribute(FieldName = "multiImageDateTimeWatermark", Default = "None")]
+        [Category("Multiimage")]
+        [DefaultValue(DateImeWatermarkEnum.None)]
+        public DateImeWatermarkEnum MultiImageDateImeWatermark
+        {
+            get { return this._MultiImageDateImeWatermark; }
+            set { this._MultiImageDateImeWatermark = value; }
+        }DateImeWatermarkEnum _MultiImageDateImeWatermark = DateImeWatermarkEnum.None;
 
         [DisplayName("GIF override")]
         [Description("Override GIF frame duration.")]

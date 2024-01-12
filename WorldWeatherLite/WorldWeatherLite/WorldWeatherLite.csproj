@@ -205,6 +205,7 @@
     <Compile Include="Language\LanguageEnum.cs" />
     <Compile Include="Language\Translation.cs" />
     <Compile Include="Language\TranslationEnum.cs" />
+    <Compile Include="DateImeWatermarkEnum.cs" />
     <Compile Include="UserControls\DayMonthTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
