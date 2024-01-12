@@ -761,6 +761,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     loc.Commit();
 
                     this.setProfile(loc);
+
+                    if (this._GUIbuttonLocation != null && !this._GUIbuttonLocation.IsEnabled)
+                        this._GUIbuttonLocation.IsEnabled = true;
                 }
             }
             else if (dlg.SelectedId == 2)
