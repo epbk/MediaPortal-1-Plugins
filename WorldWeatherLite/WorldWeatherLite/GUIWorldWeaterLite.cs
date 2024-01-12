@@ -219,6 +219,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private const string _TAG_TRANSLATION_REFRESH_DATETIME = _TAG_PREFFIX + ".TranslationRefreshDateTime";
         private const string _TAG_TRANSLATION_DAY = _TAG_PREFFIX + ".TranslationDay";
         private const string _TAG_TRANSLATION_WEEK = _TAG_PREFFIX + ".TranslationWeek";
+        private const string _TAG_TRANSLATION_GEOCLOCK = _TAG_PREFFIX + ".TranslationGeoClock";
 
         private const string _TAG_TRANSLATION_MOON_PHASE = _TAG_PREFFIX + ".TranslationMoonPhase";
         private const string _TAG_TRANSLATION_MOON_SET_TIME = _TAG_PREFFIX + ".TranslationMoonset";
@@ -903,6 +904,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 new object[]{_TAG_TRANSLATION_CURRENT_CONDITION, (int)Language.TranslationEnum.translationCurrentCondition },
                 new object[]{_TAG_TRANSLATION_FORECAST_CONDITION, (int)Language.TranslationEnum.translationForecastCondition },
                 new object[]{_TAG_TRANSLATION_REFRESH_DATETIME, (int)Language.TranslationEnum.translationRefreshDateTime },
+                new object[]{_TAG_TRANSLATION_GEOCLOCK, (int)Language.TranslationEnum.translationGeoClock },
                 new object[]{_TAG_TRANSLATION_MOON_PHASE, (int)Language.TranslationEnum.translationMoonPhase },
                 new object[]{_TAG_TRANSLATION_MOON_RISE_TIME, (int)Language.TranslationEnum.translationMoonrise },
                 new object[]{_TAG_TRANSLATION_MOON_SET_TIME, (int)Language.TranslationEnum.translationMoonset },
