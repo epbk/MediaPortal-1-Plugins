@@ -1,0 +1,694 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageClass xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Version>2.0</Version>
+  <Groups>
+    <Items>
+      <GroupItem Name="Plugin">
+        <ParentGroup />
+        <DisplayName>Plugin</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Plugin</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>AlwaysOverwrite</UpdateOption>
+              <LocalFileName>..\bin\Release\WorldWeatherLite.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{df178864-f5b0-4f0d-b79a-d09721711825}-WorldWeatherLite.dll</ZipFileName>
+              <DestinationFilename>%Base%\plugins\Windows\WorldWeatherLite.dll</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+      <GroupItem Name="Language">
+        <DisplayName>Language</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Language</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_cs.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{d025a3e6-c1cc-4917-8313-5aaa24369134}-strings_cs.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_cs.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_de.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{327d4d20-3baf-460f-88f1-91507be7d6b6}-strings_de.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_de.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_en.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{7d7e3b69-1ddb-4784-89f2-667866b19799}-strings_en.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_en.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_en-GB.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{875f2e0f-8eba-4d10-a3a3-317c73f4ed69}-strings_en-GB.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_en-GB.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_en-US.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{e963a11f-6cb5-4892-81b0-13ad0d0a42f7}-strings_en-US.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_en-US.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_es.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{74dc2250-9bba-4dc8-a30f-720ec182521b}-strings_es.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_es.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_fi.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{7c988e9b-dc38-47e7-9e7f-c29c60481dc4}-strings_fi.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_fi.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_fr.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{76962b26-a4eb-4898-bc98-e9438d4747fe}-strings_fr.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_fr.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_it.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{9787c364-d517-4b05-b098-48d8e5c38d73}-strings_it.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_it.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_nl.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{816dc441-f67e-4ecd-8bd8-9042778140fd}-strings_nl.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_nl.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_pl.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{e1831290-d2d7-4efd-b388-64bd5fe96ce9}-strings_pl.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_pl.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_pt.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{b133eb74-b289-4a5f-b18f-0d81420c38b2}-strings_pt.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_pt.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_ru.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{de30945e-a4d0-417e-99d9-6c504c2631b5}-strings_ru.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_ru.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_sv.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{51b9999a-52b2-421e-9c17-b6cc9d21d69e}-strings_sv.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_sv.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Language\strings_uk.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a1a0435f-fe1b-408a-8e99-fba36816ce27}-strings_uk.xml</ZipFileName>
+              <DestinationFilename>%Config%\Language\WorldWeather\strings_uk.xml</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+      <GroupItem Name="Base">
+        <DisplayName>Base</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Base</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\BouncyCastle.Crypto.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{dfa241ae-5b7d-4f34-aa91-ad56847a1c85}-BouncyCastle.Crypto.dll</ZipFileName>
+              <DestinationFilename>%Base%\BouncyCastle.Crypto.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\BrotliSharpLib.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{430327e6-f663-4b1a-8d3c-cb5539d3bd36}-BrotliSharpLib.dll</ZipFileName>
+              <DestinationFilename>%Base%\BrotliSharpLib.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\CoordinateSharp.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{0b3891bb-5d8f-4c0b-9930-e7432146c749}-CoordinateSharp.dll</ZipFileName>
+              <DestinationFilename>%Base%\CoordinateSharp.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\curl-ca-bundle.crt</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{b57bfb2c-6d9a-46a2-a29b-40059b7e85d8}-curl-ca-bundle.crt</ZipFileName>
+              <DestinationFilename>%Base%\curl-ca-bundle.crt</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\DokanNet.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{d34015e6-329d-4f33-ab1b-66069cff54ab}-DokanNet.dll</ZipFileName>
+              <DestinationFilename>%Base%\DokanNet.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\DotNetZip.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{f3dfcd2d-41be-4ada-97d8-da6909cb4058}-DotNetZip.dll</ZipFileName>
+              <DestinationFilename>%Base%\DotNetZip.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\HtmlAgilityPack.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{38c2eac0-43ee-4d04-9ece-523c0eaee49e}-HtmlAgilityPack.dll</ZipFileName>
+              <DestinationFilename>%Base%\HtmlAgilityPack.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\External_x64\libcrypto-1_1-x64.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a9fb68c6-6fea-49a2-95e9-470dda4da9e3}-libcrypto-1_1-x64.dll</ZipFileName>
+              <DestinationFilename>%Base%\libcrypto-1_1-x64.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\External_x64\libssl-1_1-x64.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{e676a290-71c6-4d33-8530-b54b0638817f}-libssl-1_1-x64.dll</ZipFileName>
+              <DestinationFilename>%Base%\libssl-1_1-x64.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\Lucene.Net.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{16ea1872-8c55-42f3-90d2-222a483c52a0}-Lucene.Net.dll</ZipFileName>
+              <DestinationFilename>%Base%\Lucene.Net.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\External_x64\ManagedOpenSsl.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{ccd32672-0391-4d77-a53b-736c4a68be39}-ManagedOpenSsl.dll</ZipFileName>
+              <DestinationFilename>%Base%\ManagedOpenSsl.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\External_x64\MediaPortal.Pbk.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{1b1b19fe-f7b5-45a4-afd6-80f4ce2b37c1}-MediaPortal.Pbk.dll</ZipFileName>
+              <DestinationFilename>%Base%\MediaPortal.Pbk.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\Newtonsoft.Json.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{838120d9-1f73-48e3-8dd0-76d7febcbd5d}-Newtonsoft.Json.dll</ZipFileName>
+              <DestinationFilename>%Base%\Newtonsoft.Json.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\NLog.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{e5302861-2aa9-46be-96d1-ba0a88e7a794}-NLog.dll</ZipFileName>
+              <DestinationFilename>%Base%\NLog.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\SgmlReaderDll.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{693817ce-8575-42a9-baab-4dbe2562a806}-SgmlReaderDll.dll</ZipFileName>
+              <DestinationFilename>%Base%\SgmlReaderDll.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\External\StringInterpolationBridge.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a9ca9f86-e39e-4fee-ba9a-54bbf123fe91}-StringInterpolationBridge.dll</ZipFileName>
+              <DestinationFilename>%Base%\StringInterpolationBridge.dll</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+    </Items>
+  </Groups>
+  <Sections>
+    <Items>
+      <SectionItem Guid="17179c77-ea55-4738-9cba-bfd16bc89d24" Name="Welcome Screen" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>Welcome to the Extension Installer for [Name]</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Description">
+              <Value>This will install [Name] version [Version] on your computer.
+It is recommended that you close all other applications before continuing.
+Click Next to continue or Cancel to exit Setup.</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Welcome Screen</PanelName>
+        <WizardButtonsEnum>NextCancel</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="e550ae0e-69dc-4b8f-8121-627fb05469e8" Name="Install Section" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header Title">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Header title</Description>
+            </SectionParam>
+            <SectionParam Name="Header description">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Description of section, shown in under section title</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items>
+            <ActionItem Name="InstallFiles" ActionType="InstallFiles" ConditionGroup="">
+              <Params>
+                <Items />
+              </Params>
+              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
+            </ActionItem>
+          </Items>
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Install Section</PanelName>
+        <WizardButtonsEnum>Next</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="b5672980-c735-4395-90ec-45d1be351041" Name="Setup Complete" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>The Extension Installer Wizard has successfully installed [Name].</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Show radio buttons">
+              <Value />
+              <ValueType>Bool</ValueType>
+              <Description>Use radiobutton in place of combobox</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Setup Complete</PanelName>
+        <WizardButtonsEnum>Finish</WizardButtonsEnum>
+      </SectionItem>
+    </Items>
+  </Sections>
+  <Dependencies>
+    <Items>
+      <DependencyItem>
+        <Type>MediaPortal</Type>
+        <Id />
+        <MinVersion>
+          <Major>*</Major>
+          <Minor>*</Minor>
+          <Build>*</Build>
+          <Revision>*</Revision>
+        </MinVersion>
+        <MaxVersion>
+          <Major>*</Major>
+          <Minor>*</Minor>
+          <Build>*</Build>
+          <Revision>*</Revision>
+        </MaxVersion>
+        <WarnOnly>false</WarnOnly>
+        <Message />
+        <Name>MediaPortal</Name>
+      </DependencyItem>
+    </Items>
+  </Dependencies>
+  <PluginDependencies>
+    <Items />
+  </PluginDependencies>
+  <GeneralInfo>
+    <Name>WorldWeather Lite (SharpDX)(x64)</Name>
+    <Id>56d6aa61-4b9e-4c78-9ba0-2e939c73f7a4</Id>
+    <Author>PBK</Author>
+    <HomePage />
+    <ForumPage />
+    <UpdateUrl>https://www.team-mediaportal.com/index.php?option=com_mtree&amp;task=att_download&amp;link_id=387&amp;cf_id=52</UpdateUrl>
+    <Version>
+      <Major>1</Major>
+      <Minor>1</Minor>
+      <Build>0</Build>
+      <Revision>0</Revision>
+    </Version>
+    <ExtensionDescription>World Weather Lite (x64).
+
+
+
+Alternate (light) version of World Weather plugin.
+
+
+
+For MediaPortal SharpDX version.</ExtensionDescription>
+    <VersionDescription />
+    <DevelopmentStatus>Stable</DevelopmentStatus>
+    <OnlineLocation>https://www.team-mediaportal.com/index.php?option=com_mtree&amp;task=att_download&amp;link_id=387&amp;cf_id=41</OnlineLocation>
+    <ReleaseDate>2024-01-12T16:10:21</ReleaseDate>
+    <Tags>weather,x64</Tags>
+    <PlatformCompatibility>x64</PlatformCompatibility>
+    <Location>.\Release\WorldWeatherLite.SharpDX.[Version].x64.mpe1</Location>
+    <Params>
+      <Items>
+        <SectionParam Name="Icon">
+          <Value>..\Graphics\WorldWeather-enabled.png</Value>
+          <ValueType>File</ValueType>
+          <Description>The icon file of the package (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Online Icon">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>The icon file of the package stored online (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Configuration file">
+          <Value />
+          <ValueType>Template</ValueType>
+          <Description>The file used to configure the extension.
+ If it has .exe extension the will be executed.
+ If it has .dll extension it's started like MP plugin configuration.</Description>
+        </SectionParam>
+        <SectionParam Name="Online Screenshots">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>Online stored screenshot urls separated by ; </Description>
+        </SectionParam>
+        <SectionParam Name="Force to uninstall on update">
+          <Value>yes</Value>
+          <ValueType>Bool</ValueType>
+          <Description>Show dialog and force to uninstall previous version when updating an extension. Should only be disabled if you are using an NSIS/MSI installer.</Description>
+        </SectionParam>
+      </Items>
+    </Params>
+  </GeneralInfo>
+  <UniqueFileList>
+    <Items>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>AlwaysOverwrite</UpdateOption>
+        <LocalFileName>..\bin\Release\WorldWeatherLite.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{df178864-f5b0-4f0d-b79a-d09721711825}-WorldWeatherLite.dll</ZipFileName>
+        <DestinationFilename>%Base%\plugins\Windows\WorldWeatherLite.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_cs.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{d025a3e6-c1cc-4917-8313-5aaa24369134}-strings_cs.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_cs.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_de.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{327d4d20-3baf-460f-88f1-91507be7d6b6}-strings_de.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_de.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_en.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{7d7e3b69-1ddb-4784-89f2-667866b19799}-strings_en.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_en.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_en-GB.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{875f2e0f-8eba-4d10-a3a3-317c73f4ed69}-strings_en-GB.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_en-GB.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_en-US.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{e963a11f-6cb5-4892-81b0-13ad0d0a42f7}-strings_en-US.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_en-US.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_es.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{74dc2250-9bba-4dc8-a30f-720ec182521b}-strings_es.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_es.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_fi.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{7c988e9b-dc38-47e7-9e7f-c29c60481dc4}-strings_fi.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_fi.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_fr.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{76962b26-a4eb-4898-bc98-e9438d4747fe}-strings_fr.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_fr.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_it.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{9787c364-d517-4b05-b098-48d8e5c38d73}-strings_it.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_it.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_nl.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{816dc441-f67e-4ecd-8bd8-9042778140fd}-strings_nl.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_nl.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_pl.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{e1831290-d2d7-4efd-b388-64bd5fe96ce9}-strings_pl.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_pl.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_pt.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{b133eb74-b289-4a5f-b18f-0d81420c38b2}-strings_pt.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_pt.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_ru.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{de30945e-a4d0-417e-99d9-6c504c2631b5}-strings_ru.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_ru.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_sv.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{51b9999a-52b2-421e-9c17-b6cc9d21d69e}-strings_sv.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_sv.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Language\strings_uk.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a1a0435f-fe1b-408a-8e99-fba36816ce27}-strings_uk.xml</ZipFileName>
+        <DestinationFilename>%Config%\Language\WorldWeather\strings_uk.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\BouncyCastle.Crypto.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{dfa241ae-5b7d-4f34-aa91-ad56847a1c85}-BouncyCastle.Crypto.dll</ZipFileName>
+        <DestinationFilename>%Base%\BouncyCastle.Crypto.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\BrotliSharpLib.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{430327e6-f663-4b1a-8d3c-cb5539d3bd36}-BrotliSharpLib.dll</ZipFileName>
+        <DestinationFilename>%Base%\BrotliSharpLib.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\CoordinateSharp.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{0b3891bb-5d8f-4c0b-9930-e7432146c749}-CoordinateSharp.dll</ZipFileName>
+        <DestinationFilename>%Base%\CoordinateSharp.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\curl-ca-bundle.crt</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{b57bfb2c-6d9a-46a2-a29b-40059b7e85d8}-curl-ca-bundle.crt</ZipFileName>
+        <DestinationFilename>%Base%\curl-ca-bundle.crt</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\DokanNet.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{d34015e6-329d-4f33-ab1b-66069cff54ab}-DokanNet.dll</ZipFileName>
+        <DestinationFilename>%Base%\DokanNet.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\DotNetZip.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{f3dfcd2d-41be-4ada-97d8-da6909cb4058}-DotNetZip.dll</ZipFileName>
+        <DestinationFilename>%Base%\DotNetZip.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\HtmlAgilityPack.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{38c2eac0-43ee-4d04-9ece-523c0eaee49e}-HtmlAgilityPack.dll</ZipFileName>
+        <DestinationFilename>%Base%\HtmlAgilityPack.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\External_x64\libcrypto-1_1-x64.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a9fb68c6-6fea-49a2-95e9-470dda4da9e3}-libcrypto-1_1-x64.dll</ZipFileName>
+        <DestinationFilename>%Base%\libcrypto-1_1-x64.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\External_x64\libssl-1_1-x64.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{e676a290-71c6-4d33-8530-b54b0638817f}-libssl-1_1-x64.dll</ZipFileName>
+        <DestinationFilename>%Base%\libssl-1_1-x64.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\Lucene.Net.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{16ea1872-8c55-42f3-90d2-222a483c52a0}-Lucene.Net.dll</ZipFileName>
+        <DestinationFilename>%Base%\Lucene.Net.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\External_x64\ManagedOpenSsl.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{ccd32672-0391-4d77-a53b-736c4a68be39}-ManagedOpenSsl.dll</ZipFileName>
+        <DestinationFilename>%Base%\ManagedOpenSsl.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\External_x64\MediaPortal.Pbk.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{1b1b19fe-f7b5-45a4-afd6-80f4ce2b37c1}-MediaPortal.Pbk.dll</ZipFileName>
+        <DestinationFilename>%Base%\MediaPortal.Pbk.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\Newtonsoft.Json.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{838120d9-1f73-48e3-8dd0-76d7febcbd5d}-Newtonsoft.Json.dll</ZipFileName>
+        <DestinationFilename>%Base%\Newtonsoft.Json.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\NLog.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{e5302861-2aa9-46be-96d1-ba0a88e7a794}-NLog.dll</ZipFileName>
+        <DestinationFilename>%Base%\NLog.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\SgmlReaderDll.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{693817ce-8575-42a9-baab-4dbe2562a806}-SgmlReaderDll.dll</ZipFileName>
+        <DestinationFilename>%Base%\SgmlReaderDll.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\External\StringInterpolationBridge.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a9ca9f86-e39e-4fee-ba9a-54bbf123fe91}-StringInterpolationBridge.dll</ZipFileName>
+        <DestinationFilename>%Base%\StringInterpolationBridge.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="true" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Graphics\WorldWeather-enabled.png</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{8b032a69-42cf-4a83-859b-5e39c1f6d84c}-WorldWeather-enabled.png</ZipFileName>
+        <DestinationFilename />
+      </FileItem>
+    </Items>
+  </UniqueFileList>
+  <ProjectSettings>
+    <FolderGroups />
+    <ProjectFilename>WorldWeatherLite.x64.xmp2</ProjectFilename>
+    <UpdatePath1>.\Release\update.xml</UpdatePath1>
+    <UpdatePath2 />
+    <UpdatePath3 />
+  </ProjectSettings>
+  <IsSkin>false</IsSkin>
+</PackageClass>
