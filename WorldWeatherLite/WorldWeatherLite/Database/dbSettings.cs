@@ -53,33 +53,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         public bool GUICalendarEnable
         { get; set; }
 
-        #region Obsolete
-        [Obsolete]
-        [DBFieldAttribute(FieldName = "provider", Default = "FORECA")]
-        public Providers.ProviderTypeEnum Provider
+        [DBFieldAttribute(FieldName = "profileID", Default = "0")]
+        public int ProfileID
         { get; set; }
-
-        [Obsolete]
-        [DBFieldAttribute(FieldName = "locationName", Default = "")]
-        public string LocationName
-        { get; set; }
-
-        [Obsolete]
-        [DBFieldAttribute(FieldName = "locationLong", Default = "0")]
-        public double LocationLongitude
-        { get; set; }
-
-        [Obsolete]
-        [DBFieldAttribute(FieldName = "locationLat", Default = "0")]
-        public double LocationLatitude
-        { get; set; }
-
-        [Obsolete]
-        [DBFieldAttribute(FieldName = "locationID", Default = "")]
-        public string LocationID
-        { get; set; }
-        #endregion
-
 
         public static dbSettings Instance
         {

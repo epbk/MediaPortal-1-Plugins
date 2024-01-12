@@ -23,7 +23,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private Database.dbSettings _Settings;
 
         private Providers.IWeatherProvider _Provider;
-        private Database.dbWeatherLoaction _Location;
+        private Database.dbWeatherLoaction _Profile = null;
 
         
         private Providers.ProviderMsn _ProviderMsn = new Providers.ProviderMsn();
@@ -32,14 +32,23 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private bool _PropertyControlInitialised = false;
 
+        private bool _LoadingProfile = false;
+        private bool _UpdatingProfile = false;
 
-        public ConfigurationForm(Database.dbSettings set, Database.dbWeatherLoaction loc)
+        private List<Database.dbWeatherLoaction> _DeleteList = null;
+
+        private ToolTip _ToolTip = new ToolTip();
+    
+
+        public ConfigurationForm(Database.dbSettings set)
         {
             this._Settings = set;
-            this._Location = loc;
 
             this.InitializeComponent();
 
+            this._ToolTip.SetToolTip(this.buttonAddProfile, "Add new profile");
+            this._ToolTip.SetToolTip(this.buttonRemoveProfile, "Remove profile");
+            
             this.labelVersion.Text = "Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             //Init comboboxes
@@ -52,9 +61,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this.comboBoxUnitPrecip.Items.AddRange(Pbk.Utils.Enums.GetEnumNames(typeof(GUI.GUIPrecipitationUnitEnum)));
 
             //Load settings
-
-            this.comboBoxProvider.SelectedIndex = (int)loc.Provider;
-
             this.comboBoxUnitTemp.SelectedIndex = (int)set.GUITemperatureUnit;
             this.comboBoxUnitPress.SelectedIndex = (int)set.GUIPressureUnit;
             this.comboBoxUnitWind.SelectedIndex = (int)set.GUIWindUnit;
@@ -62,17 +68,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this.comboBoxUnitPrecip.SelectedIndex = (int)set.GUIPrecipitationUnit;
 
             this.comboBoxFullScreenOption.SelectedIndex = (int)set.FullscreenVideoBehavior;
-
-            this.textBoxLocation.Text = loc.Name;
-            this.textBoxCountry.Text = loc.Country;
-            this.textBoxId.Text = loc.LocationID;
-
-            try
-            {
-                this.numericUpDownLong.Value = (decimal)loc.Longitude;
-                this.numericUpDownLat.Value = (decimal)loc.Latitude;
-            }
-            catch { }
 
             List<Database.dbWeatherImage> list = Database.dbWeatherImage.GetAll();
             for (int i = 0; i < list.Count; i++)
@@ -91,8 +86,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                 this.dataGridViewMedia.Rows.Add(row);
             }
-
-
+            
             //Holidays
             List<Database.dbHoliday> listHolidays = Database.dbHoliday.GetAll();
             int iIdx = 0;
@@ -115,6 +109,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this.holidayTextBox3.Init(listHolidays[iIdx++]);
             this.holidayTextBox4.Init(listHolidays[iIdx++]);
             this.checkBoxCalendarEn.Checked = this._Settings.GUICalendarEnable;
+            
+            //Profiles
+            Database.dbWeatherLoaction loc = Database.dbWeatherLoaction.Get(-1);
+            Database.dbWeatherLoaction.GetAll().ForEach(p => this.comboBoxProfiles.Items.Add(p));
+            this.comboBoxProfiles.SelectedItem = loc;
         }
 
 
@@ -161,12 +160,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private void buttonOK_Click(object sender, EventArgs e)
         {
             //Location
-            this._Location.LocationID = this.textBoxId.Text;
-            this._Location.Name = this.textBoxLocation.Text;
-            this._Location.Country = this.textBoxCountry.Text;
-            this._Location.Longitude = (double)this.numericUpDownLong.Value;
-            this._Location.Latitude = (double)this.numericUpDownLat.Value;
-            this._Location.Provider = (Providers.ProviderTypeEnum)this.comboBoxProvider.SelectedIndex;
+            
 
             //Refresh while in fullscreen video
             this._Settings.FullscreenVideoBehavior = (FullscreenVideoBehaviorEnum)Enum.Parse(typeof(FullscreenVideoBehaviorEnum), (string)this.comboBoxFullScreenOption.SelectedItem);
@@ -180,9 +174,23 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             this._Settings.GUICalendarEnable = this.checkBoxCalendarEn.Checked;
      
-            //Comits
-            this._Location.CommitNeeded = true;
-            this._Location.Commit();
+            //Profiles
+            this.updateProfileFromControls(this._Profile);
+            foreach(object o in this.comboBoxProfiles.Items)
+            {
+                ((Database.dbWeatherLoaction)o).CommitNeeded = true;
+                ((Database.dbWeatherLoaction)o).Commit();
+            }
+
+            //Delete removed profiles
+            if (this._DeleteList != null)
+                this._DeleteList.ForEach(p =>
+                    {
+                        if (p.ID.HasValue)
+                            p.Delete();
+                    });
+
+            //Settings
             this._Settings.CommitNeeded = true;
             this._Settings.Commit();
 
@@ -350,6 +358,98 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         {
             if (this.dataGridViewMedia.CurrentCell != null && this.dataGridViewMedia.CurrentCell.ColumnIndex == _COLUMN_INDEX_MEDIA_EN)
                 this.dataGridViewMedia.EndEdit();
+        }
+
+        private void buttonAddProfile_Click(object sender, EventArgs e)
+        {
+            Database.dbWeatherLoaction loc = new Database.dbWeatherLoaction()
+            {
+                Name = "New location",
+                Provider = Providers.ProviderTypeEnum.FORECA
+            };
+
+            this.comboBoxProfiles.Items.Add(loc);
+            this.comboBoxProfiles.SelectedItem = loc;
+        }
+
+        private void buttonRemoveProfile_Click(object sender, EventArgs e)
+        {
+            //Remember current index
+            int i = this.comboBoxProfiles.SelectedIndex;
+
+            //Add to delete list
+            if (this._DeleteList == null)
+                this._DeleteList = new List<Database.dbWeatherLoaction>();
+
+            this._DeleteList.Add(this._Profile);
+
+            //Remove profile from the combobox
+            this.comboBoxProfiles.Items.Remove(this._Profile);
+
+            //Select another profile
+            this.comboBoxProfiles.SelectedIndex = (i >= this.comboBoxProfiles.Items.Count ? i - 1 : i);
+        }
+
+        private void comboBoxProfiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!this._UpdatingProfile)
+            {
+                if (this._Profile != null)
+                    this.updateProfileFromControls(this._Profile);
+
+                //Pick selected profile
+                this._Profile = (Database.dbWeatherLoaction)this.comboBoxProfiles.Items[this.comboBoxProfiles.SelectedIndex];
+
+                this.loadProfileIntoControls(this._Profile);
+
+                this.buttonRemoveProfile.Enabled = this.comboBoxProfiles.Items.Count > 1;
+            }
+        }        
+
+        private void updateProfileFromControls(Database.dbWeatherLoaction loc)
+        {
+            loc.LocationID = this.textBoxId.Text;
+            loc.Name = this.textBoxLocation.Text;
+            loc.Country = this.textBoxCountry.Text;
+            loc.Longitude = (double)this.numericUpDownLong.Value;
+            loc.Latitude = (double)this.numericUpDownLat.Value;
+            loc.Provider = (Providers.ProviderTypeEnum)this.comboBoxProvider.SelectedIndex;
+        }
+
+        private void loadProfileIntoControls(Database.dbWeatherLoaction loc)
+        {
+            this._LoadingProfile = true;
+            try
+            {
+                this.comboBoxProvider.SelectedIndex = (int)loc.Provider;
+                this.textBoxLocation.Text = loc.Name;
+                this.textBoxCountry.Text = loc.Country;
+                this.textBoxId.Text = loc.LocationID;
+                this.numericUpDownLong.Value = (decimal)loc.Longitude;
+                this.numericUpDownLat.Value = (decimal)loc.Latitude;
+            }
+            catch { }
+
+            this._LoadingProfile = false;
+        }
+
+        private void textBoxLocation_TextChanged(object sender, EventArgs e)
+        {
+            if (!this._LoadingProfile)
+            {
+                this._Profile.Name = this.textBoxLocation.Text;
+
+                this._UpdatingProfile = true;
+
+                //Dirty hack to refresh combobox
+                typeof(ComboBox).InvokeMember("RefreshItems", 
+                    BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod,
+                    null,
+                    this.comboBoxProfiles, 
+                    null);
+
+                this._UpdatingProfile = false;
+            }
         }
     }
 }

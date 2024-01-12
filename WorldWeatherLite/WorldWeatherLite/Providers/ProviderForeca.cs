@@ -38,6 +38,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
 
         private static NLog.Logger _Logger = LogManager.GetCurrentClassLogger();
 
+        public ProviderTypeEnum Type
+        { get { return ProviderTypeEnum.FORECA; } }
 
         public string Name
         {

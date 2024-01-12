@@ -55,35 +55,45 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         [DBFieldAttribute(FieldName = "locationID", Default = "")]
         public string LocationID
         { get; set; }
-
+        
         public string ObservationLocation;
+        public DateTime RefreshLast = DateTime.MinValue;
+        public int WeatherRefreshAttempts = 0;
 
-        public static dbWeatherLoaction Instance
+        public override string ToString()
         {
-            get
+            return this.Name;
+        }
+
+
+        public static List<dbWeatherLoaction> GetAll()
+        {
+            return Manager.Get<dbWeatherLoaction>(null);
+        }
+
+        public static dbWeatherLoaction Get(int iId)
+        {
+            dbWeatherLoaction result = (dbWeatherLoaction)Manager.Get(typeof(dbWeatherLoaction), iId);
+            if (result != null)
+                return result;
+
+            List<dbWeatherLoaction> list = Manager.Get<dbWeatherLoaction>(null);
+            if (list.Count > 0)
+                return list[0];
+
+            result = new dbWeatherLoaction()
             {
-                if (_Instance == null)
-                {
-                    _Instance = (dbWeatherLoaction)Manager.Get(typeof(dbWeatherLoaction), 1);
+                Name = "New location",
+                Latitude = 0,
+                Longitude = 0,
+                LocationID = string.Empty,
+                Provider =  Providers.ProviderTypeEnum.FORECA,
+            };
 
-                    if (_Instance == null)
-                    {
-                        Database.dbSettings set = Database.dbSettings.Instance;
+            result.CommitNeeded = true;
+            result.Commit();
 
-                        _Instance = new dbWeatherLoaction()
-                        {
-                            Name = set.LocationName,
-                            Latitude = set.LocationLatitude,
-                            Longitude = set.LocationLongitude,
-                            LocationID = set.LocationID,
-                            Provider = set.Provider,
-                        };
-                        _Instance.Commit();
-                    }
-                }
-
-                return _Instance;
-            }
-        }private static dbWeatherLoaction _Instance = null;
+            return result;
+        }
     }
 }

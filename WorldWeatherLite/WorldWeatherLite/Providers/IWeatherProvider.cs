@@ -8,6 +8,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
     public interface IWeatherProvider
     {
         /// <summary>
+        /// Provider type
+        /// </summary>
+        ProviderTypeEnum Type
+        { get; }
+
+        /// <summary>
         /// Get name
         /// </summary>
         string Name

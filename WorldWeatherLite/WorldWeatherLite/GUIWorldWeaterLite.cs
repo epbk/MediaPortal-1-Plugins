@@ -346,10 +346,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private int _WeatherIsRefreshing = 0;
         private int _LocationIsRefreshing = 0;
-        private int _WeatherRefreshAttempts = 0;
+
         private System.Timers.Timer _TimerRefreshWeather;
         private System.Timers.Timer _TimerRefreshLocation;
-        private DateTime _RefreshLast = DateTime.MinValue;
+
         private bool _SystemSuspended = false;
 
         private Utils.GeoClock _GeoClock;
@@ -375,7 +375,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
 
         private Database.dbWeatherLoaction _WeatherLocation;
-        private Providers.IWeatherProvider _Provider = null;
+        private List<Providers.IWeatherProvider> _Providers = new List<Providers.IWeatherProvider>();
 
         private LocalisationProvider _Localisation;
 
@@ -444,22 +444,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             //Load settings
             this._Settings = Database.dbSettings.Instance;
 
-            this._WeatherLocation = Database.dbWeatherLoaction.Instance;
+            this._WeatherLocation = Database.dbWeatherLoaction.Get(this._Settings.ProfileID);
+            if (this._Settings.ProfileID != this._WeatherLocation.ID)
+                this._Settings.ProfileID = (int)this._WeatherLocation.ID;
 
-            switch (this._WeatherLocation.Provider)
-            {
-                case Providers.ProviderTypeEnum.MSN:
-                    this._Provider = new Providers.ProviderMsn();
-                    break;
 
-                case Providers.ProviderTypeEnum.FORECA:
-                    this._Provider = new Providers.ProviderForeca();
-                    break;
-
-                case Providers.ProviderTypeEnum.ACCU_WEATHER:
-                    this._Provider = new Providers.ProviderAccuWeather();
-                    break;
-            }
+            this._Providers.Add(new Providers.ProviderMsn());
+            this._Providers.Add(new Providers.ProviderForeca());
+            this._Providers.Add(new Providers.ProviderAccuWeather());
 
             _Logger.Debug("[init] Provider:{4}  Name:'{0}' ID:'{1}' LAT:{2} LON:{3}",
                 this._WeatherLocation.Name,
@@ -521,7 +513,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //Init tags
             tagsInit();
-            this.doLocationRefresh();
 
             //Refresh timer init
             this._TimerRefreshWeather = new System.Timers.Timer();
@@ -537,6 +528,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this._TimerRefreshLocation.Elapsed += this.cbTimerRefreshLocation;
             this._TimerRefreshLocation.Enabled = false;
 
+            this.doLocationRefresh(false);
 
             return Load(GUIGraphicsContext.Skin + "\\WorldWeather.xml");
         }
@@ -578,7 +570,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             this.setImageViewMode(this._ImageViewMode);
 
-            this.doLocationRefresh();
+            this.doLocationRefresh(false);
             tagsSetCalendar(this._Settings, this._WeatherLocation, DateTime.Today, this._Localisation, Database.dbHoliday.GetAll());
 
             this.moonImageRefresh();
@@ -591,7 +583,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         {
             if (control == this._GUIbuttonRefresh)
             {
-                this.doWeatherRefresh();
+                this.doWeatherRefresh(false);
 
                 switch (this._ViewMode)
                 {
@@ -601,7 +593,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         break;
 
                     case ViewMode.GeoClock:
-                        this.geoClockRefresh(this._WeatherLocation);
+                        this.geoClockRefresh(this._WeatherLocation, false);
                         break;
                 }
             }
@@ -668,6 +660,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         this._FullScreenMediaViewMode = false;
                 }
             }
+            else if (control == this._GUIbuttonLocation)
+                this.dialogShowLocationSelection();
         }
 
         public override bool OnMessage(GUIMessage message)
@@ -743,6 +737,34 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         protected override void OnShowContextMenu()
         {
+            GUIDialogMenu dlg = (GUIDialogMenu)GUIWindowManager.GetWindow((int)Window.WINDOW_DIALOG_MENU);
+            if (dlg == null)
+                return;
+
+            dlg.Reset();
+            dlg.SetHeading("World Weather - " + Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.headerMenu));
+
+            dlg.Add(Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.contextAddLocation));
+            dlg.Add(Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.contextChangeCurrentConditionProvider));
+                        
+
+            //Show dialog
+            dlg.DoModal(GUIWindowManager.ActiveWindow);
+
+            if (dlg.SelectedId == 1)
+            {
+                Database.dbWeatherLoaction loc = this.dialogShowAddLocation();
+                if (loc != null)
+                {
+                    loc.CommitNeeded = true;
+                    loc.Commit();
+
+                    this.setProfile(loc);
+                }
+            }
+            else if (dlg.SelectedId == 2)
+                this.dialogShowLocationSelection();
+
             base.OnShowContextMenu();
         }
 
@@ -797,7 +819,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         //Show the setup dialog
         public void ShowPlugin()
         {
-            ConfigurationForm cfg = new ConfigurationForm(Database.dbSettings.Instance, Database.dbWeatherLoaction.Instance);
+            ConfigurationForm cfg = new ConfigurationForm(Database.dbSettings.Instance);
             cfg.ShowDialog();
         }
 
@@ -1579,6 +1601,32 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         }
         #endregion
 
+        private void setProfile(Database.dbWeatherLoaction loc)
+        {
+            lock (this._TimerRefreshWeather)
+            {
+                //location change
+                this._WeatherLocation = loc;
+
+                _Logger.Debug("[setProfile] Location changed to: {0}", this._WeatherLocation.Name);
+
+                //Wetaher refresh
+                this.doWeatherRefresh(true);
+            }
+
+            //Refresh location tags
+            this.doLocationRefresh(true);
+
+            //Update profile ID
+            this._Settings.ProfileID = (int)this._WeatherLocation.ID;
+            this._Settings.CommitNeeded = true;
+            this._Settings.Commit();
+
+            //Update geoclock if needed
+            if (this._ViewMode == ViewMode.GeoClock)
+                this.geoClockRefresh(this._WeatherLocation, true);
+        }
+
         private void setViewMode(ViewMode mode)
         {
             this._ViewMode = mode;
@@ -1623,7 +1671,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     break;
 
                 case ViewMode.GeoClock:
-                    this.geoClockRefresh(this._WeatherLocation);
+                    this.geoClockRefresh(this._WeatherLocation, false);
 
                     if (this._Settings.GUICalendarEnable)
                     {
@@ -1706,7 +1754,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             if (this._GUIbuttonLocation != null)
             {
                 this._GUIbuttonLocation.Label = Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.buttonLocation);
-                this._GUIbuttonLocation.IsEnabled = false;
+                this._GUIbuttonLocation.IsEnabled = Database.dbWeatherLoaction.GetAll().Count > 1;
             }
 
             if (this._GUIbuttonBrowserMap != null)
@@ -1725,27 +1773,50 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 this._GUIbuttonRefresh.Label = Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.buttonRefresh);
         }
 
-        private bool doWeatherRefresh()
+         private bool doWeatherRefresh(bool bForce)
         {
-            if (this._Provider == null || Interlocked.CompareExchange(ref this._WeatherIsRefreshing, 1, 0) != 0)
-                return false;
+            Database.dbWeatherLoaction loc;
+            Providers.IWeatherProvider provider;
+
+            lock (this._TimerRefreshWeather)
+            {
+                while (true)
+                {
+                    loc = this._WeatherLocation;
+                    provider = this._Providers.Find(p => p.Type == loc.Provider);
+
+                    if (provider == null)
+                        return false;
+
+                    if (this._WeatherIsRefreshing != 0)
+                    {
+                        if (!bForce)
+                            return false;
+                        else
+                            Monitor.Wait(this._TimerRefreshWeather); //ongoing refresh; wait for finish
+                    }
+                    else
+                        break;
+                }
+
+                this._WeatherIsRefreshing = 1;
+            }
 
             bool bResult = false;
-
             try
             {
-                _Logger.Debug("[doWeatherRefresh] Run ...");
+                _Logger.Debug("[doWeatherRefresh][{0}] Run ...", loc.Name);
 
                 DateTime dtUtcNow = DateTime.UtcNow;
                 CoordinateSharp.Celestial celSunRise, celSunSet;
-                CoordinateSharp.Coordinate coord = getCoordinate(this._WeatherLocation, dtUtcNow, out celSunRise, out celSunSet);
+                CoordinateSharp.Coordinate coord = getCoordinate(loc, dtUtcNow, out celSunRise, out celSunSet);
 
                 bool bIsDay = dtUtcNow >= celSunRise.AdditionalSolarTimes.CivilDawn && dtUtcNow <= celSunSet.AdditionalSolarTimes.CivilDusk;
 
                 try
                 {
                     //Get current condition from selected provider
-                    Providers.WeatherData data = this._Provider.GetCurrentWeatherData(this._WeatherLocation, _REFRESH_INTERVAL);
+                    Providers.WeatherData data = provider.GetCurrentWeatherData(loc, _REFRESH_INTERVAL);
 
                     if (data != null)
                     {
@@ -1892,17 +1963,17 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 {
                     if (!bResult)
                     {
-                        double dTime = Math.Min(_REFRESH_INTERVAL, Math.Pow(2, this._WeatherRefreshAttempts) * 60);
-                        this._TimerRefreshWeather.Interval =  dTime * 1000;
-                        this._WeatherRefreshAttempts++;
-                        _Logger.Error("[doWeatherRefresh] Failed. Next refresh attempt in {0:0} seconds.", dTime);
+                        double dTime = Math.Min(_REFRESH_INTERVAL, Math.Pow(2, loc.WeatherRefreshAttempts) * 60);
+                        this._TimerRefreshWeather.Interval = dTime * 1000;
+                        loc.WeatherRefreshAttempts++;
+                        _Logger.Error("[doWeatherRefresh][{0}] Failed. Next refresh attempt in {1:0} seconds.", loc.Name, dTime);
                     }
                     else
                     {
-                        this._RefreshLast = DateTime.Now;
+                        loc.RefreshLast = DateTime.Now;
                         this._TimerRefreshWeather.Interval = _REFRESH_INTERVAL * 1000;
-                        this._WeatherRefreshAttempts = 0;
-                        _Logger.Debug("[doWeatherRefresh] Complete. Next refresh in {0} seconds.", _REFRESH_INTERVAL);
+                        loc.WeatherRefreshAttempts = 0;
+                        _Logger.Debug("[doWeatherRefresh][{0}] Complete. Next refresh in {1} seconds.", loc.Name, _REFRESH_INTERVAL);
                     }
                 }
 
@@ -1917,25 +1988,45 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
             finally
             {
-                this._WeatherIsRefreshing = 0;
+                lock (this._TimerRefreshWeather)
+                {
+                    this._WeatherIsRefreshing = 0;
+                    Monitor.PulseAll(this._TimerRefreshWeather);
+                }
             }
 
             return bResult;
         }
 
-        private void doLocationRefresh()
+        private void doLocationRefresh(bool bForce)
         {
-            if (Interlocked.CompareExchange(ref this._LocationIsRefreshing, 1, 0) != 0)
-                return;
-
-            try
+            lock (this._TimerRefreshLocation)
             {
-                tagSetLocation(this._WeatherLocation, DateTime.UtcNow, this._Settings, this._Provider);
+                while (true)
+                {
+                    if (this._LocationIsRefreshing != 0)
+                    {
+                        if (!bForce)
+                            return;
+                        else
+                            Monitor.Wait(this._TimerRefreshLocation); //ongoing refresh; wait for finish
+                    }
+                    else
+                        break;
+                }
+
+                this._LocationIsRefreshing = 1;
             }
-            finally
+
+            Database.dbWeatherLoaction loc = this._WeatherLocation;
+            tagSetLocation(loc, DateTime.UtcNow, this._Settings, this._Providers.Find(p => p.Type == loc.Provider));
+
+            lock (this._TimerRefreshLocation)
             {
                 this._LocationIsRefreshing = 0;
+                Monitor.PulseAll(this._TimerRefreshLocation);
             }
+
         }
 
         private void setWeatherRefresh(bool bEnable)
@@ -1945,7 +2036,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 if (bEnable || this._TimerRefreshWeather.Enabled)
                 {
                     //Check next weather refresh time
-                    int iTime = this._RefreshLast > DateTime.MinValue ? (int)(DateTime.Now - this._RefreshLast).TotalSeconds : _REFRESH_INTERVAL;
+                    int iTime = this._WeatherLocation.RefreshLast > DateTime.MinValue ? (int)(DateTime.Now - this._WeatherLocation.RefreshLast).TotalSeconds : _REFRESH_INTERVAL;
 
                     if (iTime >= _REFRESH_INTERVAL - 5)
                     {
@@ -2032,6 +2123,108 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             return coord;
         }
 
+        #region Dialogs
+        private Database.dbWeatherLoaction dialogShowAddLocation()
+        {
+            VirtualKeyboard keyBoard = (VirtualKeyboard)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_VIRTUAL_KEYBOARD);
+
+            if (keyBoard == null)
+                return null;
+
+            keyBoard.Reset();
+            
+            //Enter location to search
+            keyBoard.DoModal(GUIWindowManager.ActiveWindow);
+
+            if (keyBoard.IsConfirmed && !string.IsNullOrWhiteSpace(keyBoard.Text))
+            {
+                string strQuery = keyBoard.Text.Trim();
+                _Logger.Debug("[dialogShowAddLocation] Searching for:  '{0}'", strQuery);
+                List<Database.dbWeatherLoaction> result = new List<Database.dbWeatherLoaction>();
+
+                //Search the location by each provider
+                this._Providers.ForEach(prov =>
+                {
+                    try
+                    {
+                        //Search
+                        result.AddRange(prov.Search(strQuery));
+                    }
+                    catch (Exception ex)
+                    {
+                        _Logger.Error("[dialogShowAddLocation][{3}][search] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, prov.Name);
+                    }
+                });
+
+                //Show the result
+                if (result.Count > 0)
+                    return this.dialogShowLocationSelection(result, null, Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.notificationDetectedLocation), true);
+                else
+                    this.dialogShowNotify(Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.errorFailedLocationDetection));
+            }
+
+            return null;
+        }
+
+        private void dialogShowLocationSelection()
+        {
+            List<Database.dbWeatherLoaction> list = Database.dbWeatherLoaction.GetAll();
+            list.Sort((p1, p2)=> ((int)p1.ID).CompareTo((int)p2.ID));
+
+            Database.dbWeatherLoaction loc = this.dialogShowLocationSelection(list, this._WeatherLocation, null, false);
+
+            if (loc != null && this._WeatherLocation != loc)
+                this.setProfile(loc);
+
+        }
+        private Database.dbWeatherLoaction dialogShowLocationSelection(List<Database.dbWeatherLoaction> list, Database.dbWeatherLoaction preselectedItem, string strLabel, bool bPrintDetail)
+        {
+            GUIDialogMenu dlg = (GUIDialogMenu)GUIWindowManager.GetWindow((int)Window.WINDOW_DIALOG_MENU);
+            if (dlg == null)
+                return null;
+
+            if (strLabel == null)
+                strLabel = "World Weather - " + Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.headerLocation);
+
+            dlg.Reset();
+            dlg.SetHeading(strLabel);
+
+            int iSel = -1;
+            for (int i = 0; i < list.Count; i++)
+            {
+                Database.dbWeatherLoaction loc = list[i];
+                dlg.Add(bPrintDetail ? string.Format("{1} [{2}][{0}]", loc.Provider, loc.Name, loc.ObservationLocation) : loc.Name);
+
+                if (loc == preselectedItem)
+                    iSel = i;
+            }
+
+            //Preselection
+            if (iSel >= 0)
+                dlg.selectOption((iSel + 1).ToString());
+
+            //Show dialog
+            dlg.DoModal(GUIWindowManager.ActiveWindow);
+
+            if (dlg.SelectedId > 0)
+                return list[dlg.SelectedId - 1];
+            else
+                return null;
+        }
+
+        private void dialogShowNotify(string strMessage)
+        {
+            GUIDialogNotify dlg = (GUIDialogNotify)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_DIALOG_NOTIFY);
+            if (dlg != null)
+            {
+                dlg.Reset();
+                dlg.SetHeading("World Weather");
+                dlg.SetText(strMessage);
+                dlg.DoModal(GUIWindowManager.ActiveWindow);
+            }
+        }
+        #endregion
+
         #region Images methods
 
         private static string memoryImageBuild(Image image, string strId, Size size)
@@ -2091,12 +2284,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         }
 
 
-        private bool geoClockRefresh(Database.dbWeatherLoaction loc)
+        private bool geoClockRefresh(Database.dbWeatherLoaction loc, bool bForce)
         {
             DateTime dtNow = DateTime.Now;
             DateTime dt = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, dtNow.Hour, dtNow.Minute, 0);
 
-            if (this._GeoClockImagePath != null && this._GeoClockLastRefresh == dt)
+            if (this._GeoClockImagePath != null && (!bForce && this._GeoClockLastRefresh == dt))
                 return true;
             else
                 this.geoClockDestroyImage();
@@ -2528,12 +2721,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private void cbTimerRefreshWeather(object sender, System.Timers.ElapsedEventArgs e)
         {
-            this.doWeatherRefresh();
+            this.doWeatherRefresh(false);
         }
 
         private void cbTimerRefreshLocation(object sender, System.Timers.ElapsedEventArgs e)
         {
-            this.doLocationRefresh();
+            this.doLocationRefresh(false);
         }
 
         private static void cbHttpBeforeDownload(object sender, MediaPortal.Pbk.Net.Http.HttpUserWebBeforeDownloadEventArgs e)
@@ -2574,7 +2767,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 this.setWeatherRefresh(false);   
 
                 //Refresh location tags
-                this.doLocationRefresh();
+                this.doLocationRefresh(false);
             }
         }
 

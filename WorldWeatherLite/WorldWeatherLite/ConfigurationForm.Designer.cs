@@ -38,6 +38,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.buttonRemoveProfile = new System.Windows.Forms.Button();
+            this.buttonAddProfile = new System.Windows.Forms.Button();
+            this.label20 = new System.Windows.Forms.Label();
+            this.comboBoxProfiles = new System.Windows.Forms.ComboBox();
             this.groupBoxLocation = new System.Windows.Forms.GroupBox();
             this.numericUpDownLat = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownLong = new System.Windows.Forms.NumericUpDown();
@@ -82,24 +86,24 @@
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxFullScreenOption = new System.Windows.Forms.ComboBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
             this.checkBoxCalendarEn = new System.Windows.Forms.CheckBox();
             this.labelVersion = new System.Windows.Forms.Label();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonOK = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
+            this.buttonCancel = new System.Windows.Forms.Button();
+            this.buttonOK = new System.Windows.Forms.Button();
             this.holidayTextBoxChristmasDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBoxAllSaintsDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBoxReformationDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
@@ -134,8 +138,8 @@
             this.tabPage3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabPage4.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxId
@@ -166,21 +170,66 @@
             this.tabControlMain.Location = new System.Drawing.Point(12, 12);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(765, 462);
+            this.tabControlMain.Size = new System.Drawing.Size(765, 516);
             this.tabControlMain.TabIndex = 7;
             this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.tabControlMain_SelectedIndexChanged);
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.buttonRemoveProfile);
+            this.tabPage1.Controls.Add(this.buttonAddProfile);
+            this.tabPage1.Controls.Add(this.label20);
+            this.tabPage1.Controls.Add(this.comboBoxProfiles);
             this.tabPage1.Controls.Add(this.groupBoxLocation);
             this.tabPage1.Controls.Add(this.groupBoxSearch);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(757, 436);
+            this.tabPage1.Size = new System.Drawing.Size(757, 490);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Provider";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // buttonRemoveProfile
+            // 
+            this.buttonRemoveProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.delete_icon3;
+            this.buttonRemoveProfile.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonRemoveProfile.Location = new System.Drawing.Point(276, 21);
+            this.buttonRemoveProfile.Name = "buttonRemoveProfile";
+            this.buttonRemoveProfile.Size = new System.Drawing.Size(23, 23);
+            this.buttonRemoveProfile.TabIndex = 24;
+            this.buttonRemoveProfile.UseVisualStyleBackColor = true;
+            this.buttonRemoveProfile.Click += new System.EventHandler(this.buttonRemoveProfile_Click);
+            // 
+            // buttonAddProfile
+            // 
+            this.buttonAddProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Add_dark;
+            this.buttonAddProfile.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonAddProfile.Location = new System.Drawing.Point(247, 21);
+            this.buttonAddProfile.Name = "buttonAddProfile";
+            this.buttonAddProfile.Size = new System.Drawing.Size(23, 23);
+            this.buttonAddProfile.TabIndex = 23;
+            this.buttonAddProfile.UseVisualStyleBackColor = true;
+            this.buttonAddProfile.Click += new System.EventHandler(this.buttonAddProfile_Click);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(24, 26);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(39, 13);
+            this.label20.TabIndex = 22;
+            this.label20.Text = "Profile:";
+            // 
+            // comboBoxProfiles
+            // 
+            this.comboBoxProfiles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxProfiles.FormattingEnabled = true;
+            this.comboBoxProfiles.Location = new System.Drawing.Point(69, 23);
+            this.comboBoxProfiles.Name = "comboBoxProfiles";
+            this.comboBoxProfiles.Size = new System.Drawing.Size(170, 21);
+            this.comboBoxProfiles.TabIndex = 21;
+            this.comboBoxProfiles.SelectedIndexChanged += new System.EventHandler(this.comboBoxProfiles_SelectedIndexChanged);
             // 
             // groupBoxLocation
             // 
@@ -196,7 +245,7 @@
             this.groupBoxLocation.Controls.Add(this.label3);
             this.groupBoxLocation.Controls.Add(this.label5);
             this.groupBoxLocation.Controls.Add(this.comboBoxProvider);
-            this.groupBoxLocation.Location = new System.Drawing.Point(18, 22);
+            this.groupBoxLocation.Location = new System.Drawing.Point(18, 50);
             this.groupBoxLocation.Name = "groupBoxLocation";
             this.groupBoxLocation.Size = new System.Drawing.Size(287, 185);
             this.groupBoxLocation.TabIndex = 8;
@@ -279,6 +328,7 @@
             this.textBoxLocation.Name = "textBoxLocation";
             this.textBoxLocation.Size = new System.Drawing.Size(169, 20);
             this.textBoxLocation.TabIndex = 8;
+            this.textBoxLocation.TextChanged += new System.EventHandler(this.textBoxLocation_TextChanged);
             // 
             // label3
             // 
@@ -317,9 +367,9 @@
             this.groupBoxSearch.Controls.Add(this.textBoxSearchQuery);
             this.groupBoxSearch.Controls.Add(this.buttonSearch);
             this.groupBoxSearch.Controls.Add(this.dataGridViewSearch);
-            this.groupBoxSearch.Location = new System.Drawing.Point(18, 213);
+            this.groupBoxSearch.Location = new System.Drawing.Point(18, 252);
             this.groupBoxSearch.Name = "groupBoxSearch";
-            this.groupBoxSearch.Size = new System.Drawing.Size(720, 217);
+            this.groupBoxSearch.Size = new System.Drawing.Size(720, 232);
             this.groupBoxSearch.TabIndex = 20;
             this.groupBoxSearch.TabStop = false;
             this.groupBoxSearch.Text = "Location search";
@@ -395,7 +445,7 @@
             this.dataGridViewSearch.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewSearch.RowHeadersVisible = false;
             this.dataGridViewSearch.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewSearch.Size = new System.Drawing.Size(689, 141);
+            this.dataGridViewSearch.Size = new System.Drawing.Size(689, 156);
             this.dataGridViewSearch.TabIndex = 7;
             this.dataGridViewSearch.SelectionChanged += new System.EventHandler(this.dataGridViewSearch_SelectionChanged);
             // 
@@ -431,7 +481,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(757, 436);
+            this.tabPage2.Size = new System.Drawing.Size(757, 490);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Media";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -567,7 +617,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(757, 436);
+            this.tabPage3.Size = new System.Drawing.Size(757, 490);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "GUI";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -707,139 +757,10 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(757, 436);
+            this.tabPage4.Size = new System.Drawing.Size(757, 490);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Calendar";
             this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxCalendarEn
-            // 
-            this.checkBoxCalendarEn.AutoSize = true;
-            this.checkBoxCalendarEn.Location = new System.Drawing.Point(22, 18);
-            this.checkBoxCalendarEn.Name = "checkBoxCalendarEn";
-            this.checkBoxCalendarEn.Size = new System.Drawing.Size(191, 17);
-            this.checkBoxCalendarEn.TabIndex = 0;
-            this.checkBoxCalendarEn.Text = "Show holiday and season calendar";
-            this.checkBoxCalendarEn.UseVisualStyleBackColor = true;
-            // 
-            // labelVersion
-            // 
-            this.labelVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelVersion.AutoSize = true;
-            this.labelVersion.Location = new System.Drawing.Point(13, 503);
-            this.labelVersion.Name = "labelVersion";
-            this.labelVersion.Size = new System.Drawing.Size(81, 13);
-            this.labelVersion.TabIndex = 8;
-            this.labelVersion.Text = "Version: 0.0.0.0";
-            // 
-            // buttonCancel
-            // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Delete;
-            this.buttonCancel.Location = new System.Drawing.Point(693, 487);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(80, 30);
-            this.buttonCancel.TabIndex = 2;
-            this.buttonCancel.Text = " Cancel";
-            this.buttonCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
-            // 
-            // buttonOK
-            // 
-            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOK.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Save;
-            this.buttonOK.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.buttonOK.Location = new System.Drawing.Point(597, 487);
-            this.buttonOK.Name = "buttonOK";
-            this.buttonOK.Size = new System.Drawing.Size(80, 30);
-            this.buttonOK.TabIndex = 1;
-            this.buttonOK.Text = "   Save";
-            this.buttonOK.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.buttonOK.UseVisualStyleBackColor = true;
-            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "Name";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn2.HeaderText = "Location";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Longitude";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Latitude";
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.HeaderText = "Idx";
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 30;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn6.HeaderText = "Decription";
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.label16);
-            this.groupBox2.Controls.Add(this.label15);
-            this.groupBox2.Controls.Add(this.label14);
-            this.groupBox2.Controls.Add(this.holidayTextBox0);
-            this.groupBox2.Controls.Add(this.holidayTextBox4);
-            this.groupBox2.Controls.Add(this.holidayTextBox1);
-            this.groupBox2.Controls.Add(this.holidayTextBox3);
-            this.groupBox2.Controls.Add(this.holidayTextBox2);
-            this.groupBox2.Location = new System.Drawing.Point(380, 43);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(338, 195);
-            this.groupBox2.TabIndex = 6;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Custom Holidays";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(17, 29);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(60, 13);
-            this.label14.TabIndex = 6;
-            this.label14.Text = "Description";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(152, 29);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(31, 13);
-            this.label15.TabIndex = 7;
-            this.label15.Text = "Type";
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(274, 29);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(30, 13);
-            this.label16.TabIndex = 8;
-            this.label16.Text = "Date";
             // 
             // groupBox3
             // 
@@ -891,6 +812,135 @@
             this.label19.Size = new System.Drawing.Size(60, 13);
             this.label19.TabIndex = 6;
             this.label19.Text = "Description";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label16);
+            this.groupBox2.Controls.Add(this.label15);
+            this.groupBox2.Controls.Add(this.label14);
+            this.groupBox2.Controls.Add(this.holidayTextBox0);
+            this.groupBox2.Controls.Add(this.holidayTextBox4);
+            this.groupBox2.Controls.Add(this.holidayTextBox1);
+            this.groupBox2.Controls.Add(this.holidayTextBox3);
+            this.groupBox2.Controls.Add(this.holidayTextBox2);
+            this.groupBox2.Location = new System.Drawing.Point(380, 43);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(338, 195);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Custom Holidays";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(274, 29);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(30, 13);
+            this.label16.TabIndex = 8;
+            this.label16.Text = "Date";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(152, 29);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(31, 13);
+            this.label15.TabIndex = 7;
+            this.label15.Text = "Type";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(17, 29);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(60, 13);
+            this.label14.TabIndex = 6;
+            this.label14.Text = "Description";
+            // 
+            // checkBoxCalendarEn
+            // 
+            this.checkBoxCalendarEn.AutoSize = true;
+            this.checkBoxCalendarEn.Location = new System.Drawing.Point(22, 18);
+            this.checkBoxCalendarEn.Name = "checkBoxCalendarEn";
+            this.checkBoxCalendarEn.Size = new System.Drawing.Size(191, 17);
+            this.checkBoxCalendarEn.TabIndex = 0;
+            this.checkBoxCalendarEn.Text = "Show holiday and season calendar";
+            this.checkBoxCalendarEn.UseVisualStyleBackColor = true;
+            // 
+            // labelVersion
+            // 
+            this.labelVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelVersion.AutoSize = true;
+            this.labelVersion.Location = new System.Drawing.Point(13, 557);
+            this.labelVersion.Name = "labelVersion";
+            this.labelVersion.Size = new System.Drawing.Size(81, 13);
+            this.labelVersion.TabIndex = 8;
+            this.labelVersion.Text = "Version: 0.0.0.0";
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.HeaderText = "Name";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn2.HeaderText = "Location";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Longitude";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.HeaderText = "Latitude";
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.HeaderText = "Idx";
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Width = 30;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            this.dataGridViewTextBoxColumn6.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn6.HeaderText = "Decription";
+            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Delete;
+            this.buttonCancel.Location = new System.Drawing.Point(693, 541);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(80, 30);
+            this.buttonCancel.TabIndex = 2;
+            this.buttonCancel.Text = " Cancel";
+            this.buttonCancel.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            // 
+            // buttonOK
+            // 
+            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOK.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Save;
+            this.buttonOK.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonOK.Location = new System.Drawing.Point(597, 541);
+            this.buttonOK.Name = "buttonOK";
+            this.buttonOK.Size = new System.Drawing.Size(80, 30);
+            this.buttonOK.TabIndex = 1;
+            this.buttonOK.Text = "   Save";
+            this.buttonOK.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.buttonOK.UseVisualStyleBackColor = true;
+            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
             // holidayTextBoxChristmasDay
             // 
@@ -1015,7 +1065,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(792, 527);
+            this.ClientSize = new System.Drawing.Size(792, 581);
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.buttonCancel);
@@ -1029,6 +1079,7 @@
             this.Shown += new System.EventHandler(this.ConfigurationForm_Shown);
             this.tabControlMain.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.groupBoxLocation.ResumeLayout(false);
             this.groupBoxLocation.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLat)).EndInit();
@@ -1051,10 +1102,10 @@
             this.groupBox1.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1145,5 +1196,9 @@
         private UserControls.HolidayTextBox holidayTextBoxWhitSunday;
         private UserControls.HolidayTextBox holidayTextBoxAscensionDay;
         private UserControls.HolidayTextBox holidayTextBoxChristmasDay;
+        private System.Windows.Forms.ComboBox comboBoxProfiles;
+        private System.Windows.Forms.Button buttonAddProfile;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Button buttonRemoveProfile;
     }
 }
