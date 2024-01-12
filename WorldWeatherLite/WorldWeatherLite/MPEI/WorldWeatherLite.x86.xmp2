@@ -255,6 +255,65 @@
           </Items>
         </Files>
       </GroupItem>
+      <GroupItem Name="Skin">
+        <ParentGroup />
+        <DisplayName>Group3</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Skin</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\WorldWeatherGeoClock.xml</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{7398b7eb-dee2-4e09-8df1-47ee52a43748}-WorldWeatherGeoClock.xml</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\WorldWeatherGeoClock.xml</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\day.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{61b5bbeb-df4d-4460-8b79-34f00a5d3997}-day.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\day.png</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\night.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{18d32ed2-b243-4282-b9aa-aa1c2dc9f22e}-night.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\night.png</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\pin.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{1e218584-48db-4020-98a8-6adaabe3d1d6}-pin.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\pin.png</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\day.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{bb8b47e6-ae1e-4ba4-85b1-22dc7efd5d53}-day.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\day.png</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\night.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{47230823-6e30-46b8-af94-f63275f8494a}-night.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\night.png</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\pin.png</LocalFileName>
+              <ZipFileName>Installer{GenericSkinFile}\{5a592571-eb98-42ef-9260-f059af1a8bee}-pin.png</ZipFileName>
+              <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\pin.png</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
     </Items>
   </Groups>
   <Sections>
@@ -674,6 +733,55 @@ For MediaPortal SharpDX version.</ExtensionDescription>
         <ZipFileName>Installer{CopyFile}\{a9ca9f86-e39e-4fee-ba9a-54bbf123fe91}-StringInterpolationBridge.dll</ZipFileName>
         <DestinationFilename>%Base%\StringInterpolationBridge.dll</DestinationFilename>
       </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\WorldWeatherGeoClock.xml</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{7398b7eb-dee2-4e09-8df1-47ee52a43748}-WorldWeatherGeoClock.xml</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\WorldWeatherGeoClock.xml</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\day.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{61b5bbeb-df4d-4460-8b79-34f00a5d3997}-day.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\day.png</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\night.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{18d32ed2-b243-4282-b9aa-aa1c2dc9f22e}-night.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\night.png</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\high\pin.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{1e218584-48db-4020-98a8-6adaabe3d1d6}-pin.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\high\pin.png</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\day.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{bb8b47e6-ae1e-4ba4-85b1-22dc7efd5d53}-day.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\day.png</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\night.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{47230823-6e30-46b8-af94-f63275f8494a}-night.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\night.png</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="GenericSkinFile" SystemFile="false" Modified="false">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>Skin\Default\Media\WorldWeather\GeoClock\low\pin.png</LocalFileName>
+        <ZipFileName>Installer{GenericSkinFile}\{5a592571-eb98-42ef-9260-f059af1a8bee}-pin.png</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\Media\WorldWeather\GeoClock\low\pin.png</DestinationFilename>
+      </FileItem>
       <FileItem InstallType="CopyFile" SystemFile="true" Modified="true">
         <Param1 />
         <UpdateOption>OverwriteIfOlder</UpdateOption>
@@ -684,7 +792,18 @@ For MediaPortal SharpDX version.</ExtensionDescription>
     </Items>
   </UniqueFileList>
   <ProjectSettings>
-    <FolderGroups />
+    <FolderGroups>
+      <FolderGroup InstallType="GenericSkinFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName />
+        <ZipFileName>Installer{GenericSkinFile}\{9b5ffcab-44cd-4a6b-8706-25b642f4b281}-</ZipFileName>
+        <DestinationFilename>%Skin%\[DEFAULT]\</DestinationFilename>
+        <Folder>Skin\Default</Folder>
+        <Group>Skin</Group>
+        <Recursive>true</Recursive>
+      </FolderGroup>
+    </FolderGroups>
     <ProjectFilename>WorldWeatherLite.x86.xmp2</ProjectFilename>
     <UpdatePath1>.\Release\update.xml</UpdatePath1>
     <UpdatePath2 />
