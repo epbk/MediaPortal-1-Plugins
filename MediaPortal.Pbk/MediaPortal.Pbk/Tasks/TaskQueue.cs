@@ -130,16 +130,8 @@ namespace MediaPortal.Pbk.Tasks
         /// </summary>
         /// <param name="strName">Name of the queue</param>
         public TaskQueue(string strName)
+            : this(strName, null, null, ThreadPriority.Normal)
         {
-            this._ID = Interlocked.Increment(ref _IdCounter);
-
-            if (!string.IsNullOrEmpty(strName))
-                this._Name = strName;
-
-            this._TaskThreadInitHandler = null;
-            this._TaskThreadDisposeHandler = null;
-
-            this._Priority = ThreadPriority.Normal;
         }
 
         /// <summary>
@@ -149,16 +141,8 @@ namespace MediaPortal.Pbk.Tasks
         /// <param name="threadInitHandler">Delegate to initialize thread state object. Called upon creation of the thread.</param>
         /// <param name="threadDisposeHandler">Delegate to dispose thread state object. Called before termination of the thread.</param>
         public TaskQueue(string strName, TaskThreadInitHandler threadInitHandler, TaskThreadDisposeHandler threadDisposeHandler)
+            : this(strName, threadInitHandler, threadDisposeHandler, ThreadPriority.Normal)
         {
-            this._ID = Interlocked.Increment(ref _IdCounter);
-
-            if (!string.IsNullOrEmpty(strName))
-                this._Name = strName;
-
-            this._TaskThreadInitHandler = threadInitHandler;
-            this._TaskThreadDisposeHandler = threadDisposeHandler;
-
-            this._Priority = ThreadPriority.Normal;
         }
 
         /// <summary>

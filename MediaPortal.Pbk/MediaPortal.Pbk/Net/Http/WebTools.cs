@@ -281,6 +281,30 @@ namespace MediaPortal.Pbk.Net.Http
             return false;
         }
 
+        public static bool IsLocalIpAddress(IPAddress ip)
+        {
+            try
+            {
+                if (IPAddress.IsLoopback(ip))
+                    return true;
+
+                // get local IP addresses
+                IPAddress[] localIPs = Dns.GetHostAddresses(Dns.GetHostName());
+                if (localIPs != null)
+                {
+                    for (int i = 0; i < localIPs.Length; i++)
+                    {
+                        IPAddress ipAddr = localIPs[i];
+                        AddressFamily af = localIPs[i].AddressFamily;
+                        if ((af == AddressFamily.InterNetwork || af == AddressFamily.InterNetworkV6) && ip.Equals(ipAddr))
+                            return true;
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
         public static IPAddress GetLocalIpAddress()
         {
             try
@@ -291,7 +315,7 @@ namespace MediaPortal.Pbk.Net.Http
                 {
                     foreach (IPAddress ip in localIPs)
                     {
-                        if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        if (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6)
                             return ip;
                     }
                 }

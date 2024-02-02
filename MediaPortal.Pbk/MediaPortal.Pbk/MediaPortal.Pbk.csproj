@@ -491,10 +491,13 @@
     <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventArgs.cs" />
     <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventHandler.cs" />
     <Compile Include="Net\Http\HttpUserWebRequest.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequestAsyncResult.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestEventArgs.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestEventHandler.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestEventType.cs" />
     <Compile Include="Net\Http\HttpUserWebResponseStream.cs" />
+    <Compile Include="Net\Http\HttpUserWebResumeAbortEventArgs.cs" />
+    <Compile Include="Net\Http\HttpUserWebResumeAbortEventHandler.cs" />
     <Compile Include="Net\Http\WebTools.cs" />
     <Compile Include="Net\ServerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

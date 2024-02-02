@@ -584,8 +584,16 @@ namespace MediaPortal.Pbk.Net.Http
             if (wr == null && string.IsNullOrWhiteSpace(strUrl))
                 throw new ArgumentException("Both url and webrequest is null");
 
+            if (wr != null)
+            {
+                if (string.IsNullOrWhiteSpace(wr.Url))
+                    throw new ArgumentException("Request url is invalid");
+
+                strUrl = wr.Url;
+            }
+
             if (string.IsNullOrWhiteSpace(strFilename))
-                strFilename = GetFileNameHash(!string.IsNullOrWhiteSpace(strUrl) ? strUrl : wr.Url, wr != null ? wr.Post : null);
+                strFilename = GetFileNameHash(strUrl, wr != null ? wr.Post : null);
         
             FileInfo fi;
 
@@ -601,7 +609,7 @@ namespace MediaPortal.Pbk.Net.Http
 
                 while (this._CacheRequests.Exists(p => p.Equals(strFilename)))
                 {
-                    _Logger.Debug("[{0}][DownloadFile] Wait: Url in the progress. {1}", this._Id, strUrl);
+                    _Logger.Debug("[{0}][DownloadFile] Wait: Url in the progress. '{1}'", this._Id, strUrl);
 
                     bInProgress = true;
 
@@ -619,13 +627,13 @@ namespace MediaPortal.Pbk.Net.Http
                         //Another task has finished the download. No need to download the file again.
                         if (File.Exists(strCacheFullPath))
                         {
-                            _Logger.Debug("[{0}][DownloadFile] Abort: Url already processed. {1}", this._Id, strUrl);
+                            _Logger.Debug("[{0}][DownloadFile] Abort: Url already processed. '{1}'", this._Id, strUrl);
                             return strCacheFullPath;
                         }
 
                         Thread.Sleep(200);
                     }
-                    _Logger.Error("[{0}][DownloadFile] Abort: Url already processed but does not exist. {1}", this._Id, strUrl);
+                    _Logger.Error("[{0}][DownloadFile] Abort: Url already processed but does not exist. '{1}'", this._Id, strUrl);
                     return null;
 
                 }
@@ -650,12 +658,13 @@ namespace MediaPortal.Pbk.Net.Http
                                 try
                                 {
                                     fi.LastAccessTime = DateTime.Now;
+                                    _Logger.Debug("[{0}][DownloadFile] Url request: '{1}' - Using cached file: '{2}'", this._Id, strUrl, strCacheFullPath);
                                     return strCacheFullPath;
                                 }
                                 catch (Exception ex) { }
                                 Thread.Sleep(200);
                             }
-                            _Logger.Error("[{0}][DownloadFile] File Access: {1}", this._Id, strCacheFullPath);
+                            _Logger.Error("[{0}][DownloadFile] File Access: '{1}'", this._Id, strCacheFullPath);
                             return strCacheFullPath;
                         }
                     }
@@ -695,7 +704,7 @@ namespace MediaPortal.Pbk.Net.Http
                                     catch { }
                                     Thread.Sleep(200);
                                 }
-                                _Logger.Error("[{0}][DownloadFile] File Access: {1}", this._Id, strCacheFullPath);
+                                _Logger.Error("[{0}][DownloadFile] File Access: '{1}'", this._Id, strCacheFullPath);
                                 return strCacheFullPath;
 
                             case HttpStatusCode.NotModified:
@@ -712,7 +721,7 @@ namespace MediaPortal.Pbk.Net.Http
                                     catch { }
                                     Thread.Sleep(200);
                                 }
-                                _Logger.Error("[{0}][DownloadFile] File Access: {1}", this._Id, strCacheFullPath);
+                                _Logger.Error("[{0}][DownloadFile] File Access: '{1}'", this._Id, strCacheFullPath);
                                 return strCacheFullPath;
 
                             default:
@@ -812,7 +821,7 @@ namespace MediaPortal.Pbk.Net.Http
             else if (typeof(T) == typeof(HtmlAgilityPack.HtmlDocument))
             {
                 HtmlAgilityPack.HtmlDocument html = new HtmlAgilityPack.HtmlDocument();
-                html.LoadHtml(strFile);
+                html.Load(strFile);
                 return (T)(object)html;
             }
             else if (typeof(T) == typeof(System.Drawing.Image))
@@ -829,6 +838,42 @@ namespace MediaPortal.Pbk.Net.Http
             else
                 return (T)(object)null;
         }
+
+        public IAsyncResult BeginDownloadFile<T>(string strUrl, int iLifeTime, AsyncCallback asyncCallback, Object asyncState)
+        {
+            HttpUserWebRequest wr = new HttpUserWebRequest(strUrl);
+            HttpUserWebRequestAsyncResult ia = new HttpUserWebRequestAsyncResult(wr, iLifeTime, asyncCallback, asyncState);
+
+            Thread t = new Thread(new ParameterizedThreadStart((o) =>
+            {
+                HttpUserWebRequestAsyncResult a = (HttpUserWebRequestAsyncResult)o;
+                try
+                {
+                    using (a.Request)
+                    {
+                        string strFile;
+                        a.SetComplete(DownloadFile<T>(a.Request.Url, out strFile, GetFileNameHash(a.Request), a.LifeTime, a.Request, Encoding.UTF8), null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    a.SetComplete(null, ex);
+                }
+            }));
+
+            t.Start(ia);
+
+            return ia;
+        }
+
+        public T EndDownloadFile<T>(IAsyncResult ia)
+        {
+            if (ia == null)
+                throw new ArgumentException("IAsyncResult is null");
+
+            return ia.IsCompleted && ia is HttpUserWebRequestAsyncResult ? (T)((HttpUserWebRequestAsyncResult)ia).Result : (T)(object)null;
+        }
+
 
         /// <summary>
         /// Clear cached memory files
@@ -871,6 +916,66 @@ namespace MediaPortal.Pbk.Net.Http
         public static string GetFileNameHash(Uri uri)
         {
             return GetFileNameHash(uri, null);
+        }
+
+        /// <summary>
+        /// Get filename hash from http request
+        /// </summary>
+        /// <param name="wr"></param>
+        /// <returns>Filename hash</returns>
+        public static string GetFileNameHash(HttpUserWebRequest wr)
+        {
+            byte[] data = null;
+            lock (_Md5Hash)
+            {
+                _SbHash.Clear();
+
+                if (wr.HttpRequestFields != null && wr.HttpRequestFields.Count > 0)
+                {
+                    _SbHash.Append("FIELDS:");
+                    foreach (string strKey in wr.HttpRequestFields)
+                    {
+                        _SbHash.Append(strKey);
+                        _SbHash.Append('=');
+                        _SbHash.Append(wr.HttpRequestFields[strKey]);
+                        _SbHash.Append('&');
+                    }
+                }
+
+                if (wr.Cookies != null)
+                {
+                    CookieCollection cookies = wr.Cookies.GetCookies(new Uri(wr.Url));
+                    if (cookies.Count > 0)
+                    {
+                        _SbHash.Append("COOKIES:");
+                        foreach (Cookie c in cookies)
+                        {
+                            _SbHash.Append(c.Name);
+                            _SbHash.Append('=');
+                            _SbHash.Append(c.Value);
+                            _SbHash.Append('&');
+                        }
+                    }
+                }
+
+                if (_SbHash.Length > 0)
+                {
+                    byte[] d = Encoding.UTF8.GetBytes(_SbHash.ToString());
+                    if (wr.Post != null && wr.Post.Length > 0)
+                    {
+                        data = new byte[d.Length + wr.Post.Length];
+                        Buffer.BlockCopy(d, 0, data, 0, d.Length);
+                        Buffer.BlockCopy(wr.Post, 0, data, d.Length, wr.Post.Length);
+                    }
+                    else
+                        data = d;
+
+                }
+                else
+                    data = wr.Post;
+            }
+
+            return GetFileNameHash(wr.Url, data);
         }
 
         /// <summary>

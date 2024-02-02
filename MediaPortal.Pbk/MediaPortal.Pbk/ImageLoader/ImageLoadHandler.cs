@@ -156,12 +156,10 @@ namespace MediaPortal.Pbk.ImageLoader
         }
 
         public ImageLoadHandler(Net.Http.Caching caching)
+            : this(caching, ThreadPriority.Normal)
         {
-            this._JobPool = new Tasks.TaskQueue("ImageLoadHandler", null, null);
-            this._Id = Interlocked.Increment(ref _IdCounter);
-            this._Caching = caching;
         }
-        public ImageLoadHandler(Net.Http.Caching caching, ThreadPriority threadPriority = ThreadPriority.Normal)
+        public ImageLoadHandler(Net.Http.Caching caching, ThreadPriority threadPriority)
         {
             this._JobPool = new Tasks.TaskQueue("ImageLoadHandler", null, null, threadPriority);
             this._Id = Interlocked.Increment(ref _IdCounter);

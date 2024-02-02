@@ -42,12 +42,12 @@ namespace MediaPortal.Pbk.Utils.Buffering
         private int _DataReadPosition = 0;
         private int _DataWritePosition = 0;
         private bool _BufferFull = false;
-        private bool _Run = false;
-        private bool _Wait = false;
-        private bool _Flush = false;
-        private bool _Empty = false;
+        private volatile bool _Run = false;
+        private volatile bool _Wait = false;
+        private volatile bool _Flush = false;
+        private volatile bool _Empty = false;
 
-        private bool _Terminate = false;
+        private volatile bool _Terminate = false;
 
         private object _Padlock = new object();
 
@@ -347,10 +347,13 @@ namespace MediaPortal.Pbk.Utils.Buffering
             {
                 _Logger.Debug("[" + this._Id + "][Flush]");
 
-                this._FlushedSignal.Reset();
-                this._Flush = true;
-                this._WriteSignal.Set();
-                this._FlushedSignal.WaitOne();
+                if (!this._Empty)
+                {
+                    this._FlushedSignal.Reset();
+                    this._Flush = true;
+                    this._WriteSignal.Set();
+                    this._FlushedSignal.WaitOne();
+                }
 
                 _Logger.Debug("[" + this._Id + "][Flush] Done.");
             }

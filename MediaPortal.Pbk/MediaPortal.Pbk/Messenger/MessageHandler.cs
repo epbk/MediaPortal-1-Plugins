@@ -53,7 +53,7 @@ namespace MediaPortal.Pbk.Messenger
         {
             get
             {
-                return this._MessageList.Count > 0 && this._MessageList.Any(p => !p.MessageRead);
+                return this._MessageList.Count > 0 && this._MessageList.Any(p => p.MessageTtl != 0 && !p.MessageRead);
             }
         }
 
@@ -62,7 +62,7 @@ namespace MediaPortal.Pbk.Messenger
             if (this._MessageList.Count > 0)
             {
                 int iCnt = 0;
-                foreach (IMessage m in this._MessageList.Where(p => !p.MessageRead))
+                foreach (IMessage m in this._MessageList.Where(p => p.MessageTtl != 0 && !p.MessageRead))
                 {
                     if (iCnt++ != 0 || msg != m)
                         return false;
@@ -78,7 +78,7 @@ namespace MediaPortal.Pbk.Messenger
         {
             get
             {
-                return this._MessageList.Count > 0 ? this._MessageList.Count(p => !p.MessageRead) : 0;
+                return this._MessageList.Count > 0 ? this._MessageList.Count(p => p.MessageTtl != 0 && !p.MessageRead) : 0;
             }
         }
 
@@ -86,7 +86,7 @@ namespace MediaPortal.Pbk.Messenger
         {
             get
             {
-                return this._MessageList.Count > 0 ? this._MessageList.FirstOrDefault(p => !p.MessageRead) : null;
+                return this._MessageList.Count > 0 ? this._MessageList.FirstOrDefault(p => p.MessageTtl != 0 && !p.MessageRead) : null;
             }
         }
 
@@ -272,6 +272,10 @@ namespace MediaPortal.Pbk.Messenger
                 {
                     _Logger.Debug("[{0}][process] Sleeping...", this._Id);
                     this._FlagWakeUp.WaitOne();
+
+                    //If new message has been added while showing single message infinitely then move to the new message
+                    if (this._MessageStatus == Status.MessageActive && this._MessagesToShowCount > 1 && this._MessageIdx == 0)
+                        this._MessageIdx++;
                 }
                 else
                 {
