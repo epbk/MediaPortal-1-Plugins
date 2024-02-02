@@ -26,7 +26,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         private int _RefreshActive = 0;
         private int _FramesCount = 0;
 
-
         public System.Drawing.Size ImageSize
         {
             get { return this._ImageSize; }
@@ -41,12 +40,31 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         { get; private set; }
 
         public string GuiTag
-        { get; private set; }
+        {
+            get
+            {
+                return this._GuiTag;
+            }
+            set
+            {
+                this._GuiTag = value;
+
+            }
+        }private string _GuiTag = null;
 
         public DateTime LastRefresh = DateTime.MinValue;
 
         public bool FramesAvailable
         { get { return _FramesCount > 0; } }
+
+        public bool Active
+        { get; private set; }
+
+        public bool Terminating
+        { get; private set; }
+
+        public int OrderId;
+
 
         /// <summary>
         /// Gets current image frame to be visible
@@ -74,8 +92,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         {
             this.WeatherImage = wi;
             this.Id = strId;
-            this.GuiTag = strGuiTag;
+            this._GuiTag = strGuiTag;
 
+            this.ThumbnailImage = _EmptyImage;
+            GUIPropertyManager.SetProperty(this._GuiTag, _EmptyImage);
         }
         #endregion
 
@@ -92,7 +112,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
             if (this._TimerAnimation != null)
             {
                 this._TimerAnimation.Stop();
-
+                this._TimerAnimation.Elapsed -= this.cbTimerAnimation;
                 this._TimerAnimation.Dispose();
                 this._TimerAnimation = null;
             }
@@ -178,6 +198,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         {
             try
             {
+                //If we are in terminatig state, exit
+                if (this.Terminating)
+                    return;
+
                 lock (GUIGraphicsContext.RenderLock)
                 {
                     //Destroy current image if exists
@@ -185,6 +209,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
 
                     if (GUIWindowManager.ActiveWindow != GUIWorldWeaterLite.PLUGIN_ID)
                         return; //If we aren't active then destroy images and return
+
+                    if (this.Active)
+                        GUIPropertyManager.SetProperty(this.GuiTag, string.Empty);
 
                     if (images != null && images.Length > 0)
                     {
@@ -224,17 +251,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
 
                                 this._TimerAnimation.Interval = iDur;
                                 this._TimerAnimation.AutoReset = true;
-                                this._TimerAnimation.Enabled = true;
+                                this._TimerAnimation.Enabled = this.Active;
                             }
 
                             //Set first frame to GUI
                             this._CurrentTexture = tx;
-                            GUIPropertyManager.SetProperty(this.GuiTag, this.Id);
+                            if (this.Active)
+                                GUIPropertyManager.SetProperty(this.GuiTag, this.Id);
                             this.ThumbnailImage = this.Id;
                         }
                     }
                     else
-                        this.SetEmptyImage();
+                        this.SetEmptyImage(); //no images; set as black
                 }
             }
             finally
@@ -265,8 +293,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
             this.Destroy();
 
             this.ThumbnailImage = _EmptyImage;
-            GUIPropertyManager.SetProperty(this.GuiTag, _EmptyImage);
 
+            if (this.Active)
+                GUIPropertyManager.SetProperty(this.GuiTag, _EmptyImage);
         }
 
         public bool RefreshBegin()
@@ -277,6 +306,39 @@ namespace MediaPortal.Plugins.WorldWeatherLite.GUI
         public void RefreshEnd()
         {
             this._RefreshActive = 0;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void Stop()
+        {
+            if (this._TimerAnimation != null)
+                this._TimerAnimation.Stop();
+
+            GUIPropertyManager.SetProperty(this._GuiTag, string.Empty);
+            this.Active = false;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void Start()
+        {
+            if (this._TimerAnimation != null && !this._TimerAnimation.Enabled)
+                this._TimerAnimation.Start();
+
+
+            if (this.ThumbnailImage == _EmptyImage)
+                GUIPropertyManager.SetProperty(this._GuiTag, _EmptyImage);
+            else
+                GUIPropertyManager.SetProperty(this._GuiTag, this.Id);
+
+            this.Active = true;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void Terminate()
+        {
+            this.Stop();
+            this.Destroy();
+            this.Terminating = true;
         }
 
 

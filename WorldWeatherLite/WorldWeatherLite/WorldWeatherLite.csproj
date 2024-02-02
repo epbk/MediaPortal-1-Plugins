@@ -169,11 +169,16 @@
       <DependentUpon>ConfigurationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Database\dbHoliday.cs" />
+    <Compile Include="Database\dbGUIUnits.cs" />
     <Compile Include="Database\dbWeatherImage.cs" />
     <Compile Include="Database\dbSettings.cs" />
     <Compile Include="Database\dbTable.cs" />
-    <Compile Include="Database\dbWeatherLoaction.cs" />
+    <Compile Include="Database\dbProfile.cs" />
     <Compile Include="FullscreenVideoBehaviorEnum.cs" />
+    <Compile Include="GeoTimeZone\Geohash.cs" />
+    <Compile Include="GeoTimeZone\TimezoneFileReader.cs" />
+    <Compile Include="GeoTimeZone\TimeZoneLookup.cs" />
+    <Compile Include="GeoTimeZone\TimeZoneResult.cs" />
     <Compile Include="GUIWorldWeaterLite.cs" />
     <Compile Include="GUI\GUIDistanceUnitEnum.cs" />
     <Compile Include="GUI\GUIPrecipitationUnitEnum.cs" />
@@ -206,6 +211,10 @@
     <Compile Include="Language\Translation.cs" />
     <Compile Include="Language\TranslationEnum.cs" />
     <Compile Include="DateImeWatermarkEnum.cs" />
+    <Compile Include="TimeZoneConverter\CustomTimeZoneFactory.cs" />
+    <Compile Include="TimeZoneConverter\DataLoader.cs" />
+    <Compile Include="TimeZoneConverter\LinkResolution.cs" />
+    <Compile Include="TimeZoneConverter\TZConvert.cs" />
     <Compile Include="UserControls\DayMonthTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -253,7 +262,13 @@
     <EmbeddedResource Include="Graphics\WorldWeather-enabled.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GeoTimeZone\TZ.dat.gz" />
+    <EmbeddedResource Include="GeoTimeZone\TZL.dat.gz" />
     <None Include="Resources\Delete.png" />
+    <EmbeddedResource Include="TimeZoneConverter\Data\Aliases.csv.gz" />
+    <EmbeddedResource Include="TimeZoneConverter\Data\Mapping.csv.gz" />
+    <EmbeddedResource Include="TimeZoneConverter\Data\RailsMapping.csv.gz" />
+    <EmbeddedResource Include="TimeZoneConverter\Data\Territories.csv.gz" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Save.png" />
@@ -266,6 +281,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\help_alpha.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Add-dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\delete-icon3.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

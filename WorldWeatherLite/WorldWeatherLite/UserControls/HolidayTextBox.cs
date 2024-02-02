@@ -42,7 +42,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.UserControls
             this.Tag = holiday;
         }
 
-        public void Commit()
+        public void Update(bool bCommit)
         {
             Database.dbHoliday tag = (Database.dbHoliday)this.Tag;
 
@@ -51,8 +51,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite.UserControls
             tag.Month = this.Month;
             tag.HolidayType = (Utils.HolidayTypeEnum)this.comboBoxType.SelectedIndex;
 
-            tag.CommitNeeded = true;
-            tag.Commit();
+            if (bCommit)
+            {
+                tag.CommitNeeded = true;
+                tag.Commit();
+            }
         }
 
         private void comboBoxType_SelectedValueChanged(object sender, EventArgs e)

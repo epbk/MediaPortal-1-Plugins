@@ -318,7 +318,7 @@
   </Groups>
   <Sections>
     <Items>
-      <SectionItem Guid="17179c77-ea55-4738-9cba-bfd16bc89d24" Name="Welcome Screen" ConditionGroup="">
+      <SectionItem Guid="17179c77-ea55-4738-9cba-bfd16bc89d24" Name="Welcome Screen" ConditionGroup="" Condition="None">
         <Params>
           <Items>
             <SectionParam Name="Header text">
@@ -352,7 +352,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
         <PanelName>Welcome Screen</PanelName>
         <WizardButtonsEnum>NextCancel</WizardButtonsEnum>
       </SectionItem>
-      <SectionItem Guid="e550ae0e-69dc-4b8f-8121-627fb05469e8" Name="Install Section" ConditionGroup="">
+      <SectionItem Guid="e550ae0e-69dc-4b8f-8121-627fb05469e8" Name="Install Section" ConditionGroup="" Condition="None">
         <Params>
           <Items>
             <SectionParam Name="Header Title">
@@ -374,7 +374,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
         </Params>
         <Actions>
           <Items>
-            <ActionItem Name="InstallFiles" ActionType="InstallFiles" ConditionGroup="">
+            <ActionItem Name="InstallFiles" ActionType="InstallFiles" ConditionGroup="" Condition="None">
               <Params>
                 <Items />
               </Params>
@@ -386,7 +386,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
         <PanelName>Install Section</PanelName>
         <WizardButtonsEnum>Next</WizardButtonsEnum>
       </SectionItem>
-      <SectionItem Guid="b5672980-c735-4395-90ec-45d1be351041" Name="Setup Complete" ConditionGroup="">
+      <SectionItem Guid="b5672980-c735-4395-90ec-45d1be351041" Name="Setup Complete" ConditionGroup="" Condition="None">
         <Params>
           <Items>
             <SectionParam Name="Header text">
@@ -440,6 +440,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
         <WarnOnly>false</WarnOnly>
         <Message />
         <Name>MediaPortal</Name>
+        <Condition>None</Condition>
       </DependencyItem>
     </Items>
   </Dependencies>
@@ -455,8 +456,8 @@ Click Next to continue or Cancel to exit Setup.</Value>
     <UpdateUrl>https://www.team-mediaportal.com/index.php?option=com_mtree&amp;task=att_download&amp;link_id=387&amp;cf_id=52</UpdateUrl>
     <Version>
       <Major>1</Major>
-      <Minor>1</Minor>
-      <Build>0</Build>
+      <Minor>3</Minor>
+      <Build>4</Build>
       <Revision>0</Revision>
     </Version>
     <ExtensionDescription>World Weather Lite (x64).
@@ -471,7 +472,7 @@ For MediaPortal SharpDX version.</ExtensionDescription>
     <VersionDescription />
     <DevelopmentStatus>Stable</DevelopmentStatus>
     <OnlineLocation>https://www.team-mediaportal.com/index.php?option=com_mtree&amp;task=att_download&amp;link_id=387&amp;cf_id=41</OnlineLocation>
-    <ReleaseDate>2024-01-12T16:10:21</ReleaseDate>
+    <ReleaseDate>2024-01-28T16:10:21</ReleaseDate>
     <Tags>weather,x64</Tags>
     <PlatformCompatibility>x64</PlatformCompatibility>
     <Location>.\Release\WorldWeatherLite.SharpDX.[Version].x64.mpe1</Location>
@@ -786,7 +787,7 @@ For MediaPortal SharpDX version.</ExtensionDescription>
         <Param1 />
         <UpdateOption>OverwriteIfOlder</UpdateOption>
         <LocalFileName>..\Graphics\WorldWeather-enabled.png</LocalFileName>
-        <ZipFileName>Installer{CopyFile}\{61fc6d5c-67cf-4ba5-86ee-936444adea37}-WorldWeather-enabled.png</ZipFileName>
+        <ZipFileName>Installer{CopyFile}\{952daa15-a68b-445b-a227-bd49832aad7d}-WorldWeather-enabled.png</ZipFileName>
         <DestinationFilename />
       </FileItem>
     </Items>

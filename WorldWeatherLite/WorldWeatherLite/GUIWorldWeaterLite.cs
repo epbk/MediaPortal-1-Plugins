@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Globalization;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -362,7 +363,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private ViewMode _ViewMode = ViewMode.Condition;
         private ImageViewModeEnum _ImageViewMode = ImageViewModeEnum.Flat;
 
-        private GUI.GUIWeatherImage[] _WaeatherImages = new GUI.GUIWeatherImage[11];
+        //private GUI.GUIWeatherImage[] _WaeatherImages = new GUI.GUIWeatherImage[11];
 
         private MediaPortal.Pbk.Tasks.TaskQueue _ImageRefreshPool = new Pbk.Tasks.TaskQueue(
             PLUGIN_NAME,
@@ -373,8 +374,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         private bool _FullScreenMediaViewMode = false;
         private GUI.GUIWeatherImage _FullScreenMediaImage = null;
 
+        private int _GUIWeatherImageIdCounter = 0;
+        private List<GUI.GUIWeatherImage> _GUIWeatherImages = new List<GUI.GUIWeatherImage>();
 
-        private Database.dbWeatherLoaction _WeatherLocation;
+        private Database.dbProfile _Profile;
         private List<Providers.IWeatherProvider> _Providers = new List<Providers.IWeatherProvider>();
 
         private LocalisationProvider _Localisation;
@@ -443,10 +446,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //Load settings
             this._Settings = Database.dbSettings.Instance;
+            this._Settings.Upgrade();
 
-            this._WeatherLocation = Database.dbWeatherLoaction.Get(this._Settings.ProfileID);
-            if (this._Settings.ProfileID != this._WeatherLocation.ID)
-                this._Settings.ProfileID = (int)this._WeatherLocation.ID;
+            this._Profile = Database.dbProfile.Get(this._Settings.ProfileID);
+            if (this._Settings.ProfileID != this._Profile.ID)
+                this._Settings.ProfileID = (int)this._Profile.ID;
 
 
             this._Providers.Add(new Providers.ProviderMsn());
@@ -454,27 +458,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this._Providers.Add(new Providers.ProviderAccuWeather());
 
             _Logger.Debug("[init] Provider:{4}  Name:'{0}' ID:'{1}' LAT:{2} LON:{3}",
-                this._WeatherLocation.Name,
-                this._WeatherLocation.LocationID,
-                this._WeatherLocation.Latitude,
-                this._WeatherLocation.Longitude,
-                this._WeatherLocation.Provider);
-
-            if (this._Settings.DatabaseVersion < Database.dbSettings.DATABASE_VERSION_CURRENT)
-            {
-                Database.dbWeatherImage.Manager.Get<Database.dbWeatherImage>(null).ForEach(o =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(o.Url))
-                        {
-                            o.Enable = true;
-                            o.CommitNeeded = true;
-                            o.Commit();
-                        }
-                    });
-                this._Settings.DatabaseVersion = Database.dbSettings.DATABASE_VERSION_CURRENT;
-                this._Settings.CommitNeeded = true;
-                this._Settings.Commit();
-            }
+                this._Profile.Name,
+                this._Profile.LocationID,
+                this._Profile.Latitude,
+                this._Profile.Longitude,
+                this._Profile.Provider);
 
             this._ImageViewMode = this._Settings.ImageViewMode;
 
@@ -483,35 +471,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             //GeoClock init
             this._GeoClock = new Utils.GeoClock(Config.GetFolder(Config.Dir.Skin) + '\\' + Config.SkinName);
-
-            #region Init weather imgaes
-            List<Database.dbWeatherImage> list = Database.dbWeatherImage.GetAll();
-            for (int i = 0; i < list.Count; i++)
-            {
-                Database.dbWeatherImage dbImg = list[i];
-                if (dbImg.Enable && !string.IsNullOrWhiteSpace(dbImg.Url))
-                {
-                    GUI.GUIWeatherImage wi = new GUI.GUIWeatherImage(
-                        dbImg,
-                        "[" + PLUGIN_NAME + ":MediaPortalWorldWeatherImage" + i + "]",
-                        _TAG_PREFFIX + ".ImageWeather" + i);
-
-                    this._WaeatherImages[i] = wi;
-
-                    _Logger.Debug("[init] MediaWeatherImage:{0} '{1}'\r\nUrl: {2}\r\nUrlBck: {3}\r\nUrlOver: {4}\r\nPeriod: {5}\r\nPeriodSafe: {6}\r\nMultiimage: {7}\r\nDate&Time Watermark: {8}\r\n",
-                        wi.Id,
-                        dbImg.Description,
-                        dbImg.Url,
-                        dbImg.UrlBackground,
-                        dbImg.UrlOverlay,
-                        dbImg.Period,
-                        dbImg.PeriodSafe,
-                        dbImg.MultiImage,
-                        dbImg.MultiImageDateImeWatermark);
-                }
-            }
-            #endregion
-
+            
             //Init tags
             tagsInit();
             
@@ -542,6 +502,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this._Settings.CommitNeeded = true;
             this._Settings.Commit();
 
+            //Profile
+            if (this._Profile != null && this._Profile.CommitNeeded)
+                this._Profile.Commit();
 
             GUIGraphicsContext.OnVideoWindowChanged -= new VideoWindowChangedHandler(this.cbVideoWindowChanged);
 
@@ -572,10 +535,13 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             this.setImageViewMode(this._ImageViewMode);
 
             this.doLocationRefresh(false);
-            tagsSetCalendar(this._Settings, this._WeatherLocation, DateTime.Today, this._Localisation, Database.dbHoliday.GetAll());
+            tagsSetCalendar(this._Profile, this._Localisation, DateTime.Today.ToUniversalTime());
 
             this.moonImageRefresh();
-            this.imagesRefresh();
+
+            //Init weather imgaes
+            this.imagesInit();
+            
 
             this._TimerRefreshLocation.Enabled = true;
         }
@@ -594,7 +560,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         break;
 
                     case ViewMode.GeoClock:
-                        this.geoClockRefresh(this._WeatherLocation, false);
+                        this.geoClockRefresh(this._Profile, false);
                         break;
                 }
             }
@@ -611,7 +577,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         break;
 
                     case ViewMode.GeoClock:
-                        if (this._Settings.GUICalendarEnable)
+                        if (this._Profile.GUICalendarEnable)
                             this.setViewMode(ViewMode.Calendar);
                         else
                             this.setViewMode(ViewMode.Condition);
@@ -754,9 +720,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
             if (dlg.SelectedId == 1)
             {
-                Database.dbWeatherLoaction loc = this.dialogShowAddLocation();
+                Database.dbProfile loc = this.dialogShowAddLocation();
                 if (loc != null)
                 {
+                    this._Providers.Find(p => p.Type == loc.Provider).FinalizeLocationData(loc);
                     loc.CommitNeeded = true;
                     loc.Commit();
 
@@ -782,7 +749,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     Texture tx = wi.CurrentTexture;
 
                     Size size = wi.ImageSize;
-                    if (tx != null && size != System.Drawing.Size.Empty && tx != null)
+                    if (tx != null && size != System.Drawing.Size.Empty)
                     {
                         //Render the texture
                         RectangleF rect = wi.FullscreenRectangle;
@@ -823,7 +790,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         //Show the setup dialog
         public void ShowPlugin()
         {
-            ConfigurationForm cfg = new ConfigurationForm(Database.dbSettings.Instance);
+            ConfigurationForm cfg = new ConfigurationForm();
             cfg.ShowDialog();
         }
 
@@ -1033,25 +1000,24 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             //8: 
             //9: Webcam Image
             //10:Self Defined Image
-            for (int i = 0; i < this._WaeatherImages.Length; i++)
+            for (int i = 0; i < 11; i++)
             {
                 GUIPropertyManager.SetProperty(_TAG_PREFFIX + ".ImageWeather" + i, string.Empty);
-                GUIPropertyManager.SetProperty(_TAG_PREFFIX + ".ImageWeather" + i + "Description",
-                    this._WaeatherImages[i] != null ? this._WaeatherImages[i].WeatherImage.Description : string.Empty);
+                GUIPropertyManager.SetProperty(_TAG_PREFFIX + ".ImageWeather" + i + "Description", string.Empty);
             }
         }
 
-        private static void tagSetLocation(Database.dbWeatherLoaction loc, DateTime dt, Database.dbSettings set, Providers.IWeatherProvider prov)
+        private static void tagSetLocation(Database.dbProfile loc, DateTime dt, Database.dbSettings set, Providers.IWeatherProvider prov)
         {
             tagSetLocation(loc, dt, set, prov, null, null, null);
         }
-        private static void tagSetLocation(Database.dbWeatherLoaction loc, DateTime dt, Database.dbSettings set, Providers.IWeatherProvider prov,
+        private static void tagSetLocation(Database.dbProfile loc, DateTime dt, Database.dbSettings set, Providers.IWeatherProvider prov,
             CoordinateSharp.Coordinate coord, CoordinateSharp.Celestial celSunRise, CoordinateSharp.Celestial celSunSet)
         {
             try
             {
                 //Provider
-                string strProvider = prov.Name;
+                string strProvider = prov != null ? prov.Name : string.Empty;
                 string strProviderImage;
 
                 string strWeatherDir = Configuration.Config.GetSubFolder(Config.Dir.Skin, Configuration.Config.SkinName) + "\\Media\\WorldWeather\\Provider\\";
@@ -1066,12 +1032,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 GUIPropertyManager.SetProperty(_TAG_FORECAST_PROVIDER, strProvider);
                 GUIPropertyManager.SetProperty(_TAG_FORECAST_PROVIDER_IMAGE, strProviderImage);
 
-                DateTime dtLocal = dt.ToLocalTime();
+                //TimeZone
+                TimeZoneInfo tz = loc.TimeZone != null ? loc.TimeZone : TimeZoneInfo.Local;
+                TimeSpan tsUTCoffset;
+                DateTime dtTZ = loc.GetLocalTime(dt, out tsUTCoffset);
 
                 if (coord == null)
                     coord = getCoordinate(loc, dt, out celSunRise, out celSunSet);
 
-                CoordinateSharp.Celestial celLocal = dt.ToLocalTime().Day == ((DateTime)celSunRise.SunRise).Day ? celSunRise : celSunSet;
                 CoordinateSharp.Celestial celUtc = coord.CelestialInfo;
 
                 //Location
@@ -1079,7 +1047,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_COORDINATES, loc.Latitude.ToString() + ", " + loc.Longitude.ToString());
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_COUNTRY, loc.Country);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_DESCRIPTION, ">" + loc.Name + (!string.IsNullOrWhiteSpace(loc.Country) ? (" (" + loc.Country + ")") : null));
-                GUIPropertyManager.SetProperty(_TAG_LOCATION_TIME_ZONE_DESCRIPTION, TimeZoneInfo.Local.DisplayName);
+                GUIPropertyManager.SetProperty(_TAG_LOCATION_TIME_ZONE_DESCRIPTION, tz.DisplayName);
 
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_COORDINATES_DEGREE,
                     string.Format("{0}° {1}' {2}\" {3}, {4}° {5}' {6}\" {7}",
@@ -1089,22 +1057,22 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
 
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_CIVIL_TWILIGHT_MORNING_TIME,
-                    celSunRise.AdditionalSolarTimes.CivilDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.CivilDawn).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunRise.AdditionalSolarTimes.CivilDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.CivilDawn).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_CIVIL_TWILIGHT_EVENING_TIME,
-                    celSunSet.AdditionalSolarTimes.CivilDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.CivilDusk).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunSet.AdditionalSolarTimes.CivilDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.CivilDusk).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_NAUTICAL_TWILIGHT_MORNING_TIME,
-                    celSunRise.AdditionalSolarTimes.NauticalDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.NauticalDawn).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunRise.AdditionalSolarTimes.NauticalDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.NauticalDawn).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_NAUTICAL_TWILIGHT_EVENING_TIME,
-                    celSunSet.AdditionalSolarTimes.NauticalDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.NauticalDusk).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunSet.AdditionalSolarTimes.NauticalDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.NauticalDusk).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_ASTRONOMICAL_TWILIGHT_MORNING_TIME,
-                    celSunRise.AdditionalSolarTimes.AstronomicalDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.AstronomicalDawn).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunRise.AdditionalSolarTimes.AstronomicalDawn != null ? ((DateTime)celSunRise.AdditionalSolarTimes.AstronomicalDawn).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_ASTRONOMICAL_TWILIGHT_EVENING_TIME,
-                    celSunSet.AdditionalSolarTimes.AstronomicalDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.AstronomicalDusk).ToLocalTime().ToShortTimeString() : string.Empty);
+                    celSunSet.AdditionalSolarTimes.AstronomicalDusk != null ? ((DateTime)celSunSet.AdditionalSolarTimes.AstronomicalDusk).Add(tsUTCoffset).ToShortTimeString() : string.Empty);
 
                 //Sun
-                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_RISE_TIME, ((DateTime)celSunRise.SunRise).ToLocalTime().ToShortTimeString());
-                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_SET_TIME, ((DateTime)celSunSet.SunSet).ToLocalTime().ToShortTimeString());
-                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_CULMINATION_TIME, ((DateTime)celLocal.SolarNoon).ToLocalTime().ToShortTimeString());
+                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_RISE_TIME, ((DateTime)celSunRise.SunRise).Add(tsUTCoffset).ToShortTimeString());
+                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_SET_TIME, ((DateTime)celSunSet.SunSet).Add(tsUTCoffset).ToShortTimeString());
+                GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_CULMINATION_TIME, ((DateTime)celSunRise.SolarNoon).Add(tsUTCoffset).ToShortTimeString());
 
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_SUNSHINE_DURATION, DateTime.MinValue.Add((DateTime)celSunSet.SunSet - (DateTime)celSunRise.SunRise).ToShortTimeString());
 
@@ -1115,8 +1083,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_SUN_ALTITUDE, celUtc.SunAltitude.ToString("0") + "°");
 
                 //Moon
-                DateTime? dtMoonRise = celLocal.MoonRise;
-                DateTime? dtMoonSet = celLocal.MoonSet;
+                DateTime? dtMoonRise = celSunRise.MoonRise;
+                DateTime? dtMoonSet = celSunRise.MoonSet;
                 if (dtMoonSet == null)
                 {
                     //Following day
@@ -1128,8 +1096,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 DateTime dtTemp;
                 if (dtMoonRise != null)
                 {
-                    dtTemp = ((DateTime)dtMoonRise).ToLocalTime();
-                    strText = dtTemp.ToShortTimeString() + (dtTemp.Date != dtLocal.Date ? (" (" + dtTemp.ToShortDateString() + ")") : null);
+                    dtTemp = ((DateTime)dtMoonRise).Add(tsUTCoffset);
+                    strText = dtTemp.ToShortTimeString() + (dtTemp.Date != dtTZ.Date ? (" (" + dtTemp.ToShortDateString() + ")") : null);
                 }
                 else
                     strText = string.Empty;
@@ -1138,12 +1106,12 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                 if (dtMoonSet != null)
                 {
-                    dtTemp = ((DateTime)dtMoonSet).ToLocalTime();
-                    if (dtTemp.Date < dtLocal.Date)
+                    dtTemp = ((DateTime)dtMoonSet).Add(tsUTCoffset);
+                    if (dtTemp.Date < dtTZ.Date)
                     {
-                        dtMoonSet = new CoordinateSharp.Coordinate(loc.Latitude, loc.Longitude, dtLocal.AddDays(1)).CelestialInfo.MoonSet;
+                        dtMoonSet = new CoordinateSharp.Coordinate(loc.Latitude, loc.Longitude, ((DateTime)dtMoonSet).AddDays(1)).CelestialInfo.MoonSet;
                         if (dtMoonSet != null)
-                            dtTemp = ((DateTime)dtMoonSet).ToLocalTime();
+                            dtTemp = ((DateTime)dtMoonSet).Add(tsUTCoffset);
                         else
                         {
                             strText = string.Empty;
@@ -1151,7 +1119,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         }
                     }
 
-                    strText = dtTemp.ToShortTimeString() + (dtTemp.Date != dtLocal.Date ? (" (" + dtTemp.ToShortDateString() + ")") : null);
+                    strText = dtTemp.ToShortTimeString() + (dtTemp.Date != dtTZ.Date ? (" (" + dtTemp.ToShortDateString() + ")") : null);
                 }
                 else
                     strText = string.Empty;
@@ -1163,17 +1131,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 //    (((DateTime)dtMoonRise).AddSeconds(((DateTime)dtMoonSet - (DateTime)dtMoonRise).TotalSeconds / 2)).ToShortTimeString() : string.Empty);
 
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_AZIMUTH, celUtc.MoonAzimuth.ToString("0") + "°");
-                GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_DISTANCE, Utils.UnitHelper.GetDistanceStringFromKiloMeters(set.GUIDistanceUnit, celUtc.MoonDistance.Kilometers));
+                GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_DISTANCE, Utils.UnitHelper.GetDistanceStringFromKiloMeters(loc.GUIUnits.GUIDistanceUnit, celUtc.MoonDistance.Kilometers));
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_DIAMETER, string.Empty);
                 GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_ALTITUDE, celUtc.MoonAltitude.ToString("0") + "°");
 
                 //DayLigh saving
-                if (TimeZoneInfo.Local.SupportsDaylightSavingTime)
+                if (tz.SupportsDaylightSavingTime)
                 {
-                    GUIPropertyManager.SetProperty(_TAG_LOCATION_DAYLIGHT_DESCRIPTION, TimeZoneInfo.Local.DaylightName);
-
-                    System.Globalization.DaylightTime dlt = TimeZone.CurrentTimeZone.GetDaylightChanges(dt.ToLocalTime().Year);
-
+                    GUIPropertyManager.SetProperty(_TAG_LOCATION_DAYLIGHT_DESCRIPTION, tz.DaylightName);
+                    DaylightTime dlt = getDaylightChanges(tz, dtTZ);
                     GUIPropertyManager.SetProperty(_TAG_LOCATION_DAYLIGHT_START, dlt.Start.ToString());
                     GUIPropertyManager.SetProperty(_TAG_LOCATION_DAYLIGHT_END, dlt.End.ToString());
                 }
@@ -1296,9 +1262,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             GUIPropertyManager.SetProperty(_TAG_LOCATION_MOON_ALTITUDE, string.Empty);
         }
 
-        private static void tagsSetCalendar(Database.dbSettings set, Database.dbWeatherLoaction loc, DateTime dt, LocalisationProvider language, List<Database.dbHoliday> holidays)
+        private static void tagsSetCalendar(Database.dbProfile loc, LocalisationProvider language, DateTime dtUtc)
         {
-            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ENABLED, set.GUICalendarEnable ? "1" : string.Empty);
+            TimeSpan tsUTCoffset;
+            DateTime dt = loc.GetLocalTime(dtUtc, out tsUTCoffset);
+
+            List<Database.dbHoliday> holidays = loc.Holidays;
+
+            GUIPropertyManager.SetProperty(_TAG_CALENDAR_ENABLED, loc.GUICalendarEnable ? "1" : string.Empty);
 
             DateTime dtEasterSunday = Utils.Calendar.GetEasterSundayDate(dt);
             DateTime dtTemp;
@@ -1605,30 +1576,41 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         }
         #endregion
 
-        private void setProfile(Database.dbWeatherLoaction loc)
+        private void setProfile(Database.dbProfile loc)
         {
             lock (this._TimerRefreshWeather)
             {
-                //location change
-                this._WeatherLocation = loc;
+                if (this._Profile != null && this._Profile.CommitNeeded)
+                    this._Profile.Commit();
 
-                _Logger.Debug("[setProfile] Location changed to: {0}", this._WeatherLocation.Name);
+                //location change
+                this._Profile = loc;
+
+                _Logger.Debug("[setProfile] Location changed to: {0}", this._Profile.Name);
 
                 //Wetaher refresh
                 this.doWeatherRefresh(true);
+
+                //Calendar
+                tagsSetCalendar(this._Profile, this._Localisation, DateTime.Today.ToUniversalTime());
             }
 
             //Refresh location tags
             this.doLocationRefresh(true);
 
             //Update profile ID
-            this._Settings.ProfileID = (int)this._WeatherLocation.ID;
+            this._Settings.ProfileID = (int)this._Profile.ID;
             this._Settings.CommitNeeded = true;
             this._Settings.Commit();
 
             //Update geoclock if needed
             if (this._ViewMode == ViewMode.GeoClock)
-                this.geoClockRefresh(this._WeatherLocation, true);
+                this.geoClockRefresh(this._Profile, true);
+            else
+                this._GeoClockLastRefresh = DateTime.MinValue;
+
+            //Media
+            this.imagesInit();
         }
 
         private void setViewMode(ViewMode mode)
@@ -1651,15 +1633,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     break;
 
                 case ViewMode.Image:
-                    if (this._GUIfacadeList != null && this._GUIfacadeList.Count == 0)
-                    {
-                        for (int i = 0; i < this._WaeatherImages.Length; i++)
-                        {
-                            GUI.GUIWeatherImage wi = this._WaeatherImages[i];
-                            if (wi != null)
-                                this._GUIfacadeList.Add(wi);
-                        }
-                    }
+                    if (this._GUIfacadeList.Count == 0)
+                        this.reloadFacadeImages();
 
                     //this.imagesRefresh();
                     this._GUIbuttonDisplay.Label =
@@ -1675,9 +1650,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     break;
 
                 case ViewMode.GeoClock:
-                    this.geoClockRefresh(this._WeatherLocation, false);
+                    this.geoClockRefresh(this._Profile, false);
 
-                    if (this._Settings.GUICalendarEnable)
+                    if (this._Profile.GUICalendarEnable)
                     {
                         this._GUIbuttonDisplay.Label = Language.Translation.GetLanguageString(
                                 this._Localisation,
@@ -1744,6 +1719,27 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
         }
 
+        private void reloadFacadeImages()
+        {
+            if (this._GUIfacadeList != null)
+            {
+                if (this._GUIfacadeList.FilmstripLayout != null)
+                    this._GUIfacadeList.FilmstripLayout.Clear();
+                if (this._GUIfacadeList.ListLayout != null)
+                    this._GUIfacadeList.ListLayout.Clear();
+                if (this._GUIfacadeList.ThumbnailLayout != null)
+                    this._GUIfacadeList.ThumbnailLayout.Clear();
+                if (this._GUIfacadeList.CoverFlowLayout != null)
+                    this._GUIfacadeList.CoverFlowLayout.Clear();
+
+                this._GUIWeatherImages.ForEach(wi =>
+                    {
+                        if (wi.Active)
+                            this._GUIfacadeList.Add(wi);
+                    });
+            }
+        }
+
         private void buttonsInit()
         {
             if (this._GUIbuttonDisplay != null)
@@ -1758,7 +1754,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             if (this._GUIbuttonLocation != null)
             {
                 this._GUIbuttonLocation.Label = Language.Translation.GetLanguageString(this._Localisation, (int)Language.TranslationEnum.buttonLocation);
-                this._GUIbuttonLocation.IsEnabled = Database.dbWeatherLoaction.GetAll().Count > 1;
+                this._GUIbuttonLocation.IsEnabled = Database.dbProfile.GetAll().Count > 1;
             }
 
             if (this._GUIbuttonBrowserMap != null)
@@ -1779,14 +1775,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private bool doWeatherRefresh(bool bForce)
         {
-            Database.dbWeatherLoaction loc;
+            Database.dbProfile loc;
             Providers.IWeatherProvider provider;
 
             lock (this._TimerRefreshWeather)
             {
                 while (true)
                 {
-                    loc = this._WeatherLocation;
+                    loc = this._Profile;
                     provider = this._Providers.Find(p => p.Type == loc.Provider);
 
                     if (provider == null)
@@ -1820,13 +1816,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 try
                 {
                     //Get current condition from selected provider
-                    Providers.WeatherData data = provider.GetCurrentWeatherData(loc, _REFRESH_INTERVAL);
+                    Providers.WeatherData data = provider.GetCurrentWeatherData(loc, loc.WeatherRefreshInterval);
 
                     if (data != null)
                     {
                         #region Apply data to tags
 
                         string strText, strCode;
+                        Database.dbGUIUnits units = loc.GUIUnits;
 
                         string strWeatherIconDir = Configuration.Config.GetSubFolder(Config.Dir.Skin, Configuration.Config.SkinName) + "\\Media\\WorldWeather\\Condition\\Default\\high\\";
                         if (!Directory.Exists(strWeatherIconDir))
@@ -1846,16 +1843,16 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                         //Temperature
                         GUIPropertyManager.SetProperty(_TAG_TODAY_TEMPERATURE,
-                            Utils.UnitHelper.GetTemperatureStringFromCelsius(this._Settings.GUITemperatureUnit, data.Temperature));
+                            Utils.UnitHelper.GetTemperatureStringFromCelsius(units.GUITemperatureUnit, data.Temperature));
                         GUIPropertyManager.SetProperty(_TAG_TODAY_TEMPERATURE_FEELSLIKE,
-                            data.TemperatureFeelsLike > int.MinValue ? Utils.UnitHelper.GetTemperatureStringFromCelsius(this._Settings.GUITemperatureUnit, data.TemperatureFeelsLike) : "n/a");
+                            data.TemperatureFeelsLike > int.MinValue ? Utils.UnitHelper.GetTemperatureStringFromCelsius(units.GUITemperatureUnit, data.TemperatureFeelsLike) : "n/a");
 
 
                         //Humidity
                         GUIPropertyManager.SetProperty(_TAG_TODAY_HUMIDITY, data.Humidity >= 0 ? data.Humidity.ToString() + '%' : "n/a");
 
                         //Wind
-                        GUIPropertyManager.SetProperty(_TAG_TODAY_WIND_SPEED, data.Wind >= 0 ? Utils.UnitHelper.GetWindStringFromMeterPerSecond(this._Settings.GUIWindUnit, data.Wind) : "n/a");
+                        GUIPropertyManager.SetProperty(_TAG_TODAY_WIND_SPEED, data.Wind >= 0 ? Utils.UnitHelper.GetWindStringFromMeterPerSecond(units.GUIWindUnit, data.Wind) : "n/a");
 
                         //Wind direction
                         float fWindDir = data.WindDirection;
@@ -1878,7 +1875,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         }
 
                         //Pressure
-                        GUIPropertyManager.SetProperty(_TAG_TODAY_PRESSURE, data.Pressure >= 0 ? Utils.UnitHelper.GetPressureStringFromHPa(this._Settings.GUIPressureUnit, data.Pressure) : string.Empty);
+                        GUIPropertyManager.SetProperty(_TAG_TODAY_PRESSURE, data.Pressure >= 0 ? Utils.UnitHelper.GetPressureStringFromHPa(units.GUIPressureUnit, data.Pressure) : string.Empty);
 
                         //Visibility
                         GUIPropertyManager.SetProperty(_TAG_TODAY_VISIBILITY, data.Visibility >= 0 ? (data.Visibility / 1000).ToString() + " km" : string.Empty);
@@ -1903,14 +1900,14 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         else
                             dDP = data.DewPoint;
                         GUIPropertyManager.SetProperty(_TAG_TODAY_DEWPOINT,
-                            !dDP.Equals(double.NaN) ? Utils.UnitHelper.GetTemperatureStringFromCelsius(this._Settings.GUITemperatureUnit, (int)Math.Round(dDP)) : string.Empty);
+                            !dDP.Equals(double.NaN) ? Utils.UnitHelper.GetTemperatureStringFromCelsius(units.GUITemperatureUnit, (int)Math.Round(dDP)) : string.Empty);
 
                         //UV Index
                         GUIPropertyManager.SetProperty(_TAG_TODAY_UV_INDEX, data.UVIndex > int.MinValue ? data.UVIndex.ToString() : string.Empty);
 
                         //Rain precipitation
                         GUIPropertyManager.SetProperty(_TAG_TODAY_PRECIPITATION,
-                            !data.RainPrecipitation.Equals(float.NaN) ? Utils.UnitHelper.GetPrecipitationStringFromMillimeter(this._Settings.GUIPrecipitationUnit, data.RainPrecipitation) : string.Empty);
+                            !data.RainPrecipitation.Equals(float.NaN) ? Utils.UnitHelper.GetPrecipitationStringFromMillimeter(units.GUIPrecipitationUnit, data.RainPrecipitation) : string.Empty);
 
                         //Forecast
                         for (int i = 0; i < 10; i++)
@@ -1919,11 +1916,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
                             //Temperature MIN
                             GUIPropertyManager.SetProperty(_TAG_PREFFIX + ".ForecastDay" + i + "Low",
-                                day != null ? Utils.UnitHelper.GetTemperatureStringFromCelsius(this._Settings.GUITemperatureUnit, day.TemperatureMin) : string.Empty);
+                                day != null ? Utils.UnitHelper.GetTemperatureStringFromCelsius(units.GUITemperatureUnit, day.TemperatureMin) : string.Empty);
 
                             //Temperature MAX
                             GUIPropertyManager.SetProperty(_TAG_PREFFIX + ".ForecastDay" + i + "High",
-                                day != null ? Utils.UnitHelper.GetTemperatureStringFromCelsius(this._Settings.GUITemperatureUnit, day.TemperatureMax) : string.Empty);
+                                day != null ? Utils.UnitHelper.GetTemperatureStringFromCelsius(units.GUITemperatureUnit, day.TemperatureMax) : string.Empty);
 
                             //Condition
                             if (day != null)
@@ -2022,7 +2019,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 this._LocationIsRefreshing = 1;
             }
 
-            Database.dbWeatherLoaction loc = this._WeatherLocation;
+            Database.dbProfile loc = this._Profile;
             tagSetLocation(loc, DateTime.UtcNow, this._Settings, this._Providers.Find(p => p.Type == loc.Provider));
 
             lock (this._TimerRefreshLocation)
@@ -2040,7 +2037,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 if (bEnable || this._TimerRefreshWeather.Enabled)
                 {
                     //Check next weather refresh time
-                    int iTime = this._WeatherLocation.RefreshLast > DateTime.MinValue ? (int)(DateTime.Now - this._WeatherLocation.RefreshLast).TotalSeconds : _REFRESH_INTERVAL;
+                    int iTime = this._Profile.RefreshLast > DateTime.MinValue ? (int)(DateTime.Now - this._Profile.RefreshLast).TotalSeconds : _REFRESH_INTERVAL;
 
                     if (iTime >= _REFRESH_INTERVAL - 5)
                     {
@@ -2089,12 +2086,13 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             return iCode.ToString();
         }
 
-        private static CoordinateSharp.Coordinate getCoordinate(Database.dbWeatherLoaction loc, DateTime dtUtc, out CoordinateSharp.Celestial celSunRise, out CoordinateSharp.Celestial celSunSet)
+        private static CoordinateSharp.Coordinate getCoordinate(Database.dbProfile loc, DateTime dtUtc, out CoordinateSharp.Celestial celSunRise, out CoordinateSharp.Celestial celSunSet)
         {
             CoordinateSharp.Coordinate coord = new CoordinateSharp.Coordinate(loc.Latitude, loc.Longitude, dtUtc);
-
-            DateTime dtLocalDate = dtUtc.ToLocalTime().Date;
-
+            
+            TimeSpan tsUTCoffset;
+            DateTime dtLocalDate = loc.GetLocalTime(dtUtc, out tsUTCoffset).Date;
+            
             CoordinateSharp.Coordinate coordLocal = dtUtc.Date == dtLocalDate ? coord : new CoordinateSharp.Coordinate(loc.Latitude, loc.Longitude, dtLocalDate);
 
             if (coordLocal.CelestialInfo.SunRise > coordLocal.CelestialInfo.SunSet)
@@ -2110,7 +2108,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                 else
                 {
                     //West
-
                     CoordinateSharp.Coordinate c = new CoordinateSharp.Coordinate(loc.Latitude, loc.Longitude, dtLocalDate.AddDays(1));
 
                     celSunRise = coordLocal.CelestialInfo;
@@ -2127,8 +2124,36 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             return coord;
         }
 
+        private static DaylightTime getDaylightChanges(TimeZoneInfo tz, DateTime dt)
+        {
+            TimeZoneInfo.AdjustmentRule rules = tz.GetAdjustmentRules().FirstOrDefault(rule => rule.DateStart <= dt && rule.DateEnd >= dt);
+            if (rules != null)
+            {
+                DateTime dtStart = getDayLightTransitionDate(rules.DaylightTransitionStart, dt.Year);
+                DateTime dtEnd = getDayLightTransitionDate(rules.DaylightTransitionEnd, dt.Year);
+                return new DaylightTime(dtStart, dtEnd, rules.DaylightDelta);
+            }
+            return null;
+        }
+        private static DateTime getDayLightTransitionDate(TimeZoneInfo.TransitionTime tr, int iYear)
+        {
+            return tr.IsFixedDateRule ? new DateTime(iYear, tr.Month, tr.Day, tr.TimeOfDay.Hour, tr.TimeOfDay.Minute, tr.TimeOfDay.Second)
+                : getDayLightTransitionDateNotFixed(tr, iYear);
+        }
+        private static DateTime getDayLightTransitionDateNotFixed(TimeZoneInfo.TransitionTime tr, int iYear)
+        {
+            Calendar calendar = CultureInfo.CurrentCulture.Calendar;
+            int iStartOfWeek = tr.Week * 7 - 6;
+            int iFirstDayOfWeek = (int)calendar.GetDayOfWeek(new DateTime(iYear, tr.Month, 1));
+            int iChangeDayOfWeek = (int)tr.DayOfWeek;
+            int iTransitionDay = (iFirstDayOfWeek <= iChangeDayOfWeek) ? iStartOfWeek + (iChangeDayOfWeek - iFirstDayOfWeek) : iStartOfWeek + (7 - iFirstDayOfWeek + iChangeDayOfWeek);
+            if (iTransitionDay > calendar.GetDaysInMonth(iYear, tr.Month))
+                iTransitionDay -= 7;
+            return new DateTime(iYear, tr.Month, iTransitionDay, tr.TimeOfDay.Hour, tr.TimeOfDay.Minute, tr.TimeOfDay.Second);
+        }   
+
         #region Dialogs
-        private Database.dbWeatherLoaction dialogShowAddLocation()
+        private Database.dbProfile dialogShowAddLocation()
         {
             VirtualKeyboard keyBoard = (VirtualKeyboard)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_VIRTUAL_KEYBOARD);
 
@@ -2144,7 +2169,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             {
                 string strQuery = keyBoard.Text.Trim();
                 _Logger.Debug("[dialogShowAddLocation] Searching for:  '{0}'", strQuery);
-                List<Database.dbWeatherLoaction> result = new List<Database.dbWeatherLoaction>();
+                List<Database.dbProfile> result = new List<Database.dbProfile>();
 
                 //Search the location by each provider
                 this._Providers.ForEach(prov =>
@@ -2152,7 +2177,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                     try
                     {
                         //Search
-                        result.AddRange(prov.Search(strQuery));
+                        result.AddRange(prov.Search(strQuery, this._Profile.ProviderApiKey));
                     }
                     catch (Exception ex)
                     {
@@ -2172,16 +2197,16 @@ namespace MediaPortal.Plugins.WorldWeatherLite
 
         private void dialogShowLocationSelection()
         {
-            List<Database.dbWeatherLoaction> list = Database.dbWeatherLoaction.GetAll();
+            List<Database.dbProfile> list = Database.dbProfile.GetAll();
             list.Sort((p1, p2)=> ((int)p1.ID).CompareTo((int)p2.ID));
 
-            Database.dbWeatherLoaction loc = this.dialogShowLocationSelection(list, this._WeatherLocation, null, false);
+            Database.dbProfile loc = this.dialogShowLocationSelection(list, this._Profile, null, false);
 
-            if (loc != null && this._WeatherLocation != loc)
+            if (loc != null && this._Profile != loc)
                 this.setProfile(loc);
 
         }
-        private Database.dbWeatherLoaction dialogShowLocationSelection(List<Database.dbWeatherLoaction> list, Database.dbWeatherLoaction preselectedItem, string strLabel, bool bPrintDetail)
+        private Database.dbProfile dialogShowLocationSelection(List<Database.dbProfile> list, Database.dbProfile preselectedItem, string strLabel, bool bPrintDetail)
         {
             GUIDialogMenu dlg = (GUIDialogMenu)GUIWindowManager.GetWindow((int)Window.WINDOW_DIALOG_MENU);
             if (dlg == null)
@@ -2196,7 +2221,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             int iSel = -1;
             for (int i = 0; i < list.Count; i++)
             {
-                Database.dbWeatherLoaction loc = list[i];
+                Database.dbProfile loc = list[i];
                 dlg.Add(bPrintDetail ? string.Format("{1} [{2}][{0}]", loc.Provider, loc.Name, loc.ObservationLocation) : loc.Name);
 
                 if (loc == preselectedItem)
@@ -2222,7 +2247,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             if (dlg != null)
             {
                 dlg.Reset();
-                dlg.SetHeading("World Weather");
+                dlg.SetHeading(PLUGIN_TITLE);
                 dlg.SetText(strMessage);
                 dlg.DoModal(GUIWindowManager.ActiveWindow);
             }
@@ -2288,7 +2313,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite
         }
 
 
-        private bool geoClockRefresh(Database.dbWeatherLoaction loc, bool bForce)
+        private bool geoClockRefresh(Database.dbProfile loc, bool bForce)
         {
             DateTime dtNow = DateTime.Now;
             DateTime dt = new DateTime(dtNow.Year, dtNow.Month, dtNow.Day, dtNow.Hour, dtNow.Minute, 0);
@@ -2339,26 +2364,90 @@ namespace MediaPortal.Plugins.WorldWeatherLite
             }
         }
 
+        
+        private void imagesInit()
+        {
+            _Logger.Debug("[imagesInit] Run...");
+
+            //get media images from current profile
+            List<Database.dbWeatherImage> list = this._Profile.WeatherImages;
+
+            //Stop all current images
+            this._GUIWeatherImages.ForEach(wi =>
+                {
+                    wi.Stop();
+                    wi.OrderId = int.MaxValue;
+                });
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                //Tags
+                string strTag = _TAG_PREFFIX + ".ImageWeather" + i;
+                string strTagDescription = _TAG_PREFFIX + ".ImageWeather" + i + "Description";
+                Database.dbWeatherImage dbImg = list[i];
+                if (dbImg.Enable && !string.IsNullOrWhiteSpace(dbImg.Url))
+                {
+                    //try to get image from existing list
+                    GUI.GUIWeatherImage wi = this._GUIWeatherImages.Find(im => im.WeatherImage == dbImg || im.WeatherImage.Url.Equals(dbImg.Url));
+                    if (wi == null)
+                    {
+                        //new one
+                        wi = new GUI.GUIWeatherImage(
+                            dbImg,
+                            "[" + PLUGIN_NAME + ":MediaPortalWorldWeatherImage" + this._GUIWeatherImageIdCounter++ + "]",
+                            strTag);
+
+                        this._GUIWeatherImages.Add(wi);
+                    }
+
+                    //init & enable
+                    wi.GuiTag = strTag;
+                    wi.OrderId = i;
+                    GUIPropertyManager.SetProperty(strTagDescription, dbImg.Description);
+                    wi.Start();
+
+                    _Logger.Debug("[imagesInit] MediaWeatherImage:{0} '{1}'\r\nUrl: {2}\r\nUrlBck: {3}\r\nUrlOver: {4}\r\nPeriod: {5}\r\nPeriodSafe: {6}\r\nMultiimage: {7}\r\nDate&Time Watermark: {8}\r\n",
+                        wi.Id,
+                        dbImg.Description,
+                        dbImg.Url,
+                        dbImg.UrlBackground,
+                        dbImg.UrlOverlay,
+                        dbImg.Period,
+                        dbImg.PeriodSafe,
+                        dbImg.MultiImage,
+                        dbImg.MultiImageDateImeWatermark);
+                }
+                else
+                    GUIPropertyManager.SetProperty(strTagDescription, string.Empty);
+            }
+
+            //Sort the list
+            this._GUIWeatherImages.Sort((w1,w2) => w1.OrderId.CompareTo(w2.OrderId));
+
+            //reload facade by new set
+            this.reloadFacadeImages();
+
+            //start refreshing
+            this.imagesRefresh();
+
+            _Logger.Debug("[imagesInit] Complete.");
+        }
 
         private void imagesDestroy()
         {
-            for (int i = 0; i < this._WaeatherImages.Length; i++)
-            {
-                if (this._WaeatherImages[i] != null)
-                    this._WaeatherImages[i].Destroy();
-            }
+            this._GUIWeatherImages.ForEach(wi => wi.Terminate());
+            this._GUIWeatherImages.Clear();
         }
 
         private void imagesRefresh()
         {
             DateTime dtNow = DateTime.Now;
 
-            for (int i = 0; i < this._WaeatherImages.Length; i++)
+            this._GUIWeatherImages.ForEach(wi =>
             {
-                GUI.GUIWeatherImage wi = this._WaeatherImages[i];
-                if (wi != null && (dtNow - wi.LastRefresh).TotalMinutes >= wi.WeatherImage.Period)
+                if (wi.Active && (dtNow - wi.LastRefresh).TotalMinutes >= wi.WeatherImage.Period)
                     this._ImageRefreshPool.Add((o, state) => this.imageRefresh((GUI.GUIWeatherImage)o, (Pbk.Net.Http.HttpUserWebRequest)state), wi, wi.Label);
-            }
+            });
         }
 
         private Pbk.Tasks.TaskActionResultEnum imageRefresh(GUI.GUIWeatherImage wi, Pbk.Net.Http.HttpUserWebRequest wr)
@@ -2466,8 +2555,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         //Failed
 
                         //Sometimes the most recent image is not available yet; proceed to the next image(older)
-                        if (++iFailedImages <= 2 && images.Count == 0)
+                        if (++iFailedImages <= 3 && images.Count == 0)
                             goto mi_nxt;
+                        else if (images.Count > 0)
+                            goto mi_finish;
 
                         //Destroy all images
                         images.ForEach(im => im.Dispose());
@@ -2542,6 +2633,8 @@ namespace MediaPortal.Plugins.WorldWeatherLite
                         dt = dt.AddMinutes(wi.WeatherImage.Period * -1);
                     }
 
+
+                mi_finish:
                     //Add aditional time for last frame duration
                     if (durations.Count > 0)
                         durations[durations.Count - 1] += wi.WeatherImage.GUIMediaImageLastFrameAddTime;

@@ -25,13 +25,20 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
         /// <param name="loc">Location</param>
         /// <param name="iRefreshInterval">Refresh interval in seconds</param>
         /// <returns>Weather data</returns>
-        WeatherData GetCurrentWeatherData(Database.dbWeatherLoaction loc, int iRefreshInterval);
+        WeatherData GetCurrentWeatherData(Database.dbProfile loc, int iRefreshInterval);
 
         /// <summary>
         /// Search for locations
         /// </summary>
         /// <param name="strQuery">Name of location to search</param>
+        /// <param name="strApiKey">Provider API key.</param>
         /// <returns>Locations</returns>
-        IEnumerable<Database.dbWeatherLoaction> Search(string strQuery);
+        IEnumerable<Database.dbProfile> Search(string strQuery, string strApiKey);
+
+        /// <summary>
+        /// Validate all informations(id, coordinates) id needed.
+        /// </summary>
+        /// <param name="profile">Profile to validate.</param>
+        void FinalizeLocationData(Database.dbProfile profile);
     }
 }

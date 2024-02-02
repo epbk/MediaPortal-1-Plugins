@@ -11,6 +11,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
     [DBTableAttribute("weatherImage")]
     public class dbWeatherImage : dbTable
     {
+        [Browsable(false)]
+        [DBFieldAttribute(FieldName = "idParent", Default = "0")]
+        public int ParentID
+        { get; set; }
+
         [DBFieldAttribute(FieldName = "enable", Default = "False")]
         [EditorAttribute(typeof(MediaPortal.Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         [Description("The image is processed if checked")]
@@ -23,28 +28,40 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         [Category("Properties")]
         [Description("Just a text attached to the image on the GUI")]
         public string Description
-        { get; set; }
+        {
+            get { return this._Description; }
+            set { this._Description = SanityTextValue(value); }
+        }private string _Description = string.Empty;
 
         [DBFieldAttribute(FieldName = "url", Default = "")]
         [DisplayName("URL")]
         [Description("Main URL image - can be any image supported by MediaPortal including animated gif.\r\nSupported UTC DateTime tags: {yyyy} - year, {MM} - month, {dd} - day in the month, {hh} - hour, {mm} - minute")]
         [Category("URL")]
         public string Url
-        { get; set; }
+        {
+            get { return this._Url; }
+            set { this._Url = SanityTextValue(value); }
+        }private string _Url = string.Empty;
 
         [DBFieldAttribute(FieldName = "urlBackground", Default = "")]
         [DisplayName("URL: Background")]
         [Description("Just another image merged with main image as background")]
         [Category("URL")]
         public string UrlBackground
-        { get; set; }
+        {
+            get { return this._UrlBackground; }
+            set { this._UrlBackground = SanityTextValue(value); }
+        }private string _UrlBackground = string.Empty;
 
         [DisplayName("URL: Overlay")]
         [DBFieldAttribute(FieldName = "urlOverlay", Default = "")]
         [Description("The same as Background but the image is apllied on top of main image")]
         [Category("URL")]
         public string UrlOverlay
-        { get; set; }
+        {
+            get { return this._UrlOverlay; }
+            set { this._UrlOverlay = SanityTextValue(value); }
+        }private string _UrlOverlay = string.Empty;
 
         [DisplayName("Period")]
         [DBFieldAttribute(FieldName = "period", Default = "15")]
@@ -178,10 +195,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         { get; set; }
 
 
-
-        public static List<dbWeatherImage> GetAll()
+        public void CopyTo(dbWeatherImage item)
         {
-            List<dbWeatherImage> list = Manager.Get<dbWeatherImage>(null);
+            foreach (System.Reflection.PropertyInfo pi in this.GetType().GetProperties().Where(f => f.Name != "ParentID" && f.GetCustomAttributes(typeof(DBFieldAttribute), false).Length > 0))
+                pi.SetValue(item, pi.GetValue(this, null), null);
+        }
+
+        public static List<dbWeatherImage> Get(int iIdParent)
+        {
+            List<dbWeatherImage> list = Manager.Get<dbWeatherImage>(new BaseCriteria(DBField.GetFieldByDBName(typeof(dbWeatherImage), "idParent"), "=", iIdParent));
 
             if (list.Count < 11)
             {
@@ -191,37 +213,74 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
                 for (int i = 0; i < 11; i++)
                 {
                     dbWeatherImage img = new dbWeatherImage();
-                    img.CommitNeeded = true;
                     list.Add(img);
                 }
 
-                list[1].Enable = true;
-                list[1].Description = "Satellite";
-                list[1].Url = "https://api.sat24.com/animated/EU/visual/3/";
-                list[1].GUIGifFrameDurationOverride = true;
+                //Copy default values from first profile
+                List<dbWeatherImage> listDefault = Manager.Get<dbWeatherImage>(new BaseCriteria(DBField.GetFieldByDBName(typeof(dbWeatherImage), "idParent"), "=", 1));
+                if (listDefault.Count == list.Count)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                        listDefault[i].CopyTo(list[i]);
+                }
+                else
+                {
+                    InitDefaultWorld(list[0]);
+                    InitDefaultSatellite(list[1]);
+                    InitDefaultInfra(list[2]);
 
-                list[2].Enable = true;
-                list[2].Description = "Infra";
-                list[2].Url = "https://api.sat24.com/animated/EU/infraPolair/3/";
-                list[2].GUIGifFrameDurationOverride = true;
-
-                list[3].Enable = true;
-                list[3].Description = "Rain";
-                list[3].Url = "https://api.sat24.com/animated/EU/rainTMC/3/";
-                list[3].GUIGifFrameDurationOverride = true;
-
-                list[4].Enable = true;
-                list[4].Description = "Rain - CZ";
-                list[4].Url = "https://www.in-pocasi.cz/data/chmi_v2/{yyyy}{MM}{dd}_{hh}{mm}_r.png";
-                list[4].UrlBackground = "https://www.in-pocasi.cz/media/images/content/mapa-radar.png";
-                list[4].MultiImage = true;
-                list[4].Period = 10;
-
-                list.ForEach(o => o.Commit());
+                    dbWeatherImage im = list[3];
+                    im.Enable = true;
+                    im.Description = "Rain - CZ";
+                    im.Url = "https://www.in-pocasi.cz/data/chmi_v2/{yyyy}{MM}{dd}_{hh}{mm}_r.png";
+                    im.UrlBackground = "https://www.in-pocasi.cz/media/images/content/mapa-radar.png";
+                    im.MultiImage = true;
+                    im.Period = 10;
+                }
+                
             }
 
             return list;
         }
+
+        public static void InitDefaultWorld(dbWeatherImage im)
+        {
+            im.Enable = true;
+            im.Description = "World";
+            im.Url = "https://worldweather.wmo.int/cloud/graphic/colorMap-cloud.png";
+            im.UrlBackground = string.Empty;
+            im.UrlOverlay = string.Empty;
+            im.Period = 15;
+            im.MultiImage = false;
+        }
+
+        public static void InitDefaultSatellite(dbWeatherImage im)
+        {
+            im.Enable = true;
+            im.Description = "Satellite";
+            im.Url = "https://imn-api.meteoplaza.com/v4/nowcast/tiles/satellite-europe/{yyyy}{MM}{dd}{hh}{mm}/5/8/14/14/20?outputtype=jpeg";
+            im.UrlBackground = string.Empty;
+            im.UrlOverlay = "https://maptiler.infoplaza.io/api/maps/Border/static/11.22,48.95,4.02/1560x1560.png?attribution=false";
+            im.Period = 15;
+            im.PeriodSafe = 20;
+            im.MultiImage = true;
+            im.MultiImageDateImeWatermark = DateImeWatermarkEnum.UpperLeft;
+        }
+
+        public static void InitDefaultInfra(dbWeatherImage im)
+        {
+            im.Enable = true;
+            im.Description = "Infra";
+            im.Url = "https://imn-api.meteoplaza.com/v4/nowcast/tiles/satellite-europe-infrared/{yyyy}{MM}{dd}{hh}{mm}/5/8/14/14/20?outputtype=jpeg";
+            im.UrlBackground = string.Empty;
+            im.UrlOverlay = "https://maptiler.infoplaza.io/api/maps/Border/static/11.22,48.95,4.02/1560x1560.png?attribution=false";
+            im.Period = 15;
+            im.PeriodSafe = 20;
+            im.MultiImage = true;
+            im.MultiImageDateImeWatermark = DateImeWatermarkEnum.UpperLeft;
+        }
+
+        
 
     }
 }

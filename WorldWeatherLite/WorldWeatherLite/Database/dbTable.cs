@@ -37,5 +37,18 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
             if (DBManager == null) DBManager = Manager;
             base.Delete();
         }
+
+        public static string SanityTextValue(string strValue)
+        {
+            if (!string.IsNullOrWhiteSpace(strValue))
+            {
+                if (strValue[0] == ' ' || strValue[strValue.Length - 1] == ' ')
+                    return strValue.Trim();
+            }
+            else
+                return string.Empty;
+
+            return strValue;
+        }
     }
 }

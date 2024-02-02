@@ -7,6 +7,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
 {
     public abstract class ProviderBase
     {
+        public abstract ProviderTypeEnum Type { get; }
+
+        public abstract string Name { get; }
+
         /// <summary>
         /// Standart MSN translation
         /// </summary>
@@ -117,6 +121,11 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
                 default:
                     return Language.TranslationEnum.unknown;
             }
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }

@@ -10,6 +10,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
     [DBTableAttribute("holiday")]
     public class dbHoliday : dbTable
     {
+        [DBFieldAttribute(FieldName = "idParent", Default = "0")]
+        public int ParentID
+        { get; set; }
+
         [DBFieldAttribute(FieldName = "description", Default = "")]
         public string Description
         { get; set; }
@@ -26,9 +30,16 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
         public Utils.HolidayTypeEnum HolidayType
         { get; set; }
 
-        public static List<dbHoliday> GetAll()
+
+        public void CopyTo(dbHoliday item)
         {
-            List<dbHoliday> list = Manager.Get<dbHoliday>(null);
+            foreach (System.Reflection.PropertyInfo pi in this.GetType().GetProperties().Where(f => f.Name != "ParentID" && f.GetCustomAttributes(typeof(DBFieldAttribute), false).Length > 0))
+                pi.SetValue(item, pi.GetValue(this, null), null);
+        }
+
+        public static List<dbHoliday> Get(int iIdParent)
+        {
+            List<dbHoliday> list = Manager.Get<dbHoliday>(new BaseCriteria(DBField.GetFieldByDBName(typeof(dbHoliday), "idParent"), "=", iIdParent));
 
             if (list.Count < 17)
             {
@@ -48,8 +59,6 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
                     };
 
                     list.Add(db);
-                    db.CommitNeeded = true;
-                    db.Commit();
                 }
 
 
@@ -62,8 +71,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Database
                         };
 
                     list.Add(db);
-                    db.CommitNeeded = true;
-                    db.Commit();
+                }
+
+
+                //Copy default values from first profile
+                List<dbHoliday> listDefault = Manager.Get<dbHoliday>(new BaseCriteria(DBField.GetFieldByDBName(typeof(dbHoliday), "idParent"), "=", 1));
+                if (listDefault.Count == list.Count)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                        listDefault[i].CopyTo(list[i]);
                 }
             }
 

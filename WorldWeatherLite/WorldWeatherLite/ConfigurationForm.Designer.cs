@@ -34,16 +34,20 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConfigurationForm));
             this.textBoxId = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.tabControlMain = new System.Windows.Forms.TabControl();
+            this.tabControlProfile = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.buttonRemoveProfile = new System.Windows.Forms.Button();
-            this.buttonAddProfile = new System.Windows.Forms.Button();
-            this.label20 = new System.Windows.Forms.Label();
-            this.comboBoxProfiles = new System.Windows.Forms.ComboBox();
             this.groupBoxLocation = new System.Windows.Forms.GroupBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.numericUpDownWeatherRefresh = new System.Windows.Forms.NumericUpDown();
+            this.label22 = new System.Windows.Forms.Label();
+            this.textBoxAPIkey = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
             this.numericUpDownLat = new System.Windows.Forms.NumericUpDown();
+            this.comboBoxTimeZone = new System.Windows.Forms.ComboBox();
             this.numericUpDownLong = new System.Windows.Forms.NumericUpDown();
             this.textBoxCountry = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -54,9 +58,6 @@
             this.label5 = new System.Windows.Forms.Label();
             this.comboBoxProvider = new System.Windows.Forms.ComboBox();
             this.groupBoxSearch = new System.Windows.Forms.GroupBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.textBoxSearchQuery = new System.Windows.Forms.TextBox();
-            this.buttonSearch = new System.Windows.Forms.Button();
             this.dataGridViewSearch = new System.Windows.Forms.DataGridView();
             this.ColumnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnLocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -70,6 +71,8 @@
             this.ColumnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.propertyControlMedia = new MediaPortal.Pbk.Controls.PropertyControl();
             this.toolStripMedia = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_MediaMoveDown = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_MediaMoveUp = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonMediaHelp = new System.Windows.Forms.ToolStripButton();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -83,9 +86,7 @@
             this.comboBoxUnitWind = new System.Windows.Forms.ComboBox();
             this.comboBoxUnitPress = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.comboBoxFullScreenOption = new System.Windows.Forms.ComboBox();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabPageCalendar = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
@@ -95,6 +96,8 @@
             this.label15 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.checkBoxCalendarEn = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBoxFullScreenOption = new System.Windows.Forms.ComboBox();
             this.labelVersion = new System.Windows.Forms.Label();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -104,6 +107,14 @@
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOK = new System.Windows.Forms.Button();
+            this.tabControlMain = new System.Windows.Forms.TabControl();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.toolStripProfiles = new System.Windows.Forms.ToolStrip();
+            this.toolStripButtonAddProfile = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRemoveProfile = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripComboBoxProfiles = new System.Windows.Forms.ToolStripComboBox();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
             this.holidayTextBoxChristmasDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBoxAllSaintsDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBoxReformationDay = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
@@ -121,9 +132,13 @@
             this.holidayTextBox1 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBox3 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
             this.holidayTextBox2 = new MediaPortal.Plugins.WorldWeatherLite.UserControls.HolidayTextBox();
-            this.tabControlMain.SuspendLayout();
+            this.toolStripButtonSearch = new System.Windows.Forms.ToolStripButton();
+            this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tabControlProfile.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBoxLocation.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWeatherRefresh)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLat)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLong)).BeginInit();
             this.groupBoxSearch.SuspendLayout();
@@ -137,125 +152,155 @@
             this.toolStripMedia.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.tabPage4.SuspendLayout();
+            this.tabPageCalendar.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.tabControlMain.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.toolStripProfiles.SuspendLayout();
+            this.tabPage6.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxId
             // 
-            this.textBoxId.Location = new System.Drawing.Point(96, 45);
+            this.textBoxId.Location = new System.Drawing.Point(78, 18);
             this.textBoxId.Name = "textBoxId";
-            this.textBoxId.Size = new System.Drawing.Size(169, 20);
+            this.textBoxId.Size = new System.Drawing.Size(283, 20);
             this.textBoxId.TabIndex = 5;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(17, 48);
+            this.label2.Location = new System.Drawing.Point(15, 21);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(21, 13);
             this.label2.TabIndex = 6;
             this.label2.Text = "ID:";
             // 
-            // tabControlMain
+            // tabControlProfile
             // 
-            this.tabControlMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControlMain.Controls.Add(this.tabPage1);
-            this.tabControlMain.Controls.Add(this.tabPage2);
-            this.tabControlMain.Controls.Add(this.tabPage3);
-            this.tabControlMain.Controls.Add(this.tabPage4);
-            this.tabControlMain.Location = new System.Drawing.Point(12, 12);
-            this.tabControlMain.Name = "tabControlMain";
-            this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(765, 516);
-            this.tabControlMain.TabIndex = 7;
-            this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.tabControlMain_SelectedIndexChanged);
+            this.tabControlProfile.Controls.Add(this.tabPage1);
+            this.tabControlProfile.Controls.Add(this.tabPage2);
+            this.tabControlProfile.Controls.Add(this.tabPage3);
+            this.tabControlProfile.Controls.Add(this.tabPageCalendar);
+            this.tabControlProfile.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControlProfile.Location = new System.Drawing.Point(3, 30);
+            this.tabControlProfile.Name = "tabControlProfile";
+            this.tabControlProfile.SelectedIndex = 0;
+            this.tabControlProfile.Size = new System.Drawing.Size(763, 452);
+            this.tabControlProfile.TabIndex = 7;
+            this.tabControlProfile.SelectedIndexChanged += new System.EventHandler(this.tabControlProfile_SelectedIndexChanged);
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.buttonRemoveProfile);
-            this.tabPage1.Controls.Add(this.buttonAddProfile);
-            this.tabPage1.Controls.Add(this.label20);
-            this.tabPage1.Controls.Add(this.comboBoxProfiles);
             this.tabPage1.Controls.Add(this.groupBoxLocation);
             this.tabPage1.Controls.Add(this.groupBoxSearch);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(757, 490);
+            this.tabPage1.Size = new System.Drawing.Size(755, 426);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Provider";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // buttonRemoveProfile
-            // 
-            this.buttonRemoveProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.delete_icon3;
-            this.buttonRemoveProfile.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
-            this.buttonRemoveProfile.Location = new System.Drawing.Point(276, 21);
-            this.buttonRemoveProfile.Name = "buttonRemoveProfile";
-            this.buttonRemoveProfile.Size = new System.Drawing.Size(23, 23);
-            this.buttonRemoveProfile.TabIndex = 24;
-            this.buttonRemoveProfile.UseVisualStyleBackColor = true;
-            this.buttonRemoveProfile.Click += new System.EventHandler(this.buttonRemoveProfile_Click);
-            // 
-            // buttonAddProfile
-            // 
-            this.buttonAddProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Add_dark;
-            this.buttonAddProfile.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
-            this.buttonAddProfile.Location = new System.Drawing.Point(247, 21);
-            this.buttonAddProfile.Name = "buttonAddProfile";
-            this.buttonAddProfile.Size = new System.Drawing.Size(23, 23);
-            this.buttonAddProfile.TabIndex = 23;
-            this.buttonAddProfile.UseVisualStyleBackColor = true;
-            this.buttonAddProfile.Click += new System.EventHandler(this.buttonAddProfile_Click);
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(24, 26);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(39, 13);
-            this.label20.TabIndex = 22;
-            this.label20.Text = "Profile:";
-            // 
-            // comboBoxProfiles
-            // 
-            this.comboBoxProfiles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxProfiles.FormattingEnabled = true;
-            this.comboBoxProfiles.Location = new System.Drawing.Point(69, 23);
-            this.comboBoxProfiles.Name = "comboBoxProfiles";
-            this.comboBoxProfiles.Size = new System.Drawing.Size(170, 21);
-            this.comboBoxProfiles.TabIndex = 21;
-            this.comboBoxProfiles.SelectedIndexChanged += new System.EventHandler(this.comboBoxProfiles_SelectedIndexChanged);
-            // 
             // groupBoxLocation
             // 
+            this.groupBoxLocation.Controls.Add(this.label23);
+            this.groupBoxLocation.Controls.Add(this.label21);
+            this.groupBoxLocation.Controls.Add(this.numericUpDownWeatherRefresh);
             this.groupBoxLocation.Controls.Add(this.numericUpDownLat);
+            this.groupBoxLocation.Controls.Add(this.label22);
+            this.groupBoxLocation.Controls.Add(this.comboBoxTimeZone);
+            this.groupBoxLocation.Controls.Add(this.textBoxAPIkey);
             this.groupBoxLocation.Controls.Add(this.numericUpDownLong);
+            this.groupBoxLocation.Controls.Add(this.label20);
             this.groupBoxLocation.Controls.Add(this.textBoxCountry);
-            this.groupBoxLocation.Controls.Add(this.label8);
+            this.groupBoxLocation.Controls.Add(this.comboBoxProvider);
             this.groupBoxLocation.Controls.Add(this.label4);
+            this.groupBoxLocation.Controls.Add(this.label8);
             this.groupBoxLocation.Controls.Add(this.textBoxId);
             this.groupBoxLocation.Controls.Add(this.label2);
             this.groupBoxLocation.Controls.Add(this.label6);
             this.groupBoxLocation.Controls.Add(this.textBoxLocation);
             this.groupBoxLocation.Controls.Add(this.label3);
             this.groupBoxLocation.Controls.Add(this.label5);
-            this.groupBoxLocation.Controls.Add(this.comboBoxProvider);
-            this.groupBoxLocation.Location = new System.Drawing.Point(18, 50);
+            this.groupBoxLocation.Location = new System.Drawing.Point(18, 12);
             this.groupBoxLocation.Name = "groupBoxLocation";
-            this.groupBoxLocation.Size = new System.Drawing.Size(287, 185);
+            this.groupBoxLocation.Size = new System.Drawing.Size(718, 158);
             this.groupBoxLocation.TabIndex = 8;
             this.groupBoxLocation.TabStop = false;
             this.groupBoxLocation.Text = "Location";
             // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(636, 77);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(43, 13);
+            this.label23.TabIndex = 27;
+            this.label23.Text = "minutes";
+            // 
+            // numericUpDownWeatherRefresh
+            // 
+            this.numericUpDownWeatherRefresh.Location = new System.Drawing.Point(536, 71);
+            this.numericUpDownWeatherRefresh.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.numericUpDownWeatherRefresh.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDownWeatherRefresh.Name = "numericUpDownWeatherRefresh";
+            this.numericUpDownWeatherRefresh.Size = new System.Drawing.Size(92, 20);
+            this.numericUpDownWeatherRefresh.TabIndex = 26;
+            this.numericUpDownWeatherRefresh.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(401, 75);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(123, 13);
+            this.label22.TabIndex = 25;
+            this.label22.Text = "Weather refresh interval:";
+            // 
+            // textBoxAPIkey
+            // 
+            this.textBoxAPIkey.Location = new System.Drawing.Point(456, 45);
+            this.textBoxAPIkey.Name = "textBoxAPIkey";
+            this.textBoxAPIkey.Size = new System.Drawing.Size(246, 20);
+            this.textBoxAPIkey.TabIndex = 23;
+            this.textBoxAPIkey.TextChanged += new System.EventHandler(this.textBoxAPIkey_TextChanged);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(401, 48);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(48, 13);
+            this.label20.TabIndex = 24;
+            this.label20.Text = "API Key:";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(15, 127);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(59, 13);
+            this.label21.TabIndex = 22;
+            this.label21.Text = "Time zone:";
+            // 
             // numericUpDownLat
             // 
             this.numericUpDownLat.DecimalPlaces = 5;
-            this.numericUpDownLat.Location = new System.Drawing.Point(96, 155);
+            this.numericUpDownLat.Location = new System.Drawing.Point(267, 96);
             this.numericUpDownLat.Maximum = new decimal(new int[] {
             90,
             0,
@@ -267,13 +312,24 @@
             0,
             -2147483648});
             this.numericUpDownLat.Name = "numericUpDownLat";
-            this.numericUpDownLat.Size = new System.Drawing.Size(169, 20);
+            this.numericUpDownLat.Size = new System.Drawing.Size(92, 20);
             this.numericUpDownLat.TabIndex = 21;
+            // 
+            // comboBoxTimeZone
+            // 
+            this.comboBoxTimeZone.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTimeZone.FormattingEnabled = true;
+            this.comboBoxTimeZone.Location = new System.Drawing.Point(79, 123);
+            this.comboBoxTimeZone.Name = "comboBoxTimeZone";
+            this.comboBoxTimeZone.Size = new System.Drawing.Size(623, 21);
+            this.comboBoxTimeZone.TabIndex = 22;
             // 
             // numericUpDownLong
             // 
             this.numericUpDownLong.DecimalPlaces = 5;
-            this.numericUpDownLong.Location = new System.Drawing.Point(96, 131);
+            this.numericUpDownLong.Location = new System.Drawing.Point(78, 96);
             this.numericUpDownLong.Maximum = new decimal(new int[] {
             180,
             0,
@@ -285,20 +341,20 @@
             0,
             -2147483648});
             this.numericUpDownLong.Name = "numericUpDownLong";
-            this.numericUpDownLong.Size = new System.Drawing.Size(169, 20);
+            this.numericUpDownLong.Size = new System.Drawing.Size(92, 20);
             this.numericUpDownLong.TabIndex = 20;
             // 
             // textBoxCountry
             // 
-            this.textBoxCountry.Location = new System.Drawing.Point(96, 92);
+            this.textBoxCountry.Location = new System.Drawing.Point(78, 70);
             this.textBoxCountry.Name = "textBoxCountry";
-            this.textBoxCountry.Size = new System.Drawing.Size(169, 20);
+            this.textBoxCountry.Size = new System.Drawing.Size(283, 20);
             this.textBoxCountry.TabIndex = 18;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(17, 95);
+            this.label8.Location = new System.Drawing.Point(15, 72);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(46, 13);
             this.label8.TabIndex = 19;
@@ -307,7 +363,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 23);
+            this.label4.Location = new System.Drawing.Point(401, 21);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(49, 13);
             this.label4.TabIndex = 11;
@@ -316,7 +372,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(17, 159);
+            this.label6.Location = new System.Drawing.Point(215, 99);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(48, 13);
             this.label6.TabIndex = 17;
@@ -324,16 +380,16 @@
             // 
             // textBoxLocation
             // 
-            this.textBoxLocation.Location = new System.Drawing.Point(96, 69);
+            this.textBoxLocation.Location = new System.Drawing.Point(78, 44);
             this.textBoxLocation.Name = "textBoxLocation";
-            this.textBoxLocation.Size = new System.Drawing.Size(169, 20);
+            this.textBoxLocation.Size = new System.Drawing.Size(283, 20);
             this.textBoxLocation.TabIndex = 8;
             this.textBoxLocation.TextChanged += new System.EventHandler(this.textBoxLocation_TextChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(17, 72);
+            this.label3.Location = new System.Drawing.Point(15, 47);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 13);
             this.label3.TabIndex = 9;
@@ -342,7 +398,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(17, 133);
+            this.label5.Location = new System.Drawing.Point(16, 98);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(57, 13);
             this.label5.TabIndex = 15;
@@ -352,9 +408,9 @@
             // 
             this.comboBoxProvider.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxProvider.FormattingEnabled = true;
-            this.comboBoxProvider.Location = new System.Drawing.Point(96, 20);
+            this.comboBoxProvider.Location = new System.Drawing.Point(456, 18);
             this.comboBoxProvider.Name = "comboBoxProvider";
-            this.comboBoxProvider.Size = new System.Drawing.Size(169, 21);
+            this.comboBoxProvider.Size = new System.Drawing.Size(246, 21);
             this.comboBoxProvider.TabIndex = 10;
             this.comboBoxProvider.SelectedIndexChanged += new System.EventHandler(this.comboBoxProvider_SelectedIndexChanged);
             // 
@@ -363,43 +419,13 @@
             this.groupBoxSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxSearch.Controls.Add(this.label7);
-            this.groupBoxSearch.Controls.Add(this.textBoxSearchQuery);
-            this.groupBoxSearch.Controls.Add(this.buttonSearch);
             this.groupBoxSearch.Controls.Add(this.dataGridViewSearch);
-            this.groupBoxSearch.Location = new System.Drawing.Point(18, 252);
+            this.groupBoxSearch.Location = new System.Drawing.Point(18, 176);
             this.groupBoxSearch.Name = "groupBoxSearch";
-            this.groupBoxSearch.Size = new System.Drawing.Size(720, 232);
+            this.groupBoxSearch.Size = new System.Drawing.Size(718, 244);
             this.groupBoxSearch.TabIndex = 20;
             this.groupBoxSearch.TabStop = false;
-            this.groupBoxSearch.Text = "Location search";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(22, 30);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(122, 13);
-            this.label7.TabIndex = 19;
-            this.label7.Text = "Enter location to search:";
-            // 
-            // textBoxSearchQuery
-            // 
-            this.textBoxSearchQuery.Location = new System.Drawing.Point(150, 25);
-            this.textBoxSearchQuery.Name = "textBoxSearchQuery";
-            this.textBoxSearchQuery.Size = new System.Drawing.Size(182, 20);
-            this.textBoxSearchQuery.TabIndex = 12;
-            this.textBoxSearchQuery.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxSearchQuery_KeyPress);
-            // 
-            // buttonSearch
-            // 
-            this.buttonSearch.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Search;
-            this.buttonSearch.Location = new System.Drawing.Point(338, 24);
-            this.buttonSearch.Name = "buttonSearch";
-            this.buttonSearch.Size = new System.Drawing.Size(23, 23);
-            this.buttonSearch.TabIndex = 13;
-            this.buttonSearch.UseVisualStyleBackColor = true;
-            this.buttonSearch.Click += new System.EventHandler(this.buttonSearch_Click);
+            this.groupBoxSearch.Text = "Location search result";
             // 
             // dataGridViewSearch
             // 
@@ -431,7 +457,7 @@
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridViewSearch.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dataGridViewSearch.Location = new System.Drawing.Point(15, 57);
+            this.dataGridViewSearch.Location = new System.Drawing.Point(15, 19);
             this.dataGridViewSearch.MultiSelect = false;
             this.dataGridViewSearch.Name = "dataGridViewSearch";
             this.dataGridViewSearch.ReadOnly = true;
@@ -445,7 +471,7 @@
             this.dataGridViewSearch.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewSearch.RowHeadersVisible = false;
             this.dataGridViewSearch.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewSearch.Size = new System.Drawing.Size(689, 156);
+            this.dataGridViewSearch.Size = new System.Drawing.Size(687, 206);
             this.dataGridViewSearch.TabIndex = 7;
             this.dataGridViewSearch.SelectionChanged += new System.EventHandler(this.dataGridViewSearch_SelectionChanged);
             // 
@@ -481,7 +507,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(757, 490);
+            this.tabPage2.Size = new System.Drawing.Size(755, 426);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Media";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -501,8 +527,8 @@
             // splitContainerMedia.Panel2
             // 
             this.splitContainerMedia.Panel2.Controls.Add(this.propertyControlMedia);
-            this.splitContainerMedia.Size = new System.Drawing.Size(751, 402);
-            this.splitContainerMedia.SplitterDistance = 195;
+            this.splitContainerMedia.Size = new System.Drawing.Size(749, 367);
+            this.splitContainerMedia.SplitterDistance = 193;
             this.splitContainerMedia.TabIndex = 4;
             // 
             // dataGridViewMedia
@@ -544,7 +570,7 @@
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewMedia.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewMedia.RowHeadersVisible = false;
-            this.dataGridViewMedia.Size = new System.Drawing.Size(195, 402);
+            this.dataGridViewMedia.Size = new System.Drawing.Size(193, 367);
             this.dataGridViewMedia.TabIndex = 3;
             this.dataGridViewMedia.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewMedia_CellValueChanged);
             this.dataGridViewMedia.CurrentCellDirtyStateChanged += new System.EventHandler(this.dataGridViewMedia_CurrentCellDirtyStateChanged);
@@ -582,7 +608,7 @@
             this.propertyControlMedia.Name = "propertyControlMedia";
             this.propertyControlMedia.PropertySort = System.Windows.Forms.PropertySort.CategorizedAlphabetical;
             this.propertyControlMedia.SelectedObject = null;
-            this.propertyControlMedia.Size = new System.Drawing.Size(552, 402);
+            this.propertyControlMedia.Size = new System.Drawing.Size(552, 367);
             this.propertyControlMedia.TabIndex = 0;
             this.propertyControlMedia.ToolbarVisible = false;
             this.propertyControlMedia.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyControlMedia_PropertyValueChanged);
@@ -590,12 +616,36 @@
             // toolStripMedia
             // 
             this.toolStripMedia.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_MediaMoveDown,
+            this.toolStripButton_MediaMoveUp,
             this.toolStripButtonMediaHelp});
             this.toolStripMedia.Location = new System.Drawing.Point(3, 3);
             this.toolStripMedia.Name = "toolStripMedia";
-            this.toolStripMedia.Size = new System.Drawing.Size(751, 25);
+            this.toolStripMedia.Size = new System.Drawing.Size(749, 25);
             this.toolStripMedia.TabIndex = 2;
             this.toolStripMedia.Text = "toolStrip1";
+            // 
+            // toolStripButton_MediaMoveDown
+            // 
+            this.toolStripButton_MediaMoveDown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_MediaMoveDown.Enabled = false;
+            this.toolStripButton_MediaMoveDown.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_MediaMoveDown.Image")));
+            this.toolStripButton_MediaMoveDown.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_MediaMoveDown.Name = "toolStripButton_MediaMoveDown";
+            this.toolStripButton_MediaMoveDown.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_MediaMoveDown.Text = "Move Down";
+            this.toolStripButton_MediaMoveDown.Click += new System.EventHandler(this.toolStripButton_MediaMoveDown_Click);
+            // 
+            // toolStripButton_MediaMoveUp
+            // 
+            this.toolStripButton_MediaMoveUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_MediaMoveUp.Enabled = false;
+            this.toolStripButton_MediaMoveUp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_MediaMoveUp.Image")));
+            this.toolStripButton_MediaMoveUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_MediaMoveUp.Name = "toolStripButton_MediaMoveUp";
+            this.toolStripButton_MediaMoveUp.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_MediaMoveUp.Text = "Move Up";
+            this.toolStripButton_MediaMoveUp.Click += new System.EventHandler(this.toolStripButton_MediaMoveUp_Click);
             // 
             // toolStripButtonMediaHelp
             // 
@@ -612,12 +662,10 @@
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.groupBox1);
-            this.tabPage3.Controls.Add(this.label1);
-            this.tabPage3.Controls.Add(this.comboBoxFullScreenOption);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(757, 490);
+            this.tabPage3.Size = new System.Drawing.Size(755, 426);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "GUI";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -634,7 +682,7 @@
             this.groupBox1.Controls.Add(this.comboBoxUnitWind);
             this.groupBox1.Controls.Add(this.comboBoxUnitPress);
             this.groupBox1.Controls.Add(this.label10);
-            this.groupBox1.Location = new System.Drawing.Point(27, 59);
+            this.groupBox1.Location = new System.Drawing.Point(6, 6);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(380, 181);
             this.groupBox1.TabIndex = 20;
@@ -731,36 +779,18 @@
             this.label10.TabIndex = 23;
             this.label10.Text = "Wind";
             // 
-            // label1
+            // tabPageCalendar
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(24, 24);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(175, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Weather refresh in Fullscreen Video";
-            // 
-            // comboBoxFullScreenOption
-            // 
-            this.comboBoxFullScreenOption.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxFullScreenOption.FormattingEnabled = true;
-            this.comboBoxFullScreenOption.Location = new System.Drawing.Point(209, 18);
-            this.comboBoxFullScreenOption.Name = "comboBoxFullScreenOption";
-            this.comboBoxFullScreenOption.Size = new System.Drawing.Size(198, 21);
-            this.comboBoxFullScreenOption.TabIndex = 3;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Controls.Add(this.groupBox3);
-            this.tabPage4.Controls.Add(this.groupBox2);
-            this.tabPage4.Controls.Add(this.checkBoxCalendarEn);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(757, 490);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Calendar";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.tabPageCalendar.Controls.Add(this.groupBox3);
+            this.tabPageCalendar.Controls.Add(this.groupBox2);
+            this.tabPageCalendar.Controls.Add(this.checkBoxCalendarEn);
+            this.tabPageCalendar.Location = new System.Drawing.Point(4, 22);
+            this.tabPageCalendar.Name = "tabPageCalendar";
+            this.tabPageCalendar.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageCalendar.Size = new System.Drawing.Size(755, 426);
+            this.tabPageCalendar.TabIndex = 3;
+            this.tabPageCalendar.Text = "Calendar";
+            this.tabPageCalendar.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
@@ -867,6 +897,24 @@
             this.checkBoxCalendarEn.Text = "Show holiday and season calendar";
             this.checkBoxCalendarEn.UseVisualStyleBackColor = true;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(16, 28);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(175, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Weather refresh in Fullscreen Video";
+            // 
+            // comboBoxFullScreenOption
+            // 
+            this.comboBoxFullScreenOption.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxFullScreenOption.FormattingEnabled = true;
+            this.comboBoxFullScreenOption.Location = new System.Drawing.Point(201, 22);
+            this.comboBoxFullScreenOption.Name = "comboBoxFullScreenOption";
+            this.comboBoxFullScreenOption.Size = new System.Drawing.Size(198, 21);
+            this.comboBoxFullScreenOption.TabIndex = 3;
+            // 
             // labelVersion
             // 
             this.labelVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -941,6 +989,91 @@
             this.buttonOK.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
+            // 
+            // tabControlMain
+            // 
+            this.tabControlMain.Controls.Add(this.tabPage5);
+            this.tabControlMain.Controls.Add(this.tabPage6);
+            this.tabControlMain.Location = new System.Drawing.Point(3, 12);
+            this.tabControlMain.Name = "tabControlMain";
+            this.tabControlMain.SelectedIndex = 0;
+            this.tabControlMain.Size = new System.Drawing.Size(777, 511);
+            this.tabControlMain.TabIndex = 25;
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.tabControlProfile);
+            this.tabPage5.Controls.Add(this.toolStripProfiles);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(769, 485);
+            this.tabPage5.TabIndex = 0;
+            this.tabPage5.Text = "Profiles";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // toolStripProfiles
+            // 
+            this.toolStripProfiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButtonAddProfile,
+            this.toolStripButtonRemoveProfile,
+            this.toolStripSeparator1,
+            this.toolStripComboBoxProfiles,
+            this.toolStripButtonSearch,
+            this.toolStripTextBoxSearch,
+            this.toolStripLabel1});
+            this.toolStripProfiles.Location = new System.Drawing.Point(3, 3);
+            this.toolStripProfiles.Name = "toolStripProfiles";
+            this.toolStripProfiles.Size = new System.Drawing.Size(763, 27);
+            this.toolStripProfiles.TabIndex = 0;
+            this.toolStripProfiles.Text = "toolStrip1";
+            // 
+            // toolStripButtonAddProfile
+            // 
+            this.toolStripButtonAddProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonAddProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Add_dark;
+            this.toolStripButtonAddProfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonAddProfile.Name = "toolStripButtonAddProfile";
+            this.toolStripButtonAddProfile.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonAddProfile.Text = "Add new profile";
+            this.toolStripButtonAddProfile.ToolTipText = "Add new profile";
+            this.toolStripButtonAddProfile.Click += new System.EventHandler(this.toolStripButtonAddProfile_Click);
+            // 
+            // toolStripButtonRemoveProfile
+            // 
+            this.toolStripButtonRemoveProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonRemoveProfile.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.delete_icon3;
+            this.toolStripButtonRemoveProfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRemoveProfile.Name = "toolStripButtonRemoveProfile";
+            this.toolStripButtonRemoveProfile.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonRemoveProfile.Text = "Remove profile";
+            this.toolStripButtonRemoveProfile.Click += new System.EventHandler(this.toolStripButtonRemoveProfile_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            // 
+            // toolStripComboBoxProfiles
+            // 
+            this.toolStripComboBoxProfiles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.toolStripComboBoxProfiles.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.toolStripComboBoxProfiles.Name = "toolStripComboBoxProfiles";
+            this.toolStripComboBoxProfiles.Size = new System.Drawing.Size(200, 27);
+            this.toolStripComboBoxProfiles.ToolTipText = "Profiles";
+            this.toolStripComboBoxProfiles.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxProfiles_SelectedIndexChanged);
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.label1);
+            this.tabPage6.Controls.Add(this.comboBoxFullScreenOption);
+            this.tabPage6.Location = new System.Drawing.Point(4, 22);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage6.Size = new System.Drawing.Size(769, 485);
+            this.tabPage6.TabIndex = 1;
+            this.tabPage6.Text = "Settings";
+            this.tabPage6.UseVisualStyleBackColor = true;
             // 
             // holidayTextBoxChristmasDay
             // 
@@ -1061,13 +1194,39 @@
             this.holidayTextBox2.Size = new System.Drawing.Size(298, 20);
             this.holidayTextBox2.TabIndex = 3;
             // 
+            // toolStripButtonSearch
+            // 
+            this.toolStripButtonSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButtonSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonSearch.Image = global::MediaPortal.Plugins.WorldWeatherLite.Properties.Resources.Search;
+            this.toolStripButtonSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSearch.Name = "toolStripButtonSearch";
+            this.toolStripButtonSearch.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonSearch.Text = "Search";
+            this.toolStripButtonSearch.Click += new System.EventHandler(this.toolStripButtonSearch_Click);
+            // 
+            // toolStripTextBoxSearch
+            // 
+            this.toolStripTextBoxSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
+            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(200, 27);
+            this.toolStripTextBoxSearch.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.toolStripTextBoxSearch_KeyPress);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(132, 24);
+            this.toolStripLabel1.Text = "Location to search:";
+            // 
             // ConfigurationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(792, 581);
-            this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.tabControlMain);
+            this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
             this.MaximumSize = new System.Drawing.Size(1000, 800);
@@ -1077,15 +1236,14 @@
             this.Text = "Configuration";
             this.Load += new System.EventHandler(this.ConfigurationForm_Load);
             this.Shown += new System.EventHandler(this.ConfigurationForm_Shown);
-            this.tabControlMain.ResumeLayout(false);
+            this.tabControlProfile.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.groupBoxLocation.ResumeLayout(false);
             this.groupBoxLocation.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWeatherRefresh)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLat)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLong)).EndInit();
             this.groupBoxSearch.ResumeLayout(false);
-            this.groupBoxSearch.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSearch)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
@@ -1097,15 +1255,21 @@
             this.toolStripMedia.ResumeLayout(false);
             this.toolStripMedia.PerformLayout();
             this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
+            this.tabPageCalendar.ResumeLayout(false);
+            this.tabPageCalendar.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.tabControlMain.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
+            this.toolStripProfiles.ResumeLayout(false);
+            this.toolStripProfiles.PerformLayout();
+            this.tabPage6.ResumeLayout(false);
+            this.tabPage6.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1117,12 +1281,10 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.TextBox textBoxId;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TabControl tabControlMain;
+        private System.Windows.Forms.TabControl tabControlProfile;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.DataGridView dataGridViewSearch;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Button buttonSearch;
-        private System.Windows.Forms.TextBox textBoxSearchQuery;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBoxProvider;
         private System.Windows.Forms.Label label3;
@@ -1134,7 +1296,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.GroupBox groupBoxSearch;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBoxLocation;
         private System.Windows.Forms.TextBox textBoxCountry;
         private System.Windows.Forms.Label label8;
@@ -1164,12 +1325,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
-        private System.Windows.Forms.NumericUpDown numericUpDownLat;
-        private System.Windows.Forms.NumericUpDown numericUpDownLong;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnIndex;
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColumnEnable;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnDescription;
-        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TabPage tabPageCalendar;
         private System.Windows.Forms.CheckBox checkBoxCalendarEn;
         private UserControls.HolidayTextBox holidayTextBox0;
         private UserControls.HolidayTextBox holidayTextBox4;
@@ -1196,9 +1355,27 @@
         private UserControls.HolidayTextBox holidayTextBoxWhitSunday;
         private UserControls.HolidayTextBox holidayTextBoxAscensionDay;
         private UserControls.HolidayTextBox holidayTextBoxChristmasDay;
-        private System.Windows.Forms.ComboBox comboBoxProfiles;
-        private System.Windows.Forms.Button buttonAddProfile;
+        private System.Windows.Forms.ComboBox comboBoxTimeZone;
+        private System.Windows.Forms.TabControl tabControlMain;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.ToolStrip toolStripProfiles;
+        private System.Windows.Forms.ToolStripComboBox toolStripComboBoxProfiles;
+        private System.Windows.Forms.ToolStripButton toolStripButtonAddProfile;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRemoveProfile;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_MediaMoveDown;
+        private System.Windows.Forms.ToolStripButton toolStripButton_MediaMoveUp;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.NumericUpDown numericUpDownWeatherRefresh;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.TextBox textBoxAPIkey;
         private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.Button buttonRemoveProfile;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.NumericUpDown numericUpDownLat;
+        private System.Windows.Forms.NumericUpDown numericUpDownLong;
+        private System.Windows.Forms.ToolStripButton toolStripButtonSearch;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
     }
 }

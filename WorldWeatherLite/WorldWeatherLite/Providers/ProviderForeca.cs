@@ -38,15 +38,15 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
 
         private static NLog.Logger _Logger = LogManager.GetCurrentClassLogger();
 
-        public ProviderTypeEnum Type
+        public override ProviderTypeEnum Type
         { get { return ProviderTypeEnum.FORECA; } }
 
-        public string Name
+        public override string Name
         {
             get { return "Foreca"; }
         }
 
-        public WeatherData GetCurrentWeatherData(Database.dbWeatherLoaction loc, int iRefreshInterval)
+        public WeatherData GetCurrentWeatherData(Database.dbProfile loc, int iRefreshInterval)
         {
             if (loc == null || string.IsNullOrWhiteSpace(loc.LocationID))
                 return null;
@@ -169,7 +169,7 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
             return null;
         }
 
-        public IEnumerable<Database.dbWeatherLoaction> Search(string strQuery)
+        public IEnumerable<Database.dbProfile> Search(string strQuery, string strApiKey)
         {
             if (string.IsNullOrWhiteSpace(strQuery))
                 yield break; ;
@@ -178,10 +178,10 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
             JToken j = MediaPortal.Pbk.Net.Http.HttpUserWebRequest.Download<JToken>(strUrl, iResponseTimout: 30000);
             if (j != null)
             {
-                Database.dbWeatherLoaction location;
+                Database.dbProfile location;
                 foreach (JToken jItem in j["results"])
                 {
-                    location = new Database.dbWeatherLoaction()
+                    location = new Database.dbProfile()
                     {
                         LocationID = jItem["id"].ToString(),
                         ObservationLocation = jItem["countryName"].ToString(),
@@ -196,6 +196,9 @@ namespace MediaPortal.Plugins.WorldWeatherLite.Providers
                 }
             }
         }
+
+        public void FinalizeLocationData(Database.dbProfile profile)
+        { }
 
 
         private static uint parseConditionSymbol(string strSymbol)
