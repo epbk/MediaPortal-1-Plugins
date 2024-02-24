@@ -205,7 +205,8 @@ namespace MediaPortal.Pbk.Net.Http
             private Stream _StreamSource;
 
             public ulong ID;
-            public string Autority { get { return this._Autority; } }private string _Autority = null;
+            public string Autority { get { return this._Autority; } }
+            private string _Autority = null;
 
             public TcpClient Client;
 
@@ -230,7 +231,8 @@ namespace MediaPortal.Pbk.Net.Http
                             this._State = StateEnum.InUse;
                     }
                 }
-            }private StateEnum _State = StateEnum.Unknown;
+            }
+            private StateEnum _State = StateEnum.Unknown;
 
             public int CloseTimeout = -1; //[s]
 
@@ -240,7 +242,8 @@ namespace MediaPortal.Pbk.Net.Http
 
             public string Proxy;
 
-            public string Scheme { get { return this._Scheme; } }private string _Scheme = null;
+            public string Scheme { get { return this._Scheme; } }
+            private string _Scheme = null;
 
             public bool Connected
             {
@@ -414,7 +417,8 @@ namespace MediaPortal.Pbk.Net.Http
 
                     this._Ep = value;
                 }
-            }private IPEndPoint _Ep;
+            }
+            private IPEndPoint _Ep;
             public List<Connection> Connections = new List<Connection>();
             public int ConnectionSlotsInUse = 0;
             public List<ulong> AssignedTokens = new List<ulong>();
@@ -424,7 +428,8 @@ namespace MediaPortal.Pbk.Net.Http
                 {
                     return this._IsIpLocal;
                 }
-            }private bool _IsIpLocal = false;
+            }
+            private bool _IsIpLocal = false;
 
 
         }
@@ -1008,7 +1013,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._GetResponseResult;
             }
-        }private GetResponseResultEnum _GetResponseResult;
+        }
+        private GetResponseResultEnum _GetResponseResult;
 
         public string Url
         {
@@ -1024,20 +1030,23 @@ namespace MediaPortal.Pbk.Net.Http
 
                 this.init(value);
             }
-        }private string _ServerUrl;
+        }
+        private string _ServerUrl;
 
         public Uri Uri
         {
-            get 
+            get
             {
-                return this._ServerUri; 
+                return this._ServerUri;
             }
-        }private Uri _ServerUri;
+        }
+        private Uri _ServerUri;
 
         public string ServerUrlRedirect
         {
             get { return this._ServerUrlRedirect; }
-        }private string _ServerUrlRedirect;
+        }
+        private string _ServerUrlRedirect;
 
         public object Tag;
 
@@ -1055,7 +1064,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._HttpResponseVersion;
             }
-        }private double _HttpResponseVersion;
+        }
+        private double _HttpResponseVersion;
 
         public long ContentLength
         {
@@ -1063,7 +1073,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._ContentLength;
             }
-        }private long _ContentLength;
+        }
+        private long _ContentLength;
 
         public string ContentFilename
         {
@@ -1071,7 +1082,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._ContentFilename;
             }
-        }private string _ContentFilename;
+        }
+        private string _ContentFilename;
 
         public long ResponseBytesReceived
         {
@@ -1079,7 +1091,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._ResponseBytesReceived;
             }
-        }private long _ResponseBytesReceived;
+        }
+        private long _ResponseBytesReceived;
 
         public long FilestreamPosition
         {
@@ -1087,7 +1100,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._FileStreamPosition;
             }
-        }private long _FileStreamPosition;
+        }
+        private long _FileStreamPosition;
 
         public bool FileStreamInitComplete
         {
@@ -1095,12 +1109,14 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._FileStreamInitComplete;
             }
-        }private bool _FileStreamInitComplete;
-        
+        }
+        private bool _FileStreamInitComplete;
+
         public long FileOffset
         {
             get { return this._FileOffset; }
-        } private long _FileOffset;
+        }
+        private long _FileOffset;
 
         public bool AllowKeepAlive = true;
 
@@ -1121,7 +1137,8 @@ namespace MediaPortal.Pbk.Net.Http
                     this._ConnectionKeepAliveTimeout = value;
 
             }
-        }private int _ConnectionKeepAliveTimeout;
+        }
+        private int _ConnectionKeepAliveTimeout;
 
         /// <summary>
         /// Enable or disable cookies when sending http request
@@ -1147,7 +1164,8 @@ namespace MediaPortal.Pbk.Net.Http
                     this._RedirectMaxCount = value;
             }
 
-        }private int _RedirectMaxCount;
+        }
+        private int _RedirectMaxCount;
 
         public int ConnectTimeout
         {
@@ -1165,7 +1183,8 @@ namespace MediaPortal.Pbk.Net.Http
                     this._ConnectTimeout = value;
             }
 
-        }private int _ConnectTimeout = _CONNECT_TIMEOUT_DEFAULT;
+        }
+        private int _ConnectTimeout = _CONNECT_TIMEOUT_DEFAULT;
         public int ResponseTimeout
         {
             get
@@ -1182,7 +1201,8 @@ namespace MediaPortal.Pbk.Net.Http
                     this._ResponseTimeout = value;
             }
 
-        }private int _ResponseTimeout = _RESPONSE_TIMEOUT_DEFAULT;
+        }
+        private int _ResponseTimeout = _RESPONSE_TIMEOUT_DEFAULT;
 
         /// <summary>
         /// Data to be send as POST content.
@@ -1210,23 +1230,27 @@ namespace MediaPortal.Pbk.Net.Http
                 _AllowSystemProxyDefault = value;
                 _Logger.Debug("[AllowSystemProxyDefault] " + value);
             }
-        }private static bool _AllowSystemProxyDefault = true;
+        }
+        private static bool _AllowSystemProxyDefault = true;
 
         public NameValueCollection HttpRequestFields;
         public Dictionary<string, string> HttpResponseFields
         {
             get { return this._HttpResponseFields; }
-        }private Dictionary<string, string> _HttpResponseFields;
+        }
+        private Dictionary<string, string> _HttpResponseFields;
 
         public HttpStatusCode HttpResponseCode
         {
             get { return this._HttpResponseCode; }
-        }private HttpStatusCode _HttpResponseCode;
+        }
+        private HttpStatusCode _HttpResponseCode;
 
         public ChunkedStream StreamChunked
         {
             get { return this._StreamChunked; }
-        }private ChunkedStream _StreamChunked = null;
+        }
+        private ChunkedStream _StreamChunked = null;
 
         public Utils.OptionEnum UseOpenSSL = Utils.OptionEnum.Default;
         public static bool UseOpenSSLDefault
@@ -1241,7 +1265,8 @@ namespace MediaPortal.Pbk.Net.Http
                 _UseOpenSSLDefault = value;
                 _Logger.Debug("[UseOpenSSLDefault] " + value);
             }
-        }private static bool _UseOpenSSLDefault = System.Environment.OSVersion.Version.Major < 10;
+        }
+        private static bool _UseOpenSSLDefault = System.Environment.OSVersion.Version.Major < 10;
 
         public OpenSSL.SSL.SslProtocols OpenSslProtocols = OpenSSL.SSL.SslProtocols.TLS1_2_VERSION;
         public OpenSSL.SSL.SslStrength OpenSslStrength = OpenSSL.SSL.SslStrength.Default;
@@ -1252,7 +1277,8 @@ namespace MediaPortal.Pbk.Net.Http
         public DateTime ModifiedSince
         {
             get { return this._ModifiedSince; }
-        } private DateTime _ModifiedSince;
+        }
+        private DateTime _ModifiedSince;
 
         public HttpMethodEnum Method;
 
@@ -1275,7 +1301,8 @@ namespace MediaPortal.Pbk.Net.Http
                 else
                     this._ProgressUpdateInterval = value;
             }
-        }private int _ProgressUpdateInterval = 1000;
+        }
+        private int _ProgressUpdateInterval = 1000;
 
 
         public long ResumingFrom
@@ -1284,7 +1311,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._ResumingFrom;
             }
-        }private long _ResumingFrom;
+        }
+        private long _ResumingFrom;
 
         public long FileLength
         {
@@ -1292,7 +1320,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._FileLength;
             }
-        }private long _FileLength;
+        }
+        private long _FileLength;
 
 
         /// <summary>
@@ -1337,7 +1366,8 @@ namespace MediaPortal.Pbk.Net.Http
 
                 return this._IsResponseStreamEnded;
             }
-        }private bool _IsResponseStreamEnded;
+        }
+        private bool _IsResponseStreamEnded;
 
         /// <summary>
         /// Returns true if the response stream is compressed.
@@ -1348,7 +1378,8 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 return this._IsResponseStreamCompressed;
             }
-        }private bool _IsResponseStreamCompressed = false;
+        }
+        private bool _IsResponseStreamCompressed = false;
 
         public bool ConnectionKeepAlive
         {
@@ -1367,7 +1398,8 @@ namespace MediaPortal.Pbk.Net.Http
         public bool Closed
         {
             get { return this._Closed; }
-        }private bool _Closed = true;
+        }
+        private bool _Closed = true;
 
         /// <summary>
         /// Maximum number of silmultaneous connection to one server(IP).
@@ -1407,7 +1439,8 @@ namespace MediaPortal.Pbk.Net.Http
                 else
                     _ConnectionKeepAliveMaxDefault = value;
             }
-        }private static int _ConnectionKeepAliveMaxDefault = _CONNECTION_KEEP_ALIVE_MAX_DEFAULT;
+        }
+        private static int _ConnectionKeepAliveMaxDefault = _CONNECTION_KEEP_ALIVE_MAX_DEFAULT;
 
         /// <summary>
         /// Keep-alive connection timout[s].
@@ -1426,7 +1459,8 @@ namespace MediaPortal.Pbk.Net.Http
                 else
                     _ConnectionKeepAliveTimeoutDefault = value;
             }
-        }private static int _ConnectionKeepAliveTimeoutDefault = _CONNECTION_KEEP_ALIVE_TIMEOUT_DEFAULT;
+        }
+        private static int _ConnectionKeepAliveTimeoutDefault = _CONNECTION_KEEP_ALIVE_TIMEOUT_DEFAULT;
 
         /// <summary>
         /// Keep-alive reused connection cross-domain access
@@ -1528,7 +1562,7 @@ namespace MediaPortal.Pbk.Net.Http
         {
             this.init(strUrl);
         }
-#endregion
+        #endregion
 
         #region Public methods
 
@@ -1827,7 +1861,7 @@ namespace MediaPortal.Pbk.Net.Http
                     return false;
                 }
 
-#region  Event: Before save to file (call the event to get filename)
+                #region  Event: Before save to file (call the event to get filename)
                 if (this.BeforeSaveToFile != null)
                 {
                     try
@@ -1847,7 +1881,7 @@ namespace MediaPortal.Pbk.Net.Http
                         _Logger.Error("[{3}][getResponseStream] Error onEvent BeforeSaveToFile: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._Id);
                     }
                 }
-#endregion
+                #endregion
 
                 using (FileStream fs = new FileStream(strPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
@@ -2518,7 +2552,7 @@ namespace MediaPortal.Pbk.Net.Http
         private T download<T>(Encoding enc)
         {
             this._HttpResponseCode = 0;
-  
+
             try
             {
                 //Get response stream
@@ -2596,7 +2630,7 @@ namespace MediaPortal.Pbk.Net.Http
                                     buffer = new byte[_BUFFER_SEGMENT_SIZE];
                                     iReceived = 0;
                                 }
-                                
+
                                 //Remember current buffer size
                                 iBufferCurrentWritten = iReceived;
                             }
@@ -2711,7 +2745,7 @@ namespace MediaPortal.Pbk.Net.Http
                 if (this._TotalBytesWritten == 0)
                     return (T)(object)null;
 
-#region Concat all buffers to single one
+                #region Concat all buffers to single one
                 if (buffers != null)
                 {
                     if (this._TotalBytesWritten != iBufferCurrentWritten || typeof(T) == typeof(byte[]))
@@ -2749,9 +2783,9 @@ namespace MediaPortal.Pbk.Net.Http
 
                     buffers = null;
                 }
-#endregion
+                #endregion
 
-#region Return requested data type
+                #region Return requested data type
 
 
                 string strContentType;
@@ -2801,7 +2835,7 @@ namespace MediaPortal.Pbk.Net.Http
                 }
                 else
                     return (T)(object)null;
-#endregion
+                #endregion
             }
             catch (Exception ex)
             {
@@ -2831,7 +2865,7 @@ namespace MediaPortal.Pbk.Net.Http
 
             if (fsDest != null)
             {
-#region Content range
+                #region Content range
                 long lTo;
                 long lLength;
                 if (this._HttpResponseCode == HttpStatusCode.PartialContent && this.TryGetHttpResponseFieldContentRange(out this._ResumingFrom, out lTo, out lLength))
@@ -2854,7 +2888,7 @@ namespace MediaPortal.Pbk.Net.Http
                     _Logger.Debug("[{2}][readStream] Resume: {0}-{1}", this._ResumingFrom, lTo, this._Id);
 
                 }
-                 else if (this._ResumeFrom > 0)
+                else if (this._ResumeFrom > 0)
                 {
                     _Logger.Error("[{0}][readStream] Resume not available.", this._Id);
 
@@ -2892,64 +2926,64 @@ namespace MediaPortal.Pbk.Net.Http
 
             try
             {
-            while (!this.Abort)
-            {
-                //Read stream
-                if ((iCnt = this._Stream.Read(this._BufferReceive, 0, _BUFFER_SIZE)) > 0)
+                while (!this.Abort)
                 {
-                    if (fsDest != null)
+                    //Read stream
+                    if ((iCnt = this._Stream.Read(this._BufferReceive, 0, _BUFFER_SIZE)) > 0)
                     {
-                        //Write to file
-                        fsDest.Write(this._BufferReceive, 0, iCnt);
-                        this._FileStreamPosition += iCnt;
-
-                        //Report progress
-                        if ((DateTime.Now - this._DownloadProgressUpdateTs).TotalMilliseconds >= this._ProgressUpdateInterval)
+                        if (fsDest != null)
                         {
-                            if (this.Event != null)
+                            //Write to file
+                            fsDest.Write(this._BufferReceive, 0, iCnt);
+                            this._FileStreamPosition += iCnt;
+
+                            //Report progress
+                            if ((DateTime.Now - this._DownloadProgressUpdateTs).TotalMilliseconds >= this._ProgressUpdateInterval)
                             {
-                                try { this.Event(this, args); }
-                                catch { }
+                                if (this.Event != null)
+                                {
+                                    try { this.Event(this, args); }
+                                    catch { }
+                                }
+
+                                this._DownloadProgressUpdateTs = DateTime.Now;
                             }
-
-                            this._DownloadProgressUpdateTs = DateTime.Now;
                         }
+
+                        this._TotalBytesWritten += iCnt;
+
+                        //if (this.IsResponseStreamEndKnown && this._ContentLength == this._ResponseBytesReceived && !this.IsResponseStreamCompressed)
+                        //{
+                        //    //Response received
+                        //    bResult = true;
+                        //    break;
+                        //}
                     }
+                    else if (this.IsResponseStreamEnded)
+                    {
+                        bResult = true;
+                        break;
+                    }
+                    else if (this.IsResponseStreamEndKnown)
+                    {
+                        _Logger.Error("[{3}][readStream] Socket closed. Content-Length:{0} ContentBytesReceived:{1} Url: {2}",
+                        this._ContentLength, this._ResponseBytesReceived, this._ServerUrl, this._Id);
 
-                    this._TotalBytesWritten += iCnt;
-
-                    //if (this.IsResponseStreamEndKnown && this._ContentLength == this._ResponseBytesReceived && !this.IsResponseStreamCompressed)
-                    //{
-                    //    //Response received
-                    //    bResult = true;
-                    //    break;
-                    //}
+                        this._ConnectionKeepAlive = false;
+                        break;
+                    }
+                    else //Unknown length
+                    {
+                        bResult = true;
+                        break;
+                    }
                 }
-                else if (this.IsResponseStreamEnded)
-                {
-                    bResult = true;
-                    break;
-                }
-                else if (this.IsResponseStreamEndKnown)
-                {
-                    _Logger.Error("[{3}][readStream] Socket closed. Content-Length:{0} ContentBytesReceived:{1} Url: {2}",
-                    this._ContentLength, this._ResponseBytesReceived, this._ServerUrl, this._Id);
 
+                if (this.Abort)
+                {
+                    _Logger.Warn("[{0}][readStream] Abort.", this._Id);
                     this._ConnectionKeepAlive = false;
-                    break;
                 }
-                else //Unknown length
-                {
-                    bResult = true;
-                    break;
-                }
-            }
-
-            if (this.Abort)
-            {
-                _Logger.Warn("[{0}][readStream] Abort.", this._Id);
-                this._ConnectionKeepAlive = false;
-            }
             }
             catch (IOException ex)
             {
@@ -2961,7 +2995,7 @@ namespace MediaPortal.Pbk.Net.Http
                     this._ConnectionKeepAlive = false;
                 }
                 else
-                    throw(ex);
+                    throw (ex);
             }
 
             return bResult;
@@ -3022,7 +3056,7 @@ namespace MediaPortal.Pbk.Net.Http
             if (this._ServerUri == null)
                 throw new Exception("[getResponseStream] Not initialized.");
 
-#region Proxy
+            #region Proxy
             try
             {
                 if ((this.AllowSystemProxy == Utils.OptionEnum.Yes || (this.AllowSystemProxy == Utils.OptionEnum.Default && AllowSystemProxyDefault))
@@ -3049,9 +3083,9 @@ namespace MediaPortal.Pbk.Net.Http
                 }
             }
             catch { }
-#endregion
+            #endregion
 
-#region Init
+            #region Init
             byte[] httpHeader = Encoding.ASCII.GetBytes(this.createHttpHeader());
             //this.ServerUrlRedirect = null;
             this._HttpResponseFields = null;
@@ -3076,7 +3110,7 @@ namespace MediaPortal.Pbk.Net.Http
             }
 
             bool bClose = true;
-#endregion
+            #endregion
 
             try
             {
@@ -3093,7 +3127,7 @@ namespace MediaPortal.Pbk.Net.Http
                 this._ServerIpEndpoint = new IPEndPoint(ips[0], this._ServerUri.Port);
                 this._ServerAutority = this._ServerUri.Authority;
 
-#region Connect
+                #region Connect
                 //Try get existing available connection
                 Connection sc = _Connections.GetConnection(this);
                 if (sc != null)
@@ -3108,7 +3142,7 @@ namespace MediaPortal.Pbk.Net.Http
                 }
                 else
                 {
-#region Connect to the server
+                    #region Connect to the server
                     if (!string.IsNullOrEmpty(this.Proxy))
                     {
                         IPEndPoint ep = null;
@@ -3150,7 +3184,7 @@ namespace MediaPortal.Pbk.Net.Http
                     {
                         if (!string.IsNullOrEmpty(this.Proxy))
                         {
-#region Proxy CONNECT
+                            #region Proxy CONNECT
 
                             this._Stream = this._TcpClient.GetStream();
 
@@ -3177,7 +3211,7 @@ namespace MediaPortal.Pbk.Net.Http
                                     {
                                         iReceived += iCnt;
 
-#region Http Response
+                                        #region Http Response
 
                                         //Analyze HTTP response
                                         Dictionary<string, string> httpResponseFields = null;
@@ -3215,14 +3249,14 @@ namespace MediaPortal.Pbk.Net.Http
                                             }
                                         }
 
-#endregion
+                                        #endregion
 
                                     }
                                     else
                                         goto ext;
                                 }
                             }
-  catch (IOException ex)
+                            catch (IOException ex)
                             {
                                 //COR_E_IO -2146232800 FFFFFFFF80131620
                                 if (ex.InnerException is SocketException && ((SocketException)ex.InnerException).SocketErrorCode == SocketError.TimedOut)
@@ -3258,7 +3292,7 @@ namespace MediaPortal.Pbk.Net.Http
                             {
                             }
 
-#endregion
+                            #endregion
                         }
 
                     ssl:
@@ -3394,12 +3428,12 @@ namespace MediaPortal.Pbk.Net.Http
                         _Logger.Error("[{0}][getResponseStream] Send http header timeout.", this._Id); //10060 WSAETIMEDOUT
                     else
                         _Logger.Error("[{0}][getResponseStream] Send http header exception: {1}", this._Id, ex.Message);
-                    
+
                     goto err;
                 }
-#endregion
+                #endregion
 
-#region Post data
+                #region Post data
                 if (this.Method == HttpMethodEnum.POST)
                 {
                     if (this.Post != null && this.Post.Length > 0)
@@ -3482,9 +3516,9 @@ namespace MediaPortal.Pbk.Net.Http
                             _Logger.Debug("[{0}][getResponseStream] POST done. Uploaded: {1}  Url: {2}", this._Id, dwSent, this._ServerUrl);
                     }
                 }
-#endregion
+                #endregion
 
-#region Response
+                #region Response
                 iReceived = 0;
 
                 try
@@ -3504,7 +3538,7 @@ namespace MediaPortal.Pbk.Net.Http
                         {
                             iReceived += iCnt;
 
-#region Http Response
+                            #region Http Response
 
                             //Analyze HTTP response
                             int iHttpLength = GetHttpResponse(this._ServerUri, this._BufferReceive, 0, iReceived,
@@ -3529,7 +3563,7 @@ namespace MediaPortal.Pbk.Net.Http
                             }
                             else
                             {
-#region Response received
+                                #region Response received
 
                                 if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{3}][getResponseStream] HTTP Response: Length:{0} Received:{1}\r\n{2}",
                                            iHttpLength,
@@ -3548,7 +3582,7 @@ namespace MediaPortal.Pbk.Net.Http
                                 if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONTENT_DISPOSITION, out strValue))
                                     this._ContentFilename = GetHttpFilename(strValue);
 
-#region Keep-Alive
+                                #region Keep-Alive
                                 bool bKeepAlive = this._HttpResponseVersion >= 1.1;
                                 if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONNECTION, out strValue))
                                 {
@@ -3594,14 +3628,14 @@ namespace MediaPortal.Pbk.Net.Http
                                 }
                                 else
                                     this._ConnectionKeepAlive = false;
-#endregion
+                                #endregion
 
                                 //Chunked transfer
                                 this._ConnectionChunked = this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_TRANSFER_ENCODING, out strValue) &&
                                     strValue.Equals("chunked", StringComparison.CurrentCultureIgnoreCase);
 
 
-#region Analyze response code
+                                #region Analyze response code
                                 switch (this._HttpResponseCode)
                                 {
                                     case HttpStatusCode.NotModified:
@@ -3617,7 +3651,7 @@ namespace MediaPortal.Pbk.Net.Http
                                         if (this._ContentLength < 0 && !this._ConnectionChunked)
                                             this._ConnectionKeepAlive = false;// unknown length
 
-#region  Event: Before download (call the event to check if we can proceed)
+                                        #region  Event: Before download (call the event to check if we can proceed)
                                         if (this.BeforeDownload != null)
                                         {
                                             try
@@ -3637,27 +3671,27 @@ namespace MediaPortal.Pbk.Net.Http
                                                 _Logger.Error("[{3}][getResponseStream] Error onEvent BeforeDownload: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._Id);
                                             }
                                         }
-#endregion
+                                        #endregion
 
                                         //Stream chain
                                         // SocketStream <- SslStream <- HttpUserInterStream <- ChunkedStream <- CompressionStream <- HttpUserWebResponseStream
 
-#region Inter Stream
+                                        #region Inter Stream
                                         int iRem = iReceived - iHttpLength;
                                         //_logger.Debug("[getResponseStream] Creating user stream: RemainingData:{0} Url:{1}", iRem, this._ServerUrl);
                                         this._Stream = new InterStream(this._Stream, this._BufferReceive, iHttpLength, iRem, this);
-#endregion
+                                        #endregion
 
-#region Chunked Stream
+                                        #region Chunked Stream
                                         if (this._ConnectionChunked)
                                         {
                                             if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][getResponseStream] Chunked transfer detected.", this._Id);
                                             this._StreamChunked = new ChunkedStream(this._Stream, true) { CheckZeroChunk = false };
                                             this._Stream = this._StreamChunked;
                                         }
-#endregion
+                                        #endregion
 
-#region Compression Stream
+                                        #region Compression Stream
                                         if (this._HttpResponseFields.TryGetValue(HttpHeaderField.HTTP_FIELD_CONTENT_ENCODING, out strValue))
                                         {
                                             //If the previous stream is chunked then we need to set zero check flag
@@ -3699,7 +3733,7 @@ namespace MediaPortal.Pbk.Net.Http
                                                 }
                                             }
                                         }
-#endregion
+                                        #endregion
 
                                         //We need to use different connection: flush current stream to allow keep alive
                                         if (this._GetResponseResult == GetResponseResultEnum.ErrorOtherConnectionRequired)
@@ -3753,12 +3787,12 @@ namespace MediaPortal.Pbk.Net.Http
                                         goto ok;
 
                                 }
-#endregion
+                                #endregion
 
-#endregion
+                                #endregion
                             }
 
-#endregion
+                            #endregion
 
                         }
                         else
@@ -3814,7 +3848,7 @@ namespace MediaPortal.Pbk.Net.Http
                 finally
                 {
                 }
-#endregion
+            #endregion
 
             err:
                 this._GetResponseResult = GetResponseResultEnum.Error;
