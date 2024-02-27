@@ -11,9 +11,12 @@ namespace MediaPortal.Pbk.Net.Http
     {
         private Stream _Stream;
         private int _ChunkSize = -1;
+        private int _ChunkPosition = -1;
         private bool _ReadMode;
         private int _ChunkSizeTextLength = 0;
         private char[] _ChunkSizeText = new char[8];
+        private bool _DeliverEntireChunk = false;
+        private byte[] _ChunkBuffeer = null;
 
         /// <summary>
         /// If 'True' zero chunk is checked right after receiving the previous chunk(read mode only).
@@ -30,6 +33,25 @@ namespace MediaPortal.Pbk.Net.Http
                 return this._Ended;
             }
         }private bool _Ended = false;
+
+        /// <summary>
+        /// If 'True' only entire chunk is delivered when reading
+        /// </summary>
+        public bool DeliverEntireChunk
+        {
+            get
+            {
+                return this._DeliverEntireChunk;
+            }
+
+            set
+            {
+                if (value && this._ChunkBuffeer == null)
+                    this._ChunkBuffeer = new byte[1024 * 8];
+
+                this._DeliverEntireChunk = value;
+            }
+        }
 
 
         public ChunkedStream(Stream stream, bool bReadMode)
@@ -89,9 +111,43 @@ namespace MediaPortal.Pbk.Net.Http
             else
             {
                 //Chunk is receiving
-                int iCount = Math.Min(iLength, this._ChunkSize);
-                int iRead = this._Stream.Read(buffer, iOffset, iCount);
-                this._ChunkSize -= iRead;
+                int iRead;
+                
+                if (this._DeliverEntireChunk)
+                {
+                    //Read entire chunk
+                    if (this._ChunkPosition < 0)
+                    {
+                        this._ChunkPosition = 0;
+                        while (this._ChunkPosition < this._ChunkSize)
+                        {
+                            iRead = this._Stream.Read(this._ChunkBuffeer, this._ChunkPosition, this._ChunkSize - this._ChunkPosition);
+
+                            if (iRead <= 0)
+                                return 0;
+
+                            this._ChunkPosition += iRead;
+                        }
+
+                        this._ChunkPosition = 0;
+                    }
+
+                    iRead = Math.Min(iLength, this._ChunkSize - this._ChunkPosition);
+                    Buffer.BlockCopy(this._ChunkBuffeer, this._ChunkPosition, buffer, iOffset, iRead);
+
+                    //Advance read position
+                    this._ChunkPosition += iRead;
+
+                    //Check entire chunk
+                    if (this._ChunkPosition == this._ChunkSize)
+                        this._ChunkSize = 0;
+                }
+                else
+                {
+                    int iCount = Math.Min(iLength, this._ChunkSize);
+                    iRead = this._Stream.Read(buffer, iOffset, iCount);
+                    this._ChunkSize -= iRead;
+                }
 
                 if (this._ChunkSize == 0)
                 {
@@ -154,6 +210,8 @@ namespace MediaPortal.Pbk.Net.Http
 
         private bool readChunkSizeAndCheckZero()
         {
+            this._ChunkPosition = -1;
+
             if ((this._ChunkSize = this.readChunkSize()) == 0)
             {
                 //Zero terminating chunk
@@ -169,6 +227,10 @@ namespace MediaPortal.Pbk.Net.Http
                     return true;
                 }
             }
+
+            //Check chunk buffer if needed
+            if (this._ChunkBuffeer != null && this._ChunkBuffeer.Length < this._ChunkSize)
+                this._ChunkBuffeer = new byte[(int)Math.Ceiling(this._ChunkSize / 1024.0) * 1024];
 
             return false;
         }
