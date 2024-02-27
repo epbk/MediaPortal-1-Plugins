@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4AD9E867-38C9-4049-9191-429E9EDACB01}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MediaPortal.IptvChannels</RootNamespace>
+    <AssemblyName>IptvChannels</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Common.Utils, Version=1.11.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Common.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Gentle.Common">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Gentle.Framework">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MediaPortal.Pbk">
+      <HintPath>C:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\MediaPortal.Pbk.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Team MediaPortal\MediaPortal TV Server\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>C:\Program Files\Team MediaPortal\MediaPortal TV Server\NLog.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PluginBase">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\PluginBase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PowerScheduler.Interfaces">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\PowerScheduler.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SetupControls">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\SetupControls.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TvBusinessLayer">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TvBusinessLayer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TvControl">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TvControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TVDatabase">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TVDatabase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TVLibrary">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TVLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TvLibrary.Interfaces">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TvLibrary.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TvLibrary.Utils">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TvLibrary.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\DataGridViewCustom.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\DataGridViewCustomRow.cs" />
+    <Compile Include="Controls\DataGridViewDropEventArgs.cs" />
+    <Compile Include="Controls\DataGridViewDropEventHandler.cs" />
+    <Compile Include="Controls\DataGridViewRowTypeEnum.cs" />
+    <Compile Include="GenerateLinkConfigEnum.cs" />
+    <Compile Include="SendEventTypeEnum.cs" />
+    <Compile Include="Controls\UIEditor\FileSizeConverter.cs" />
+    <Compile Include="Controls\UIEditor\TimePeriodConverter.cs" />
+    <Compile Include="Database\dbContentProtection.cs" />
+    <Compile Include="Database\dbContentProtectionKey.cs" />
+    <Compile Include="Database\dbSettings.cs" />
+    <Compile Include="Database\dbTable.cs" />
+    <Compile Include="PluginLoader.cs" />
+    <Compile Include="Config\ConfigControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\ConfigControl.designer.cs">
+      <DependentUpon>ConfigControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Log\Log.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Proxy\ConnectionEventArgs.cs" />
+    <Compile Include="Proxy\ConnectionEventHandler.cs" />
+    <Compile Include="Proxy\ConnectionEventTypeEnum.cs" />
+    <Compile Include="Proxy\ConnectionHandler.cs" />
+    <Compile Include="Proxy\HlsDecryptor.cs" />
+    <Compile Include="Proxy\HlsSequencer.cs" />
+    <Compile Include="Proxy\IClient.cs" />
+    <Compile Include="Proxy\MediaServer\ContentProtection.cs" />
+    <Compile Include="Proxy\MediaServer\IJob.cs" />
+    <Compile Include="Proxy\MediaServer\JobEventArgs.cs" />
+    <Compile Include="Proxy\MediaServer\JobHandler.cs" />
+    <Compile Include="Proxy\MediaServer\JobHandlerStatus.cs" />
+    <Compile Include="Proxy\MediaServer\JobResources.cs" />
+    <Compile Include="Proxy\MediaServer\JobResurcesDownload.cs" />
+    <Compile Include="Proxy\MediaServer\JobStatus.cs" />
+    <Compile Include="Proxy\MediaServer\Task.cs" />
+    <Compile Include="Proxy\MediaServer\TaskCDN.cs" />
+    <Compile Include="Proxy\MediaServer\TaskEventArgs.cs" />
+    <Compile Include="Proxy\MediaServer\TaskEventTypeEnum.cs" />
+    <Compile Include="Proxy\MediaServer\TaskReportTypeEnum.cs" />
+    <Compile Include="Proxy\MediaServer\TaskSegment.cs" />
+    <Compile Include="Proxy\MediaServer\TaskSegmentCDN.cs" />
+    <Compile Include="Proxy\MediaServer\TaskSegmentTypeEnum.cs" />
+    <Compile Include="Proxy\MediaServer\TaskStatusEnum.cs" />
+    <Compile Include="Proxy\ProccesExitType.cs" />
+    <Compile Include="Proxy\RemoteClient.cs" />
+    <Compile Include="Proxy\SendHandler.cs" />
+    <Compile Include="Proxy\UdpClient.cs" />
+    <Compile Include="Settings\Setting.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SiteUtils\IptvChannel.cs" />
+    <Compile Include="SiteUtils\SiteUtilBase.cs" />
+    <Compile Include="SiteUtils\VideoDescription.cs" />
+    <Compile Include="Tools\Json.cs" />
+    <Compile Include="Tools\RegularExpressions.cs" />
+    <Compile Include="Tools\Utils.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Config\ConfigControl.resx">
+      <DependentUpon>ConfigControl.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

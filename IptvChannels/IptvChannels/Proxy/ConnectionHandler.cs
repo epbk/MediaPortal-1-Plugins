@@ -1,0 +1,669 @@
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Net.Sockets;
+using NLog;
+
+namespace MediaPortal.IptvChannels.Proxy
+{
+    public class ConnectionHandler
+    {
+        #region Constants
+        public const int TS_BLOCK_SIZE = 188;
+        public const int TS_BLOCK_MARKER = 0x47;
+        private const int REFRESH_PERIOD = 1000; //1s
+        #endregion
+
+        #region Private Fields
+
+        private static NLog.Logger _Logger = LogManager.GetCurrentClassLogger();
+
+        private static List<ConnectionHandler> _HandlerList = new List<ConnectionHandler>();
+
+        private List<RemoteClient> _ClientList = new List<RemoteClient> { };
+
+        private static long _IdCnt = 0;
+        private long _Id = 0;
+        private string _HandlerId;
+
+        private ulong _DataCounter = 0;
+        private ulong _DataSent = 0;
+        private int _SendPeek = 0;
+        private bool _Closed = false;
+
+        private int _TimoutNoClients = Database.dbSettings.Instance.TimeoutNoClients;
+        private int _TimoutNoData = Database.dbSettings.Instance.TimeoutNoData;
+
+        private DateTime _OpenTS = new DateTime();
+        private DateTime _StartProcesTS = new DateTime();
+
+        private Thread _ThreadProcess = null;
+        private bool _ForceTerminate = false;
+
+        private string _Info = string.Empty;
+
+        private static System.Globalization.CultureInfo _CiEn = new System.Globalization.CultureInfo("en-US");
+
+        private static List<ConnectionEventHandler> _EventTargets = new List<ConnectionEventHandler>();
+        #endregion
+
+        #region Public Fields
+
+        public string Info
+        {
+            get
+            {
+                return this._Info;
+            }
+            set
+            {
+                this._Info = value;
+
+                if (_EventTargets.Count > 0)
+                    invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.HandlerUpdated, Tag = this });
+            }
+        }
+
+        public bool LogEvents = false;
+        public string ServerUrl;
+        public string Args;
+
+        public string HandlerId
+        { get { return this._HandlerId; } }
+
+        public int ConnectedClients
+        {
+            get
+            {
+                //lock (this._ClientList)
+                {
+                    return this._ClientList.Count;
+                }
+            }
+        }
+
+        public List<RemoteClient> ClientList
+        {
+            get
+            {
+                List<RemoteClient> result = new List<RemoteClient>();
+                lock (this._ClientList)
+                {
+                    result.AddRange(this._ClientList);
+                }
+
+                return result;
+            }
+        }
+        #endregion
+
+        public static event ConnectionEventHandler Event
+        {
+            add
+            {
+                lock (_EventTargets)
+                {
+                    if (!_EventTargets.Exists(h => h == value))
+                        _EventTargets.Add(value);
+                }
+            }
+
+            remove
+            {
+                lock (_EventTargets)
+                {
+                    _EventTargets.Remove(value);
+                }
+            }
+        }
+
+        #region ctor
+        public ConnectionHandler(string strServerUrl)
+        {
+            this._Id = Interlocked.Increment(ref _IdCnt);
+            this._HandlerId = this._Id.ToString("000");
+
+            this._OpenTS = DateTime.Now;
+            this._StartProcesTS = DateTime.Now;
+            this.ServerUrl = strServerUrl;
+        }
+        #endregion
+
+        public static ConnectionHandler Get(string strUrl, string strFFfmpegArgs)
+        {
+            lock (_HandlerList)
+            {
+                ConnectionHandler handler = _HandlerList.Find(h => h.ServerUrl == strUrl);
+                if (handler == null)
+                {
+                    handler = new ConnectionHandler(strUrl)
+                    {
+                        Args = strFFfmpegArgs
+                    };
+                    _HandlerList.Add(handler);
+
+                    if (_EventTargets.Count > 0)
+                        invokeEvent(handler, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.HandlerAdded, Tag = handler });
+
+                    handler._ThreadProcess = new Thread(new ThreadStart(() => handler.doProcess()));
+                    handler._ThreadProcess.Start();
+                }
+
+                return handler;
+            }
+        }
+
+        public void Close()
+        {
+            if (!this._Closed)
+            {
+                this._ForceTerminate = true;
+                this.close();
+                this._ThreadProcess.Join();
+            }
+        }
+
+        public static void CloseAll()
+        {
+            lock (_HandlerList)
+            {
+                _HandlerList.ForEach(h => h.Close());
+            }
+        }
+
+        public void AddClient(Socket socketRemote)
+        {
+            lock (this._ClientList)
+            {
+                socketRemote.SendTimeout = 5000;
+                RemoteClient c = new RemoteClient(this, socketRemote);
+                c.BufferSize = Database.dbSettings.Instance.ClientMemoryBufferSize;
+
+                this._ClientList.Add(c);
+
+                if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][AddClient(] Remote socket: " + c.RemotePoint);
+
+                if (_EventTargets.Count > 0)
+                    invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.ClientAdded, Tag = c });
+            }
+        }
+
+        public static IEnumerable<ConnectionHandler> GetHandlers()
+        {
+            lock (_HandlerList)
+            {
+                for (int i = 0; i < _HandlerList.Count; i++)
+                    yield return _HandlerList[i];
+            }
+        }
+
+        public StringBuilder SerializeJson(StringBuilder sb)
+        {
+            sb.Append('{');
+            sb.Append("\"type\":\"ConnectionHandler\",");
+            sb.Append("\"id\":\"");
+            sb.Append(this.HandlerId);
+            sb.Append("\",\"url\":\"");
+            sb.Append(this.ServerUrl);
+            sb.Append("\",\"info\":\"");
+            Tools.Json.AppendAndValidate(this.Info, sb);
+            sb.Append("\",\"clients\":\"");
+            sb.Append(this._ClientList.Count);
+            sb.Append("\"}");
+
+            return sb;
+        }
+
+        #region Private Methods
+
+        private void close()
+        {
+            lock (this._ClientList)
+            {
+                if (!this._Closed)
+                {
+                    if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][close] Closing...");
+
+                    for (int i = this._ClientList.Count - 1; i >= 0; i--)
+                    {
+                        RemoteClient c = this._ClientList[i];
+                        try
+                        {
+                            c.Close();
+                        }
+                        catch
+                        {
+                        }
+
+                        this._ClientList.RemoveAt(i);
+
+                        if (_EventTargets.Count > 0)
+                            invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.ClientRemoved, Tag = c });
+                    };
+
+                    this._Closed = true;
+
+                    if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][close] Closed.");
+                }
+            }
+
+            lock (_HandlerList)
+            {
+                _HandlerList.Remove(this);
+            }
+
+            if (_EventTargets.Count > 0)
+                invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.HandlerRemoved, Tag = this });
+        }
+
+        private void doProcess()
+        {
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Start...", this._HandlerId);
+
+            this.Info = "Connecting to UDP...";
+
+            //Start FFmpeg
+            try
+            {
+                //Init UDP
+                UdpClient udp = new UdpClient(null, this.sendToAllClients, 0); //port = 0 : pick free port
+                if (!udp.Connect())
+                    return;
+
+                this.Info = "Connecting to FFmpeg ...";
+
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+
+                //if (!this._ShowDosWindowBox)
+                {
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.CreateNoWindow = true;
+                }
+
+                startInfo.FileName = "\"ffmpeg.exe\"";
+                startInfo.UseShellExecute = false;
+                startInfo.ErrorDialog = false;
+                startInfo.RedirectStandardError = true;
+                startInfo.RedirectStandardOutput = true;
+                Process pr = new Process();
+                pr.StartInfo = startInfo;
+                //test.Exited += new EventHandler(restream_Exited);
+                pr.OutputDataReceived += this.outputHandler;
+                pr.ErrorDataReceived += this.errorHandler;
+                startInfo.Arguments = " -re -i " + this.ServerUrl + ' ' + this.Args + " -c copy -f mpegts udp://127.0.0.1:" + udp.Port;
+
+                // Send http OK
+                this.sendToAllClients(null, 0, 0, -1, true, false);
+
+                if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Starting FFmpeg: {1}", this._HandlerId, startInfo.Arguments);
+
+                //Start ffmpeg
+                pr.Start();
+                pr.BeginOutputReadLine();
+                pr.BeginErrorReadLine();
+
+                //Proxy url
+                //this.ServerUrl = "udp://127.0.0.1:" + udp.Port;
+
+                //Start UDP process
+                this.processMonitor(udp, null);
+
+                pr.CancelOutputRead();
+                pr.CancelErrorRead();
+
+                //Stop FFmpeg
+                if (!pr.HasExited)
+                    pr.Kill();
+
+                //Close UDP
+                udp.Close();
+                udp = null;
+            }
+            catch (Exception ex)
+            {
+                _Logger.Error("[{3}][ffmpeg][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
+            }
+            finally
+            {
+                this.close();
+            }
+
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Closed.", this._HandlerId);
+        }
+
+        private void outputHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][ffmpeg][outputHandler] {1}", this._HandlerId, e.Data);
+        }
+
+        private void errorHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[{0}][ffmpeg][errorHandler] {1}", this._HandlerId, e.Data);
+        }
+
+        private static string getSizeStringShort(ulong val)
+        {
+            string strT, strVal;
+            if (val < 1024)
+            {
+                strVal = val.ToString();
+                strT = " B";
+            }
+            else if (val < 1048576)
+            {
+                strVal = (val / 1024).ToString();
+                strT = " kB";
+            }
+            else if (val < 1073741824)
+            {
+                strVal = (val / 1048576).ToString();
+                strT = " MB";
+            }
+            else
+            {
+                strVal = ((double)val / 1073741824).ToString("0.00");
+                strT = " GB";
+            }
+
+            return strVal + strT;
+        }
+
+
+        private void processMonitor(IClient client, Pbk.Utils.Buffering.IBuffer buffer)
+        {
+            ulong lDownloadedBytes = 0;
+            int iTimeOutAct = 0;
+
+            int iSocketCnt;
+            int iSocketCntTimeout = 0;
+
+            StringBuilder sbInfo = new StringBuilder(256);
+
+            while (!this._ForceTerminate)
+            {
+                Thread.Sleep(REFRESH_PERIOD);
+                
+                iSocketCnt = this._ClientList.Count;
+
+                if (iSocketCnt < 1)
+                    iSocketCntTimeout += REFRESH_PERIOD;
+                else
+                    iSocketCntTimeout = 0;
+
+                if (iSocketCntTimeout >= this._TimoutNoClients)
+                    break;
+
+                //Data timeout test
+                ulong lReadDiff = client.DataSent - lDownloadedBytes;
+                if (lReadDiff == 0)
+                    iTimeOutAct += REFRESH_PERIOD;
+                else
+                    iTimeOutAct = 0;
+
+                if (iTimeOutAct >= this._TimoutNoData)
+                {
+                    //Timeout elapsed; no data has been received within the interval
+                    this.Info = "No Data. Closing connection with the server. [" + this._HandlerId + "]";
+                    if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][Process] No Data. Closing connection with the server.", this._HandlerId);
+
+                    break;
+                }
+                else if (_EventTargets.Count > 0)
+                {
+                    #region Info
+                    uint wBitRate = (uint)((float)(lReadDiff * 8) / REFRESH_PERIOD); //in kbit
+                    ulong dwTimeDiff = (ulong)(DateTime.Now - client.DataSentFirstTS).TotalSeconds;
+                    ulong dwBitRateAvg = dwTimeDiff > 0 && client.DataSent > 0 ? (client.DataSent * 8 / 1000 / dwTimeDiff) : 0;
+                    
+                    sbInfo.Clear();
+                    sbInfo.Append("Data received:  ");
+                    sbInfo.Append(getSizeStringShort(client.DataSent));
+                    sbInfo.Append("   Bitrate: ");
+                    if (wBitRate < 1000)
+                    {
+                        sbInfo.Append(wBitRate);
+                        sbInfo.Append(" kbit");
+                    }
+                    else
+                    {
+                        sbInfo.Append(((float)wBitRate / 1000).ToString("0.00"));
+                        sbInfo.Append(" mbit");
+                    }
+                    sbInfo.Append('/');
+                    if (dwBitRateAvg > 0)
+                    {
+                        if (dwBitRateAvg < 1000)
+                        {
+                            sbInfo.Append(dwBitRateAvg);
+                            sbInfo.Append(" kbit");
+                        }
+                        else
+                        {
+                            sbInfo.Append(((float)dwBitRateAvg / 1000).ToString("0.00"));
+                            sbInfo.Append(" mbit");
+                        }
+                    }
+                    else
+                        sbInfo.Append("0 kbit");
+                    sbInfo.Append("  Errors: ");
+                    sbInfo.Append(client.PacketErrors);
+                    if (buffer != null)
+                    {
+                        sbInfo.Append("  Buffer: [");
+                        sbInfo.Append(buffer.BuffersInUse);
+                        sbInfo.Append('/');
+                        sbInfo.Append(buffer.Buffers);
+                        sbInfo.Append('/');
+                        sbInfo.Append(buffer.BuffersMax);
+                        sbInfo.Append("][");
+                        sbInfo.Append(Pbk.Utils.Tools.PrintFileSize(buffer.BufferSizeMax, "0", _CiEn));
+                        sbInfo.Append("] ");
+                        sbInfo.Append(buffer.CurrentLevel.ToString("0"));
+                        sbInfo.Append('%');
+                    }
+                    sbInfo.Append("   Handler duration: ");
+                    sbInfo.Append((DateTime.Now - this._OpenTS).ToString("hh\\:mm\\:ss"));
+                    this.Info = sbInfo.ToString();
+                    #endregion
+                }    
+
+                lDownloadedBytes = client.DataSent;
+            }
+
+            this._DataSent = client.DataSent;
+        }
+
+
+        private void removeClient(int iIdx)
+        {
+            lock (this._ClientList)
+            {
+                RemoteClient client = this._ClientList[iIdx];
+                this._ClientList.Remove(client);
+                //this._CheckClientsTs = DateTime.Now;
+
+                if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][removeClient] Remote socket: " + client.RemotePoint);
+
+                if (_EventTargets.Count > 0)
+                    invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.ClientRemoved, Tag = client }); 
+            }
+        }
+
+        private void sendHttpHeader(RemoteClient client)
+        {
+            if (!client.HttpResponseSent)
+            {
+                //First place into buffer default http response
+                byte[] resp = Encoding.ASCII.GetBytes(this.createHttpResponse(client));
+
+                client.WriteData(resp, 0, resp.Length);
+
+                client.HttpResponseSent = true;
+            }
+        }
+
+        private string createHttpResponse(RemoteClient client)
+        {
+            StringBuilder sb = new StringBuilder(128);
+
+            sb.Append("HTTP/1.1 200 OK");
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+
+            sb.Append("Content-Type: ");
+            sb.Append("video/mp2t");
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+
+            sb.Append("Connection: close");
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+
+            string strResp = sb.ToString();
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[CreateHttpResponse] Response:\r\n" + strResp);
+            return strResp;
+        }
+
+        private static int findTsMarker(byte[] buffer, int iOffset, int iLength)
+        {
+            int iIdxDataEnd = iOffset + iLength - 1;
+
+            for (int iIdx = iOffset; (iIdx < buffer.Length && iIdx <= iIdxDataEnd); iIdx++)
+            {
+                if (buffer[iIdx] == TS_BLOCK_MARKER)
+                {
+                    int iIdxNext = iIdx + TS_BLOCK_SIZE;
+                    if (iIdxNext < buffer.Length && iIdxNext <= iIdxDataEnd)
+                    {
+                        if (buffer[iIdxNext] == TS_BLOCK_MARKER)
+                            return iIdx; //Next block has TS marker; OK
+                        else 
+                            continue; //Invalid TS marker in next block; try next byte
+                    }
+                    else
+                        return iIdx; //not enough data; assume correct TS marker
+                }
+            }
+
+            return -1; //TS marker not found
+        }
+
+        private int sendToAllClients(byte[] buffer, int iOffset, int iLength)
+        {
+            this.sendToAllClients(buffer, iOffset, iLength, -1, false, true);
+
+            return 0;
+        }
+        private void sendToAllClients(byte[] buffer, int iOffset, int iLength, int iMinSendLength, bool bHttpHeaderOnly, bool bCount)
+        {
+            if (iLength > this._SendPeek)
+            {
+                this._SendPeek = iLength;
+                if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][SendToAllClients] Send peek:" + iLength);
+            }
+
+            lock (this._ClientList)
+            {
+                for (int iIdx = 0; iIdx < this._ClientList.Count; iIdx++)
+                {
+                    RemoteClient client = this._ClientList[iIdx];
+
+                    if (bHttpHeaderOnly && client.HttpResponseSent)
+                        continue;
+
+                    int iClientOffset = iOffset;
+                    int iClientLength = iLength;
+
+                    try
+                    {
+                        if (client.IsConnected)
+                        {
+                            lock (client)
+                            {
+                                if (bHttpHeaderOnly)
+                                {
+                                    this.sendHttpHeader(client);
+                                    client.SendTs = DateTime.Now;
+                                }
+                                else
+                                {
+                                    if (!client.FirstDataPacketSent)
+                                    {
+                                        //First data to the client
+
+                                        this.sendHttpHeader(client);
+
+                                        //TS packet size boundaries
+                                        int iTsMarkerIdx = findTsMarker(buffer, iClientOffset, iClientLength);
+                                        if (iTsMarkerIdx >= 0)
+                                        {
+                                            int iSkip = iTsMarkerIdx - iClientOffset;
+                                            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][SendToAllClients] Skipping:" + iSkip + "/" + iClientLength + "  [" + client.RemotePoint + "]");
+
+                                            iClientOffset = iTsMarkerIdx;
+                                            iClientLength -= iSkip;
+                                        }
+                                        else
+                                            _Logger.Warn("[" + this._HandlerId + "][SendToAllClients] Invalid TS marker.  [" + client.RemotePoint + "]");
+
+                                        client.FirstDataPacketSent = true;
+                                    }
+
+                                    //Send
+                                    byte[] bufferSend = buffer;
+
+                                    client.SendTs = DateTime.Now;
+                                    int iRem = client.WriteData(bufferSend, iClientOffset, iClientLength);
+                                    if (iRem > 0)
+                                    {
+                                        //Not all data has been written; buffer full
+
+                                        //Buffer overflow
+                                        if ((DateTime.Now - client.LastWarning).TotalMilliseconds > 200)
+                                        {
+                                            client.LastWarning = DateTime.Now;
+                                            _Logger.Error("[" + this._HandlerId + "][SendToAllClients] Client buffer overflow. ["
+                                                + iClientLength + ":" + client.BufferSize + "][" + client.RemotePoint + "]");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][SendToAllClients] Error occured: client socket closed. Removing from list. " + "[" + client.RemotePoint + "]");
+                            client.Close();
+                            this.removeClient(iIdx);
+                            iIdx--;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Client socket closed ??
+                        if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][SendToAllClients] Error occured: unable to send data to client socket. Removing from list. " + "[" + client.RemotePoint + "]");
+                        client.Close();
+                        this.removeClient(iIdx);
+                        iIdx--;
+                    }
+                }
+            }
+
+            if (!bHttpHeaderOnly && bCount)
+                this._DataCounter += (ulong)iLength;
+        }
+
+
+        private static void invokeEvent(object sender, ConnectionEventArgs e)
+        {
+            lock (_EventTargets)
+            {
+                _EventTargets.ForEach(h =>
+                    {
+                        try { h.Invoke(sender, e); }
+                        catch { }
+                    });
+            }
+        }
+        #endregion
+    }
+}
