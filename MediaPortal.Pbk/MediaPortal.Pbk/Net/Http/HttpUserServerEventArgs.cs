@@ -24,5 +24,6 @@ namespace MediaPortal.Pbk.Net.Http
         public Socket RemoteSocket = null;
         public bool ResponseSent = false;
         public bool KeepAlive = true;
+        public bool CloseSocket = true;
     }
 }

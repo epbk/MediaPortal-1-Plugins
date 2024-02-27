@@ -370,6 +370,7 @@ namespace MediaPortal.Pbk.Net.Http
         {
             string strRemoteClient = null;
             int iKeepAliveMaxCnt = 0;
+            bool bCloseSocket = true;
 
             try
             {
@@ -736,7 +737,10 @@ namespace MediaPortal.Pbk.Net.Http
                         if (args.KeepAlive && bKeepAlive && this._KeepAliveMax < 1 || (iKeepAliveMaxCnt < this._KeepAliveMax))
                             goto start;
                         else
+                        {
+                            bCloseSocket = args.CloseSocket;
                             return;
+                        }
                     }
                 }
                 //else Monitor.Exit(this._RequestReceivedPadlock);
@@ -765,12 +769,15 @@ namespace MediaPortal.Pbk.Net.Http
             {
                 try
                 {
-                    if (socket.Connected)
+                    if (bCloseSocket)
                     {
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Disconnect(true);
+                        if (socket.Connected)
+                        {
+                            socket.Shutdown(SocketShutdown.Both);
+                            socket.Disconnect(true);
+                        }
+                        socket.Close();
                     }
-                    socket.Close();
                 }
                 catch { }
 
