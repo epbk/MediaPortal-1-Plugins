@@ -1093,7 +1093,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                         //update http data
                         string strMasterList = this._SbMasterList.ToString();
-                        this._MasterListRaw = Encoding.ASCII.GetBytes(strMasterList);
+                        this._MasterListRaw = Encoding.UTF8.GetBytes(strMasterList);
                         this._MasterListRefreshTs = dtRefreshRequest;
 
                         if (Log.LogLevel <= LogLevel.Trace) this.Logger.Trace("[{0}][refreshMasterList] Master list:\r\n{1}", this._Identifier, strMasterList);
