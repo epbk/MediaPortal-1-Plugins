@@ -337,6 +337,11 @@ namespace SetupTv.Sections
             this.updateLinkResult();
         }
 
+        private void checkBoxUseSplitter_CheckedChanged(object sender, EventArgs e)
+        {
+            this.updateLinkResult();
+        }
+
         private void buttonCopyToClipboard_Click(object sender, EventArgs e)
         {
             Clipboard.Clear();
@@ -356,8 +361,9 @@ namespace SetupTv.Sections
 
         private void updateLinkResult()
         {
-            MediaPortal.IptvChannels.GenerateLinkConfigEnum cfg = MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER 
-                 | MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS;
+            MediaPortal.IptvChannels.GenerateLinkConfigEnum cfg =this.checkBoxUseSplitter.Checked ?
+                MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER |
+                MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS : MediaPortal.IptvChannels.GenerateLinkConfigEnum.NONE;
 
             if (this.checkBoxFfmpeg.Checked)
                 cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.FFMPEG;

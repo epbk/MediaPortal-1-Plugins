@@ -42,13 +42,7 @@ namespace SetupTv.Sections
             this.propertyGridPlugins = new System.Windows.Forms.PropertyGrid();
             this.comboBox_Sites = new System.Windows.Forms.ComboBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.dataGridView_ConList = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.dataGridViewCDN = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxFFMPEG = new System.Windows.Forms.TextBox();
@@ -62,6 +56,13 @@ namespace SetupTv.Sections
             this.bSave = new MediaPortal.UserInterface.Controls.MPButton();
             this.tabMain = new System.Windows.Forms.TabControl();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
+            this.checkBoxUseSplitter = new System.Windows.Forms.CheckBox();
+            this.dataGridView_ConList = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
+            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewCDN = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -72,11 +73,11 @@ namespace SetupTv.Sections
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConList)).BeginInit();
             this.tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewCDN)).BeginInit();
             this.tabPage5.SuspendLayout();
             this.tabMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConList)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewCDN)).BeginInit();
             this.SuspendLayout();
             // 
             // tabGeneral
@@ -176,62 +177,6 @@ namespace SetupTv.Sections
             this.tabPage3.Text = "Streaming";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // dataGridView_ConList
-            // 
-            this.dataGridView_ConList.AllowUserToAddRows = false;
-            this.dataGridView_ConList.AllowUserToDeleteRows = false;
-            this.dataGridView_ConList.AllowUserToResizeRows = false;
-            this.dataGridView_ConList.BoxOffset = 5;
-            this.dataGridView_ConList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView_ConList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column6,
-            this.Column3,
-            this.Column4,
-            this.Column5});
-            this.dataGridView_ConList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView_ConList.GroupRowBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.dataGridView_ConList.Location = new System.Drawing.Point(3, 3);
-            this.dataGridView_ConList.MainColumnIndex = 0;
-            this.dataGridView_ConList.Name = "dataGridView_ConList";
-            this.dataGridView_ConList.RowHeadersVisible = false;
-            this.dataGridView_ConList.RowHeadersWidth = 25;
-            this.dataGridView_ConList.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            this.dataGridView_ConList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView_ConList.Size = new System.Drawing.Size(423, 355);
-            this.dataGridView_ConList.TabIndex = 83;
-            this.dataGridView_ConList.BeforeUncolapse += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridView_ConList_BeforeUncolapse);
-            this.dataGridView_ConList.CellPostPaint += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.dataGridView_ConList_CellPostPaint);
-            this.dataGridView_ConList.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridView_ConList_RowPostPaint);
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "Id";
-            this.Column6.Name = "Column6";
-            this.Column6.ReadOnly = true;
-            this.Column6.Width = 40;
-            // 
-            // Column3
-            // 
-            this.Column3.HeaderText = "Url";
-            this.Column3.Name = "Column3";
-            this.Column3.ReadOnly = true;
-            this.Column3.Width = 230;
-            // 
-            // Column4
-            // 
-            this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Column4.HeaderText = "Info";
-            this.Column4.Name = "Column4";
-            this.Column4.ReadOnly = true;
-            // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "Clients";
-            this.Column5.Name = "Column5";
-            this.Column5.ReadOnly = true;
-            this.Column5.Visible = false;
-            this.Column5.Width = 50;
-            // 
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.dataGridViewCDN);
@@ -243,34 +188,9 @@ namespace SetupTv.Sections
             this.tabPage4.Text = "CDN";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // dataGridViewCDN
-            // 
-            this.dataGridViewCDN.AllowUserToAddRows = false;
-            this.dataGridViewCDN.AllowUserToDeleteRows = false;
-            this.dataGridViewCDN.AllowUserToResizeRows = false;
-            this.dataGridViewCDN.BoxOffset = 5;
-            this.dataGridViewCDN.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewCDN.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn5});
-            this.dataGridViewCDN.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewCDN.GroupRowBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.dataGridViewCDN.Location = new System.Drawing.Point(3, 3);
-            this.dataGridViewCDN.MainColumnIndex = 0;
-            this.dataGridViewCDN.Name = "dataGridViewCDN";
-            this.dataGridViewCDN.ReadOnly = true;
-            this.dataGridViewCDN.RowHeadersVisible = false;
-            this.dataGridViewCDN.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewCDN.Size = new System.Drawing.Size(423, 355);
-            this.dataGridViewCDN.TabIndex = 5;
-            this.dataGridViewCDN.BeforeUncolapse += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridViewCDN_BeforeUncolapse);
-            this.dataGridViewCDN.CellPostPaint += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.dataGridViewCDN_CellPostPaint);
-            this.dataGridViewCDN.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridViewCDN_RowPostPaint);
-            // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.checkBoxUseSplitter);
             this.tabPage5.Controls.Add(this.label3);
             this.tabPage5.Controls.Add(this.textBoxFFMPEG);
             this.tabPage5.Controls.Add(this.label2);
@@ -327,7 +247,7 @@ namespace SetupTv.Sections
             // checkBoxFfmpeg
             // 
             this.checkBoxFfmpeg.AutoSize = true;
-            this.checkBoxFfmpeg.Location = new System.Drawing.Point(21, 177);
+            this.checkBoxFfmpeg.Location = new System.Drawing.Point(21, 209);
             this.checkBoxFfmpeg.Name = "checkBoxFfmpeg";
             this.checkBoxFfmpeg.Size = new System.Drawing.Size(91, 17);
             this.checkBoxFfmpeg.TabIndex = 12;
@@ -338,7 +258,7 @@ namespace SetupTv.Sections
             // checkBoxCDN
             // 
             this.checkBoxCDN.AutoSize = true;
-            this.checkBoxCDN.Location = new System.Drawing.Point(140, 177);
+            this.checkBoxCDN.Location = new System.Drawing.Point(21, 232);
             this.checkBoxCDN.Name = "checkBoxCDN";
             this.checkBoxCDN.Size = new System.Drawing.Size(71, 17);
             this.checkBoxCDN.TabIndex = 11;
@@ -413,6 +333,102 @@ namespace SetupTv.Sections
             this.imageList.Images.SetKeyName(8, "OpenFolder");
             this.imageList.Images.SetKeyName(9, "Warn");
             this.imageList.Images.SetKeyName(10, "ScheduleDisabled.png");
+            this.imageList.Images.SetKeyName(11, "Stopping");
+            // 
+            // checkBoxUseSplitter
+            // 
+            this.checkBoxUseSplitter.AutoSize = true;
+            this.checkBoxUseSplitter.Checked = true;
+            this.checkBoxUseSplitter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUseSplitter.Location = new System.Drawing.Point(21, 186);
+            this.checkBoxUseSplitter.Name = "checkBoxUseSplitter";
+            this.checkBoxUseSplitter.Size = new System.Drawing.Size(152, 17);
+            this.checkBoxUseSplitter.TabIndex = 17;
+            this.checkBoxUseSplitter.Text = "Use MP Url Source Splitter";
+            this.checkBoxUseSplitter.UseVisualStyleBackColor = true;
+            this.checkBoxUseSplitter.CheckedChanged += new System.EventHandler(this.checkBoxUseSplitter_CheckedChanged);
+            // 
+            // dataGridView_ConList
+            // 
+            this.dataGridView_ConList.AllowUserToAddRows = false;
+            this.dataGridView_ConList.AllowUserToDeleteRows = false;
+            this.dataGridView_ConList.AllowUserToResizeRows = false;
+            this.dataGridView_ConList.BoxOffset = 5;
+            this.dataGridView_ConList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView_ConList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column6,
+            this.Column3,
+            this.Column4,
+            this.Column5});
+            this.dataGridView_ConList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView_ConList.GroupRowBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.dataGridView_ConList.Location = new System.Drawing.Point(3, 3);
+            this.dataGridView_ConList.MainColumnIndex = 0;
+            this.dataGridView_ConList.Name = "dataGridView_ConList";
+            this.dataGridView_ConList.RowHeadersVisible = false;
+            this.dataGridView_ConList.RowHeadersWidth = 25;
+            this.dataGridView_ConList.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            this.dataGridView_ConList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridView_ConList.Size = new System.Drawing.Size(423, 355);
+            this.dataGridView_ConList.TabIndex = 83;
+            this.dataGridView_ConList.BeforeUncolapse += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridView_ConList_BeforeUncolapse);
+            this.dataGridView_ConList.CellPostPaint += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.dataGridView_ConList_CellPostPaint);
+            this.dataGridView_ConList.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridView_ConList_RowPostPaint);
+            // 
+            // Column6
+            // 
+            this.Column6.HeaderText = "Id";
+            this.Column6.Name = "Column6";
+            this.Column6.ReadOnly = true;
+            this.Column6.Width = 40;
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "Url";
+            this.Column3.Name = "Column3";
+            this.Column3.ReadOnly = true;
+            this.Column3.Width = 230;
+            // 
+            // Column4
+            // 
+            this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column4.HeaderText = "Info";
+            this.Column4.Name = "Column4";
+            this.Column4.ReadOnly = true;
+            // 
+            // Column5
+            // 
+            this.Column5.HeaderText = "Clients";
+            this.Column5.Name = "Column5";
+            this.Column5.ReadOnly = true;
+            this.Column5.Visible = false;
+            this.Column5.Width = 50;
+            // 
+            // dataGridViewCDN
+            // 
+            this.dataGridViewCDN.AllowUserToAddRows = false;
+            this.dataGridViewCDN.AllowUserToDeleteRows = false;
+            this.dataGridViewCDN.AllowUserToResizeRows = false;
+            this.dataGridViewCDN.BoxOffset = 5;
+            this.dataGridViewCDN.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewCDN.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn1,
+            this.dataGridViewTextBoxColumn2,
+            this.dataGridViewTextBoxColumn3,
+            this.dataGridViewTextBoxColumn5});
+            this.dataGridViewCDN.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridViewCDN.GroupRowBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.dataGridViewCDN.Location = new System.Drawing.Point(3, 3);
+            this.dataGridViewCDN.MainColumnIndex = 0;
+            this.dataGridViewCDN.Name = "dataGridViewCDN";
+            this.dataGridViewCDN.ReadOnly = true;
+            this.dataGridViewCDN.RowHeadersVisible = false;
+            this.dataGridViewCDN.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridViewCDN.Size = new System.Drawing.Size(423, 355);
+            this.dataGridViewCDN.TabIndex = 5;
+            this.dataGridViewCDN.BeforeUncolapse += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridViewCDN_BeforeUncolapse);
+            this.dataGridViewCDN.CellPostPaint += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.dataGridViewCDN_CellPostPaint);
+            this.dataGridViewCDN.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dataGridViewCDN_RowPostPaint);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -456,12 +472,12 @@ namespace SetupTv.Sections
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConList)).EndInit();
             this.tabPage4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewCDN)).EndInit();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
             this.tabMain.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_ConList)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewCDN)).EndInit();
             this.ResumeLayout(false);
 
     }
@@ -503,5 +519,6 @@ namespace SetupTv.Sections
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.CheckBox checkBoxUseSplitter;
     }
 }
