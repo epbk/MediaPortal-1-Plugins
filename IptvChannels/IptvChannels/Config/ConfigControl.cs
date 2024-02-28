@@ -44,6 +44,7 @@ namespace SetupTv.Sections
         private const int _ICON_IDX_FOLDER_OPEN = 8;
         private const int _ICON_IDX_WARN = 9;
         private const int _ICON_IDX_SCHEDULE_DISABLED = 10;
+        private const int _ICON_IDX_STOPPING = 11;
         #endregion
 
         #region Types
@@ -513,6 +514,9 @@ namespace SetupTv.Sections
 
                 case "Downloading":
                     return this.imageList.Images[_ICON_IDX_DOWNLOAD];
+
+                case "Stopping":
+                    return this.imageList.Images[_ICON_IDX_STOPPING];
 
                 default:
                     return null;
