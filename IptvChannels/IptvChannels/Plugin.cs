@@ -1427,7 +1427,7 @@ namespace MediaPortal.IptvChannels
                     if (iId >= 0 && task.Identifier == iId)
                         return task;
 
-                    if (task.Url == strIdentifier)
+                    if (task.Url == strIdentifier && task.IsRequestAvailable)
                         return task;
                 }
             }

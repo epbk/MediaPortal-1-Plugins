@@ -44,8 +44,11 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private volatile byte[] _MasterListRaw = null;
         DateTime _MasterListRefreshTs = DateTime.MinValue;
 
-        private System.Timers.Timer _TimerRefresh = null;
-        private System.Timers.Timer _TimerTerminate = null;
+        private System.Timers.Timer _TimerMaintenance = null;
+
+        private int _CleaningPeriod = 5;
+        private int _CleaningCountDown = -1;
+        private int _AutoTerminateCountDown = -1;
 
         private bool _QueueStarted = false;
 
@@ -67,6 +70,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         private List<HlsDecryptor> _DecryptorBuffer = new List<HlsDecryptor>();
         private object _DecryptorPadlock = new object();
+
 
         #endregion
 
@@ -109,7 +113,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override bool Start()
         {
-            if (this._TimerRefresh == null)
+            if (this._TimerMaintenance == null)
             {
                 this.Logger.Debug("[Start] " + this.Title);
 
@@ -119,25 +123,21 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 this._Stopping = 0;
                 this.Status = TaskStatusEnum.Starting;
 
-                this._TimerRefresh = new System.Timers.Timer();
-                this._TimerRefresh.Interval = 5000;
-                this._TimerRefresh.AutoReset = true;
-                this._TimerRefresh.Elapsed += new System.Timers.ElapsedEventHandler(this.cbRefreshTmerElapsed);
-                this._TimerRefresh.Enabled = true;
+                if (this.Autoterminate)
+                    this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+
+                this._CleaningCountDown = this._CleaningPeriod;
+                this._TimerMaintenance = new System.Timers.Timer();
+                this._TimerMaintenance.Interval = 1000;
+                this._TimerMaintenance.AutoReset = true;
+                this._TimerMaintenance.Elapsed += new System.Timers.ElapsedEventHandler(this.cbRefreshTmerElapsed);
+                this._TimerMaintenance.Enabled = true;
 
                 this._MasterListRefreshTs = DateTime.MinValue;
 
                 this.refreshMasterList();
 
-                if (this.Autoterminate)
-                {
-                    this._TimerTerminate = new System.Timers.Timer();
-                    this._TimerTerminate.Interval = Database.dbSettings.Instance.MediaServerAutoterminatePeriod * 1000;
-                    this._TimerTerminate.AutoReset = false;
-                    this._TimerTerminate.Elapsed += new System.Timers.ElapsedEventHandler(this.cbTerminateTimerElapsed);
-                    this._TimerTerminate.Enabled = true;
-                }
-
+                
 
                 if (!Directory.Exists(this.WorkFolder))
                     Directory.CreateDirectory(this.WorkFolder);
@@ -157,7 +157,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override bool Stop()
         {
-            if (this._TimerRefresh != null)
+            if (this._TimerMaintenance != null)
             {
                 this.Logger.Debug("[Stop] " + this.Title);
 
@@ -210,7 +210,19 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 return this._LeadingUriPath;
             }
         }private string _LeadingUriPath = null;
+                
+        public bool IsRequestAvailable
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            get
+            {
+                if (this.Status != TaskStatusEnum.Running)
+                    return false;
 
+                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                return true;
+            }
+        }
 
         /// <summary>
         /// Handle http request
@@ -228,9 +240,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     return false;
 
                 //Reset autoterminate timer
-                System.Timers.Timer timer = this._TimerTerminate;
-                if (timer != null)
-                    timer.Interval = Database.dbSettings.Instance.MediaServerAutoterminatePeriod * 1000;
+                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
 
                 //Process http request
                 if (!uri.LocalPath.StartsWith(this.LeadingUriPath))
@@ -522,27 +532,19 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void terminate()
         {
-            if (this._TimerRefresh != null)
+            if (this._TimerMaintenance != null)
             {
-                this._TimerRefresh.Enabled = false;
-                this._TimerRefresh.Elapsed -= new System.Timers.ElapsedEventHandler(this.cbRefreshTmerElapsed);
-                this._TimerRefresh.Dispose();
-                this._TimerRefresh = null;
-
-                if (this._TimerTerminate != null)
-                {
-                    this._TimerTerminate.Enabled = false;
-                    this._TimerTerminate.Elapsed -= new System.Timers.ElapsedEventHandler(this.cbTerminateTimerElapsed);
-                    this._TimerTerminate.Dispose();
-                    this._TimerTerminate = null;
-                }
+                this._TimerMaintenance.Enabled = false;
+                this._TimerMaintenance.Elapsed -= new System.Timers.ElapsedEventHandler(this.cbRefreshTmerElapsed);
+                this._TimerMaintenance.Dispose();
+                this._TimerMaintenance = null;
             }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void refreshMasterList()
         {
-            if ((DateTime.Now - this._MasterListRefreshTs).TotalMilliseconds >= (this._TimerRefresh.Interval - 1000))
+            if ((DateTime.Now - this._MasterListRefreshTs).TotalMilliseconds >= (this._CleaningPeriod - 1))
             {
                 DateTime dtRefreshRequest = DateTime.Now;
 
@@ -1086,10 +1088,11 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             this._Identifier, this._VideoType, dTotalListDuration, dTargetDuration);
 
                         //Refresh interval for maintenance
-                        int iInterval = Math.Min(30000, Math.Max(2000, (int)((dTargetDuration > 0 ? (dTargetDuration * 1.2) : (dTotalListDuration * 0.33)) * 1000)));
-                        if (this._TimerRefresh.Interval != iInterval)
+                        int iInterval = Math.Min(30, Math.Max(2, (int)(dTargetDuration > 0 ? (dTargetDuration * 1.2) : (dTotalListDuration * 0.33))));
+                        if (this._CleaningPeriod != iInterval)
                         {
-                            this._TimerRefresh.Interval = iInterval;
+                            this._CleaningPeriod = iInterval;
+                            this._CleaningCountDown = iInterval;
                             this.Logger.Debug("[{0}][refreshMasterList] RefreshInterval set to: {1}", this._Identifier, iInterval);
                         }
 
@@ -1369,12 +1372,20 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         #region Callbacks
         private void cbRefreshTmerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            this.segmentCleaning(); //Do maintanenece
-        }
+            if (this._TimerMaintenance != null)
+            {
+                if (--this._CleaningCountDown <= 0)
+                {
+                    this._CleaningCountDown = this._CleaningPeriod;
+                    this.segmentCleaning(); //Do maintanenece
+                }
+            }
 
-        private void cbTerminateTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            this.Stop();
+            lock (this)
+            {
+                if (this._AutoTerminateCountDown > 0 && --this._AutoTerminateCountDown <= 0)
+                    this.Stop();
+            }
         }
 
         private void cbSegmentAddedToDownloadQueue(object sender, EventArgs e)
