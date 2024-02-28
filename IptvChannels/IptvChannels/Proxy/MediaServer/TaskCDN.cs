@@ -80,7 +80,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         [Browsable(false)]
         [Category("Task")]
         public bool Autoterminate
-        { get; set; }
+        { get; set; } = true;
 
         [Browsable(false)]
         public bool Persistent
@@ -123,8 +123,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 this._Stopping = 0;
                 this.Status = TaskStatusEnum.Starting;
 
-                if (this.Autoterminate)
-                    this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
 
                 this._CleaningCountDown = this._CleaningPeriod;
                 this._TimerMaintenance = new System.Timers.Timer();
@@ -1383,7 +1382,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
             lock (this)
             {
-                if (this._AutoTerminateCountDown > 0 && --this._AutoTerminateCountDown <= 0)
+                if (this.Autoterminate && this._AutoTerminateCountDown > 0 && --this._AutoTerminateCountDown <= 0)
                     this.Stop();
             }
         }
