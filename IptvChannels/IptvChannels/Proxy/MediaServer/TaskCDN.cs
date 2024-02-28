@@ -383,6 +383,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         if (!segment.IsContentLengthKnown)
                                             chunk = new byte[16]; //prepare buffer for chunk size
 
+                                        //Set send timeout to 20s
+                                        args.RemoteSocket.SendTimeout = 20000;
 
                                         //Send http response to the client
                                         args.RemoteSocket.Send(createHttpResponse(chunk == null ? segment.Length : -1, args.KeepAlive, strContentType));
