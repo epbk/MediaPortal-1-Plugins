@@ -455,7 +455,10 @@ namespace SetupTv.Sections
             DataGridViewRow row = this.findCDNTaskRow(j);
 
             if (row != null)
+            {
                 row.Cells[_COLUMN_CDN_INDEX_STATUS].Value = (string)j["status"];
+                this.dataGridViewCDN.InvalidateCell(this.dataGridViewCDN.MainColumnIndex, row.Index);
+            }
         }
 
         private void cdnSegmentAdd(JToken j)
