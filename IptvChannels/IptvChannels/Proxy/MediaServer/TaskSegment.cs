@@ -16,6 +16,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         public string FullPath;
         public string Url;
         public int ID;
+        public int UID { get; private set; }
 
         public TaskEventArgs ArgsUpdate;
         public TaskEventArgs ArgsStateChanged;
@@ -42,9 +43,11 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         protected Logger _Logger = LogManager.GetCurrentClassLogger();
         protected int _Starting = 0;
         protected bool _Abort = false;
+        private static int _UidCounter = -1;
 
         public TaskSegment(Task task)
         {
+            this.UID = Interlocked.Increment(ref _UidCounter);
             this._Task = task;
             this.ArgsUpdate = new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentUpdate, Tag = this };
             this.ArgsStateChanged = new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = this };

@@ -645,7 +645,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             sb.Append("\"parentId\":\"");
             sb.Append(this._Task.Identifier);
             sb.Append("\",\"id\":\"");
-            sb.Append(this.ID);
+            sb.Append(this.UID);
             sb.Append("\",\"status\":\"");
             sb.Append(this.Status);
             sb.Append("\",\"path\":\"");
