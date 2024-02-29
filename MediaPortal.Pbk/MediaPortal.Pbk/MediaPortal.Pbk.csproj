@@ -89,6 +89,12 @@
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\ManagedOpenSsl.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' != 'TvServer'">
+    <Reference Include="Databases">
+      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Databases.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="BrotliSharpLib">
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\BrotliSharpLib.dll</HintPath>
@@ -96,10 +102,6 @@
     </Reference>
     <Reference Include="Common.GUIPlugins">
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Common.GUIPlugins.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Databases">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\Databases.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DokanNet">
@@ -170,6 +172,9 @@
       <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal\TvLibrary.Interfaces.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Compile Include="3rdParty\Cornerstone\Database\SQLite\SQLiteClient.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\SQLite\SQLiteException.cs" />
+    <Compile Include="3rdParty\Cornerstone\Database\SQLite\SQLiteResultSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Common.Utils">
