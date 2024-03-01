@@ -1382,8 +1382,12 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
             lock (this)
             {
-                if (this.Autoterminate && this._AutoTerminateCountDown > 0 && --this._AutoTerminateCountDown <= 0)
-                    this.Stop();
+                if (this.Autoterminate && this._AutoTerminateCountDown > 0)
+                {
+                    this._AutoTerminateCountDown -= 1000;
+                    if (this._AutoTerminateCountDown <= 0)
+                        this.Stop();
+                }
             }
         }
 

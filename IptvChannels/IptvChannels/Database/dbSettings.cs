@@ -41,13 +41,17 @@ namespace MediaPortal.IptvChannels.Database
 
         [Category("Plugin")]
         [DisplayName("Wakeup For Epg Grabbing")]
-        [DBFieldAttribute(FieldName = "wakeupForEpgGrabbing", Default = "0")]
+        [DBFieldAttribute(FieldName = "wakeupForEpgGrabbing", Default = "False")]
+        [DefaultValue(false)]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public bool WakeupForEpgGrabbing
         { get; set; }
 
         [Category("Plugin")]
         [DisplayName("Delete Unreferenced Channels")]
-        [DBFieldAttribute(FieldName = "deleteUnreferencedChannels", Default = "1")]
+        [DBFieldAttribute(FieldName = "deleteUnreferencedChannels", Default = "True")]
+        [DefaultValue(true)]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public bool DeleteUnreferencedChannels
         { get; set; }
 
@@ -100,12 +104,12 @@ namespace MediaPortal.IptvChannels.Database
 
         #endregion
 
-        #region Proxy
+        #region Streaming
 
         [DBFieldAttribute(FieldName = "proxTempPath", Default = "")]
         [Description("Proxy temporary path.")]
         [DisplayName("Path: temporary")]
-        [Category("Proxy")]
+        [Category("Streaming")]
         [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectDirectoryUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public string TempPath
         {
@@ -155,7 +159,7 @@ namespace MediaPortal.IptvChannels.Database
         [Description("Timeout - no clients.")]
         [DisplayName("Timeout: no clients")]
         [DefaultValue(TIMEOUT_PERIOD_NO_CLIENTS)]
-        [Category("Proxy")]
+        [Category("Streaming")]
         [TypeConverter(typeof(Controls.UIEditor.TimePeriodConverter))]
         public int TimeoutNoClients
         {
@@ -178,7 +182,7 @@ namespace MediaPortal.IptvChannels.Database
         [Description("Timeout - no data.")]
         [DisplayName("Timeout: no data")]
         [DefaultValue(TIMEOUT_PERIOD_NO_DATA)]
-        [Category("Proxy")]
+        [Category("Streaming")]
         [TypeConverter(typeof(Controls.UIEditor.TimePeriodConverter))]
         public int TimeoutNoData
         {
@@ -201,7 +205,7 @@ namespace MediaPortal.IptvChannels.Database
         [Description("Client memory buffer size.")]
         [DisplayName("Client memory buffer size")]
         [DefaultValue(Proxy.RemoteClient.DEFAULT_BUFFER_SIZE)]
-        [Category("Proxy")]
+        [Category("Streaming")]
         [TypeConverter(typeof(Controls.UIEditor.FileSizeConverter))]
         public int ClientMemoryBufferSize
         {
@@ -266,25 +270,27 @@ namespace MediaPortal.IptvChannels.Database
         [Description("True: chunk will start download upon http request.\r\nFalse: chunk will start download immediately.")]
         [Category("Media Server")]
         [DisplayName("Begin download on request")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public bool MediaServerBeginDownloadOnRequest
         { get; set; }
 
-        [DBFieldAttribute(FieldName = "mediaServerAutoterminatePeriod", Default = "60")]
-        [DefaultValue(60)]
-        [Description("Autoterminate player task period in seconds.\r\nOnly for autocreated tasks.")]
+        [DBFieldAttribute(FieldName = "mediaServerAutoterminatePeriod", Default = "60000")]
+        [DefaultValue(60000)]
+        [Description("Task/Segment autoterminate period.")]
         [Category("Media Server")]
         [DisplayName("Autoterminate period")]
+        [TypeConverter(typeof(Controls.UIEditor.TimePeriodConverter))]
         public int MediaServerAutoterminatePeriod
         {
             get { return this._MediaServerAutoterminatePeriod; }
             set
             {
-                if (value < 5)
-                    this._MediaServerAutoterminatePeriod = 5;
+                if (value < 5000)
+                    this._MediaServerAutoterminatePeriod = 5000;
                 else
                     this._MediaServerAutoterminatePeriod = value;
             }
-        }private int _MediaServerAutoterminatePeriod = 60;
+        }private int _MediaServerAutoterminatePeriod = 60000;
 
         #endregion
 

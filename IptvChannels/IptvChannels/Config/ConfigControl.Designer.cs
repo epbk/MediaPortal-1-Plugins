@@ -44,6 +44,7 @@ namespace SetupTv.Sections
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.checkBoxUseSplitter = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxFFMPEG = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -56,7 +57,8 @@ namespace SetupTv.Sections
             this.bSave = new MediaPortal.UserInterface.Controls.MPButton();
             this.tabMain = new System.Windows.Forms.TabControl();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.checkBoxUseSplitter = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.dataGridView_ConList = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -185,11 +187,13 @@ namespace SetupTv.Sections
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage4.Size = new System.Drawing.Size(429, 361);
             this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "CDN";
+            this.tabPage4.Text = "Media Server";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.label5);
+            this.tabPage5.Controls.Add(this.label4);
             this.tabPage5.Controls.Add(this.checkBoxUseSplitter);
             this.tabPage5.Controls.Add(this.label3);
             this.tabPage5.Controls.Add(this.textBoxFFMPEG);
@@ -207,6 +211,19 @@ namespace SetupTv.Sections
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "Link Generator";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxUseSplitter
+            // 
+            this.checkBoxUseSplitter.AutoSize = true;
+            this.checkBoxUseSplitter.Checked = true;
+            this.checkBoxUseSplitter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUseSplitter.Location = new System.Drawing.Point(21, 186);
+            this.checkBoxUseSplitter.Name = "checkBoxUseSplitter";
+            this.checkBoxUseSplitter.Size = new System.Drawing.Size(192, 17);
+            this.checkBoxUseSplitter.TabIndex = 17;
+            this.checkBoxUseSplitter.Text = "Use MediaPortal Url Source Splitter";
+            this.checkBoxUseSplitter.UseVisualStyleBackColor = true;
+            this.checkBoxUseSplitter.CheckedChanged += new System.EventHandler(this.checkBoxUseSplitter_CheckedChanged);
             // 
             // label3
             // 
@@ -247,7 +264,7 @@ namespace SetupTv.Sections
             // checkBoxFfmpeg
             // 
             this.checkBoxFfmpeg.AutoSize = true;
-            this.checkBoxFfmpeg.Location = new System.Drawing.Point(21, 209);
+            this.checkBoxFfmpeg.Location = new System.Drawing.Point(21, 235);
             this.checkBoxFfmpeg.Name = "checkBoxFfmpeg";
             this.checkBoxFfmpeg.Size = new System.Drawing.Size(91, 17);
             this.checkBoxFfmpeg.TabIndex = 12;
@@ -258,11 +275,11 @@ namespace SetupTv.Sections
             // checkBoxCDN
             // 
             this.checkBoxCDN.AutoSize = true;
-            this.checkBoxCDN.Location = new System.Drawing.Point(21, 232);
+            this.checkBoxCDN.Location = new System.Drawing.Point(21, 288);
             this.checkBoxCDN.Name = "checkBoxCDN";
-            this.checkBoxCDN.Size = new System.Drawing.Size(71, 17);
+            this.checkBoxCDN.Size = new System.Drawing.Size(111, 17);
             this.checkBoxCDN.TabIndex = 11;
-            this.checkBoxCDN.Text = "Use CDN";
+            this.checkBoxCDN.Text = "Use Media Server";
             this.checkBoxCDN.UseVisualStyleBackColor = true;
             this.checkBoxCDN.CheckedChanged += new System.EventHandler(this.checkBoxCDN_CheckedChanged);
             // 
@@ -335,18 +352,23 @@ namespace SetupTv.Sections
             this.imageList.Images.SetKeyName(10, "ScheduleDisabled.png");
             this.imageList.Images.SetKeyName(11, "Stopping");
             // 
-            // checkBoxUseSplitter
+            // label4
             // 
-            this.checkBoxUseSplitter.AutoSize = true;
-            this.checkBoxUseSplitter.Checked = true;
-            this.checkBoxUseSplitter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUseSplitter.Location = new System.Drawing.Point(21, 186);
-            this.checkBoxUseSplitter.Name = "checkBoxUseSplitter";
-            this.checkBoxUseSplitter.Size = new System.Drawing.Size(152, 17);
-            this.checkBoxUseSplitter.TabIndex = 17;
-            this.checkBoxUseSplitter.Text = "Use MP Url Source Splitter";
-            this.checkBoxUseSplitter.UseVisualStyleBackColor = true;
-            this.checkBoxUseSplitter.CheckedChanged += new System.EventHandler(this.checkBoxUseSplitter_CheckedChanged);
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(38, 308);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(249, 13);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "(proxy cache media server for HLS and MPD Dash)";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(38, 255);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(203, 13);
+            this.label5.TabIndex = 19;
+            this.label5.Text = "(convert input format to Transport Stream)";
             // 
             // dataGridView_ConList
             // 
@@ -520,5 +542,7 @@ namespace SetupTv.Sections
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
         private System.Windows.Forms.CheckBox checkBoxUseSplitter;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
     }
 }
