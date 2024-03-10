@@ -61,7 +61,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             this._Version = "1.1.3";
             this._Author = "Pbk";
             this._Description = "Česká Televize";
-            this._EpgRefreshPeriod = 15;
+            this._EpgRefreshPeriod = 15 * 60000;
         }
         #endregion
 
