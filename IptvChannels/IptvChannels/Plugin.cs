@@ -168,6 +168,52 @@ namespace MediaPortal.IptvChannels
                 return null;
 
         }
+
+        public bool CreateChannel(string strChannelName, string strChannelUrl)
+        {
+            this.checkIptvCards();
+
+            if (this._IptvCards != null)
+            {
+                //Create TV channel
+                DVBIPChannel channel = new DVBIPChannel();
+                channel.IsTv = true;
+                channel.IsRadio = false;
+
+                channel.Url = strChannelUrl;
+                channel.PmtPid = _PMT_PID_DEFAULT;
+                channel.ServiceId = _PROGRAM_ID_DEFAULT;
+                channel.NetworkId = _NETWORK_ID_DEFAULT;
+                channel.TransportId = _TS_ID_DEFAULT;
+
+                channel.Provider = _PROVIDER_PREFIX;
+                channel.FreeToAir = true;
+                channel.Name = strChannelName;
+
+                Channel dbChannel = this._TvLayer.AddNewChannel(strChannelName, channel.LogicalChannelNumber);
+                dbChannel.SortOrder = 10000;
+
+                if (channel.LogicalChannelNumber >= 1)
+                    dbChannel.SortOrder = channel.LogicalChannelNumber;
+
+                dbChannel.IsTv = true;
+                dbChannel.IsRadio = false;
+                dbChannel.Persist();
+                dbChannel.GrabEpg = false;
+                dbChannel.VisibleInGuide = true;
+
+                this._TvLayer.AddChannelToGroup(dbChannel, TvConstants.TvGroupNames.AllChannels);
+                this._TvLayer.AddTuningDetails(dbChannel, channel);
+
+                this._IptvCards.ForEach(card => this._TvLayer.MapChannelToCard(card, dbChannel, false));
+
+                _Logger.Debug("[CreateChannel] Channel created: " + dbChannel.DisplayName);
+
+                return true;
+            }
+
+            return false;
+        }
         #endregion
 
         #region Private members
@@ -328,9 +374,37 @@ namespace MediaPortal.IptvChannels
             }
         }
 
+        private void checkIptvCards()
+        {
+            //Get list IPTV cards
+            if (this._IptvCards == null)
+            {
+                _Logger.Debug("[CheckChannels] Checking for IPTV cards...");
+
+                this._IptvCards = new List<Card>();
+
+                foreach (Card card in this._TvLayer.Cards)
+                {
+                    if (RemoteControl.Instance.Type(card.IdCard) == CardType.DvbIP)
+                    {
+                        this._IptvCards.Add(card);
+                        _Logger.Debug("[CheckChannels] IPTV Card found:" + card.Name);
+                    }
+                }
+
+                if (this._IptvCards.Count < 1)
+                {
+                    _Logger.Error("[CheckChannels] Error: IPTV card not found.");
+                    return;
+                }
+            }
+        }
+
         private void checkSiteChannels()
         {
             List<Channel> delList = new List<Channel>();
+
+            this.checkIptvCards();
 
             foreach (SiteUtils.SiteUtilBase site in this._Sites)
             {
@@ -339,29 +413,6 @@ namespace MediaPortal.IptvChannels
                 try
                 {
                     string strUrlChannelBase = "http://127.0.0.1:" + Database.dbSettings.Instance.HttpServerPort + HTTP_PATH_LINK + "?site=" + HttpUtility.UrlEncode(site.Name) + "&channel=";
-
-                    //Get list IPTV cards
-                    if (this._IptvCards == null)
-                    {
-                        _Logger.Debug("[CheckChannels] Checking for IPTV cards...");
-
-                        this._IptvCards = new List<Card>();
-
-                        foreach (Card card in this._TvLayer.Cards)
-                        {
-                            if (RemoteControl.Instance.Type(card.IdCard) == CardType.DvbIP)
-                            {
-                                this._IptvCards.Add(card);
-                                _Logger.Debug("[CheckChannels] IPTV Card found:" + card.Name);
-                            }
-                        }
-
-                        if (this._IptvCards.Count < 1)
-                        {
-                            _Logger.Error("[CheckChannels] Error: IPTV card not found.");
-                            return;
-                        }
-                    }
 
                     if (this._IptvCards.Count > 0)
                     {
