@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using MediaPortal.Pbk.Cornerstone.Database;
 using NLog;
 
 namespace MediaPortal.IptvChannels.SiteUtils
@@ -26,7 +27,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
         #endregion
 
         #region Properties
-        [Category("IptvChannelsUserConfiguration"), Description("Preferred video quality."), DisplayName("Video Quality")]
+        [Category("Video"), Description("Preferred video quality."), DisplayName("Video Quality")]
+        [DBField()]
         public virtual VideoQualityTypes VideoQuality
         {
             get
@@ -39,11 +41,16 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
-        [Category("IptvChannelsUserConfiguration"), Description("EPG refresh enable."), DisplayName("Epg Refresh Enabled")]
+        [Category("EPG"), Description("EPG refresh enable."), DisplayName("Epg Refresh Enabled")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [DBField()]
         public bool EpgRefreshEnabled
         { get; set; }
 
-        [Category("IptvChannelsUserConfiguration"), Description("EPG refresh period in minutes."), DisplayName("Epg Refresh Period")]
+        [Category("EPG"), Description("EPG refresh period."), DisplayName("Epg Refresh Period")]
+        [TypeConverter(typeof(Controls.UIEditor.TimePeriodConverter))]
+        [DefaultValue(1440 * 60000)]
+        [DBField()]
         public int EpgRefreshPeriod
         {
             get
@@ -55,14 +62,15 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
             set
             {
-                if (value < 1) 
-                    this._EpgRefreshPeriod = 1;
+                if (value < 60000) 
+                    this._EpgRefreshPeriod = 60000;
                 else 
                     this._EpgRefreshPeriod = value;
             }
         }
 
-        [Category("IptvChannelsUserConfiguration"), Description("Author.")]
+        [Category("Plugin"), Description("Author.")]
+        [DBField()]
         public string Author
         {
             get
@@ -71,7 +79,7 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
-        [Category("IptvChannelsUserConfiguration"), Description("Current version.")]
+        [Category("Plugin"), Description("Current version.")]
         public string Version
         {
             get
@@ -80,7 +88,7 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
-        [Category("IptvChannelsUserConfiguration"), Description("Description.")]
+        [Category("Plugin"), Description("Description.")]
         public string Description
         {
             get
@@ -89,7 +97,9 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
-        [Category("IptvChannelsUserConfiguration"), Description("Enable or disable the site.")]
+        [Category("Plugin"), Description("Enable or disable the site.")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [DBField()]
         public bool Enabled
         {
             get

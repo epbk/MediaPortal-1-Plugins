@@ -7,6 +7,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Reflection;
 using NLog;
+using MediaPortal.Pbk.Cornerstone.Database;
 
 namespace MediaPortal.IptvChannels.Settings
 {
@@ -40,11 +41,6 @@ namespace MediaPortal.IptvChannels.Settings
                 {
                     xmldoc.Load(GetConfigPath());
 
-                    //this.ProxyPort = TryParse(xmldoc.SelectSingleNode("//IptvChannels/General/PROXYport/text()"),
-                    //    Setting.PROXY_PORT_DEFAULT, System.Globalization.NumberStyles.Integer);
-                    //this.DeleteUnreferencedChannels = TryParse(xmldoc.SelectSingleNode("//IptvChannels/General/DeleteUnreferencedChannels/text()"), true);
-                    //this.WakeupForEpgGrabbing = TryParse(xmldoc.SelectSingleNode("//IptvChannels/General/WakeupForEpgGrabbing/text()"), false);
-                    
                     //Directory list
                     XmlNodeList siteList = xmldoc.SelectNodes("//IptvChannels/Sites/Site[@name]");
                     foreach (XmlNode siteNode in siteList)
@@ -54,13 +50,13 @@ namespace MediaPortal.IptvChannels.Settings
                             if (site.Name == siteNode.Attributes["name"].Value)
                             {
                                 //Load all properties
-                                IEnumerable<PropertyInfo> properties = site.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(CategoryAttribute), false));
+                                IEnumerable<PropertyInfo> properties = site.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(DBFieldAttribute), false));
                                 foreach (PropertyInfo p in properties)
                                 {
                                     if (p.Name != "Version" && p.Name != "Author" && p.Name != "Description")
                                     {
-                                        object[] atr = p.GetCustomAttributes(typeof(CategoryAttribute), false);
-                                        if (atr != null && atr.Length > 0 && ((CategoryAttribute)atr[0]).Category == "IptvChannelsUserConfiguration")
+                                        object[] atr = p.GetCustomAttributes(typeof(DBFieldAttribute), false);
+                                        if (atr != null && atr.Length > 0)
                                         {
 
                                             XmlNode pNode = siteNode.SelectSingleNode("./" + p.Name + "/text()");
@@ -126,14 +122,6 @@ namespace MediaPortal.IptvChannels.Settings
                 xmldoc.InsertBefore(xmlDeclaration, xmldoc.DocumentElement);
                 xmldoc.AppendChild(rootNode);
 
-                //General node
-                XmlElement generalNode = xmldoc.CreateElement("General");
-                rootNode.AppendChild(generalNode);
-
-                //AppendValue(xmldoc, generalNode, "PROXYport", this.ProxyPort.ToString());
-                //AppendValue(xmldoc, generalNode, "DeleteUnreferencedChannels", this.DeleteUnreferencedChannels.ToString());
-                //AppendValue(xmldoc, generalNode, "WakeupForEpgGrabbing", this.WakeupForEpgGrabbing.ToString());
-
                 //Sites
                 XmlElement siteList = xmldoc.CreateElement("Sites");
                 rootNode.AppendChild(siteList);
@@ -148,13 +136,13 @@ namespace MediaPortal.IptvChannels.Settings
                     siteList.AppendChild(siteNode);
 
                     //Save all properties
-                    IEnumerable<PropertyInfo> properties = site.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(CategoryAttribute), false));
+                    IEnumerable<PropertyInfo> properties = site.GetType().GetProperties().Where(prop => prop.IsDefined(typeof(DBFieldAttribute), false));
                     foreach (PropertyInfo p in properties)
                     {
                         if (p.Name != "Version" && p.Name != "Author" && p.Name != "Description")
                         {
-                            object[] atr = p.GetCustomAttributes(typeof(CategoryAttribute), false);
-                            if (atr != null && atr.Length > 0 && ((CategoryAttribute)atr[0]).Category == "IptvChannelsUserConfiguration")
+                            object[] atr = p.GetCustomAttributes(typeof(DBFieldAttribute), false);
+                            if (atr != null && atr.Length > 0)
                             {
                                 AppendValue(xmldoc, siteNode, p.Name, p.GetValue(site, null).ToString());
                             }

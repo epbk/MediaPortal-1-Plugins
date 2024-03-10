@@ -9,10 +9,10 @@ using System.Threading;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using TvLibrary;
 using TvDatabase;
 using System.ComponentModel;
 using NLog;
+using MediaPortal.Pbk.Cornerstone.Database;
 
 namespace MediaPortal.IptvChannels.SiteUtils.Sites
 {
@@ -43,7 +43,9 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #endregion
 
         #region Properties
-        [Category("IptvChannelsUserConfiguration"), Description("Include channels ČT 1, ČT 2, ČT 24, ČT Sport and ČT :D/Art"), DisplayName("Include Basic Channels"), Browsable(false)]
+        [Category("Channels"), Description("Include channels ČT 1, ČT 2, ČT 24, ČT Sport and ČT :D/Art"), DisplayName("Include Basic Channels"), Browsable(false)]
+        [DBField()]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public bool IncludeBasicChannels
         { get; set; }
 
