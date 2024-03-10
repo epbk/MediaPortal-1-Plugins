@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageClass xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Version>2.0</Version>
+  <Groups>
+    <Items>
+      <GroupItem Name="TvServerStarted">
+        <ParentGroup />
+        <DisplayName>TvServerStarted</DisplayName>
+        <DefaulChecked>false</DefaulChecked>
+        <Description>TvServerStarted</Description>
+        <Files>
+          <Items />
+        </Files>
+      </GroupItem>
+      <GroupItem Name="Plugin">
+        <ParentGroup />
+        <DisplayName>Plugin</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Plugin</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\bin\Release\IptvChannels.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{df8ecdfc-be14-4037-b535-1e0fdefd2748}-IptvChannels.dll</ZipFileName>
+              <DestinationFilename>%TvServerPlugins%\IptvChannels.dll</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+      <GroupItem Name="Libraries">
+        <ParentGroup />
+        <DisplayName>Libraries</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Libraries</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x86\sqlite.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{37f4509a-6a11-4ea4-bd46-a67761130bae}-sqlite.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\sqlite.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x64\sqlite.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{d6749bcc-14c2-4b3d-9cde-fb20920a2d7c}-sqlite.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\sqlite.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x86\TvServer\ManagedOpenSsl.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{64bc74ba-f8ce-4065-8ee3-6e21a4761e3e}-ManagedOpenSsl.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\ManagedOpenSsl.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x86\TvServer\MediaPortal.Pbk.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{62ddc6f6-48ff-48e4-9595-3ad13446f391}-MediaPortal.Pbk.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\MediaPortal.Pbk.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x64\TvServer\ManagedOpenSsl.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a60c5497-7b61-4bff-9efd-71a2ab7a1489}-ManagedOpenSsl.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\ManagedOpenSsl.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x64\TvServer\MediaPortal.Pbk.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{5bd2a399-50c2-41ba-8443-521d846bd722}-MediaPortal.Pbk.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\MediaPortal.Pbk.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x86\libcrypto-1_1.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{b8097173-2fd5-4a46-ae4d-776633e5c2cd}-libcrypto-1_1.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\libcrypto-1_1.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x86\libssl-1_1.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{1d01ffc8-421d-479e-b6e9-50a3acfa7b02}-libssl-1_1.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\libssl-1_1.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x64\libcrypto-1_1-x64.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{2be62a6b-2bbc-407e-8d0c-dd2ca5811cd5}-libcrypto-1_1-x64.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\libcrypto-1_1-x64.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x64\libssl-1_1-x64.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a61e90da-2b62-4e08-973c-1109c46417a6}-libssl-1_1-x64.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\libssl-1_1-x64.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\BrotliSharpLib.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{5f961ee9-0878-4834-8d77-3ea4808659c1}-BrotliSharpLib.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\BrotliSharpLib.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\curl-ca-bundle.crt</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{39772c5b-99d8-48a3-8814-061ca0c46454}-curl-ca-bundle.crt</ZipFileName>
+              <DestinationFilename>%TvServerBase%\curl-ca-bundle.crt</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\HtmlAgilityPack.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{23f4cb0d-ac0e-43b7-9e23-8b9db258772d}-HtmlAgilityPack.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\HtmlAgilityPack.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\SgmlReaderDll.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{9b04df64-4d26-46ca-8d54-5ed06afeb8aa}-SgmlReaderDll.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\SgmlReaderDll.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\NLog.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{6867b0ce-9410-4e1d-a5d6-196d4d639df2}-NLog.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\NLog.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Newtonsoft.Json.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{21750904-90f2-434e-8159-27661165f335}-Newtonsoft.Json.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Newtonsoft.Json.dll</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+    </Items>
+  </Groups>
+  <Sections>
+    <Items>
+      <SectionItem Guid="a90ce0b7-c9d5-44fc-ba3a-0417a2dbbc17" Name="Welcome Screen" ConditionGroup="" Condition="None">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>Welcome to the Extension Installer for [Name]</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Description">
+              <Value>This will install [Name] version [Version] on your computer.
+It is recommended that you close all other applications before continuing.
+Click Next to continue or Cancel to exit Setup.</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Welcome Screen</PanelName>
+        <WizardButtonsEnum>BackNextCancel</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="1dde52d2-7555-4508-849f-be0e48221e25" Name="Install Section" ConditionGroup="" Condition="None">
+        <Params>
+          <Items>
+            <SectionParam Name="Header Title">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Header title</Description>
+            </SectionParam>
+            <SectionParam Name="Header description">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Description of section, shown in under section title</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items>
+            <ActionItem Name="Stop TV Service" ActionType="Script" ConditionGroup="" Condition="None">
+              <Params>
+                <Items>
+                  <SectionParam Name="Script">
+                    <Value>//css_reference "MpeCore.dll";
+
+using MpeCore.Classes;
+using MpeCore;
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Threading;
+using System.Diagnostics;
+using System.ServiceProcess;
+
+public class Script
+{
+    public enum TvServiceState
+    {
+        NotInstalled,
+        StartPending,
+        Running,
+        StopPending,
+        Stopped
+    }
+
+    public static TvServiceState CheckTvServiceState()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            try
+            {
+                switch (sc.Status)
+                {
+                    case ServiceControllerStatus.Running:
+                        return TvServiceState.Running;
+                    case ServiceControllerStatus.StartPending:
+                        return TvServiceState.StartPending;
+                    case ServiceControllerStatus.StopPending:
+                        return TvServiceState.StopPending;
+                    case ServiceControllerStatus.Stopped:
+                        return TvServiceState.Stopped;
+                    default:
+                        throw new Exception(String.Format("Unknown TvService state: {0}", sc.Status));
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                return TvServiceState.NotInstalled;
+            }
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public static void StopTvService()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            sc.Stop();
+        }
+
+        Process[] processes = Process.GetProcessesByName("TvService");
+        while (true)
+        {
+            for (int i = 0; i &lt; processes.Length; i++)
+            {
+                if (!processes[i].HasExited)
+                    goto wait;
+            }
+            break;
+        wait:
+            Thread.Sleep(100);
+            continue;
+        }
+
+        for (int i = 0; i &lt; processes.Length; i++)
+            processes[i].Dispose();
+    }
+
+        public static void Main(PackageClass packageClass, ActionItem actionItem)
+        {
+            try
+            {
+                if (CheckTvServiceState() != TvServiceState.NotInstalled)
+                {
+                    bool bServiceStarted = false;
+                    while (true)
+                    {
+                        TvServiceState state = CheckTvServiceState();
+
+                        if (state == TvServiceState.Running || state == TvServiceState.Stopped)
+                        {
+                            bServiceStarted = state == TvServiceState.Running;
+                            break;
+                        }
+
+                        Thread.Sleep(100);
+                    }
+
+                    if (bServiceStarted)
+                        StopTvService();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!packageClass.Silent)
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return;
+        }
+}</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
+                  </SectionParam>
+                  <SectionParam Name="Uninstall Script">
+                    <Value>//css_reference "MpeCore.dll";
+
+using MpeCore.Classes;
+using MpeCore;
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Threading;
+using System.Diagnostics;
+using System.ServiceProcess;
+
+public class Script
+{
+    public static void StartTvService()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            sc.Start();
+        }
+    }
+
+    public static void Main(PackageClass packageClass, UnInstallItem item)
+    {
+        try
+        {
+            if (packageClass.Groups["TvServerStarted"].Checked)
+                StartTvService();
+        }
+        catch (Exception ex)
+        {
+            if (!packageClass.Silent)
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
+</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
+                  </SectionParam>
+                </Items>
+              </Params>
+              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
+            </ActionItem>
+            <ActionItem Name="InstallFiles" ActionType="InstallFiles" ConditionGroup="" Condition="None">
+              <Params>
+                <Items />
+              </Params>
+              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
+            </ActionItem>
+            <ActionItem Name="Start TV Service" ActionType="Script" ConditionGroup="" Condition="None">
+              <Params>
+                <Items>
+                  <SectionParam Name="Script">
+                    <Value>//css_reference "MpeCore.dll";
+
+using MpeCore.Classes;
+using MpeCore;
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Threading;
+using System.Diagnostics;
+using System.ServiceProcess;
+
+public class Script
+{
+    public static void StartTvService()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            sc.Start();
+        }
+    }
+
+    public static void Main(PackageClass packageClass, ActionItem actionItem)
+    {
+        try
+        {
+            StartTvService();
+        }
+        catch (Exception ex)
+        {
+            if (!packageClass.Silent)
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
+
+</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
+                  </SectionParam>
+                  <SectionParam Name="Uninstall Script">
+                    <Value>//css_reference "MpeCore.dll";
+
+using MpeCore.Classes;
+using MpeCore;
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Threading;
+using System.Diagnostics;
+using System.ServiceProcess;
+
+public class Script
+{
+    public enum TvServiceState
+    {
+        NotInstalled,
+        StartPending,
+        Running,
+        StopPending,
+        Stopped
+    }
+
+    public static TvServiceState CheckTvServiceState()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            try
+            {
+                switch (sc.Status)
+                {
+                    case ServiceControllerStatus.Running:
+                        return TvServiceState.Running;
+                    case ServiceControllerStatus.StartPending:
+                        return TvServiceState.StartPending;
+                    case ServiceControllerStatus.StopPending:
+                        return TvServiceState.StopPending;
+                    case ServiceControllerStatus.Stopped:
+                        return TvServiceState.Stopped;
+                    default:
+                        throw new Exception(String.Format("Unknown TvService state: {0}", sc.Status));
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                return TvServiceState.NotInstalled;
+            }
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public static void StopTvService()
+    {
+        using (ServiceController sc = new ServiceController("TvService"))
+        {
+            sc.Stop();
+        }
+
+        Process[] processes = Process.GetProcessesByName("TvService");
+        while (true)
+        {
+            for (int i = 0; i &lt; processes.Length; i++)
+            {
+                if (!processes[i].HasExited)
+                    goto wait;
+            }
+            break;
+        wait:
+            Thread.Sleep(100);
+            continue;
+        }
+
+        for (int i = 0; i &lt; processes.Length; i++)
+            processes[i].Dispose();
+    }
+
+    public static void Main(PackageClass packageClass, UnInstallItem item)
+    {
+        try
+        {
+
+            if (CheckTvServiceState() != TvServiceState.NotInstalled)
+            {
+                bool bServiceStarted = false;
+                while (true)
+                {
+                    TvServiceState state = CheckTvServiceState();
+
+                    if (state == TvServiceState.Running || state == TvServiceState.Stopped)
+                    {
+                        bServiceStarted = state == TvServiceState.Running;
+                        break;
+                    }
+
+                    Thread.Sleep(100);
+                }
+
+                if (bServiceStarted)
+                {
+                    StopTvService();
+                    packageClass.Groups["TvServerStarted"].DefaulChecked = true;
+                    packageClass.Groups["TvServerStarted"].Checked = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            //if (!packageClass.Silent)
+            {
+                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        return;
+    }
+}
+
+</Value>
+                    <ValueType>Script</ValueType>
+                    <Description />
+                  </SectionParam>
+                </Items>
+              </Params>
+              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
+            </ActionItem>
+          </Items>
+        </Actions>
+        <IncludedGroups>
+          <string>Default</string>
+        </IncludedGroups>
+        <PanelName>Install Section</PanelName>
+        <WizardButtonsEnum>Next</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="20b8ef3a-6639-467b-84f8-fa2a55cefad3" Name="Setup Complete" ConditionGroup="" Condition="None">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>The Extension Installer Wizard has successfully installed [Name].</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Show radio buttons">
+              <Value />
+              <ValueType>Bool</ValueType>
+              <Description>Use radiobutton in place of combobox</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Setup Complete</PanelName>
+        <WizardButtonsEnum>BackNextCancel</WizardButtonsEnum>
+      </SectionItem>
+    </Items>
+  </Sections>
+  <Dependencies>
+    <Items>
+      <DependencyItem>
+        <Type>MediaPortal</Type>
+        <Id />
+        <MinVersion>
+          <Major>1</Major>
+          <Minor>32</Minor>
+          <Build>100</Build>
+          <Revision>0</Revision>
+        </MinVersion>
+        <MaxVersion>
+          <Major>*</Major>
+          <Minor>*</Minor>
+          <Build>*</Build>
+          <Revision>*</Revision>
+        </MaxVersion>
+        <WarnOnly>true</WarnOnly>
+        <Message>Requires MediaPortal 1.32.100.0 or higher!</Message>
+        <Name>MediaPortal</Name>
+        <Condition>None</Condition>
+      </DependencyItem>
+      <DependencyItem>
+        <Type>Extension</Type>
+        <Id>46346a1d-b99f-4e4a-a018-6abd93f42497</Id>
+        <MinVersion>
+          <Major>2</Major>
+          <Minor>2</Minor>
+          <Build>28</Build>
+          <Revision>8799</Revision>
+        </MinVersion>
+        <MaxVersion>
+          <Major>*</Major>
+          <Minor>*</Minor>
+          <Build>*</Build>
+          <Revision>*</Revision>
+        </MaxVersion>
+        <WarnOnly>true</WarnOnly>
+        <Message>Requires MediaPortal IPTV filter and url source splitter 2.2.28.8799 or higher!</Message>
+        <Name>MediaPortal IPTV filter and url source splitter</Name>
+        <Condition>None</Condition>
+      </DependencyItem>
+    </Items>
+  </Dependencies>
+  <PluginDependencies>
+    <Items />
+  </PluginDependencies>
+  <GeneralInfo>
+    <Name>IptvChannels</Name>
+    <Id>ace5d036-6abc-4a15-b82c-e3db580561d0</Id>
+    <Author>PBK</Author>
+    <HomePage />
+    <ForumPage />
+    <UpdateUrl />
+    <Version>
+      <Major>0</Major>
+      <Minor>9</Minor>
+      <Build>0</Build>
+      <Revision>0</Revision>
+    </Version>
+    <ExtensionDescription>IPTV channels</ExtensionDescription>
+    <VersionDescription />
+    <DevelopmentStatus>Stable</DevelopmentStatus>
+    <OnlineLocation />
+    <ReleaseDate>2024-03-09T18:27:26</ReleaseDate>
+    <Tags>iptv,tv server plugins</Tags>
+    <PlatformCompatibility>AnyCPU</PlatformCompatibility>
+    <Location>.\IptvChannels.v[Version].mpe1</Location>
+    <Params>
+      <Items>
+        <SectionParam Name="Icon">
+          <Value />
+          <ValueType>File</ValueType>
+          <Description>The icon file of the package (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Online Icon">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>The icon file of the package stored online (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Configuration file">
+          <Value />
+          <ValueType>Template</ValueType>
+          <Description>The file used to configure the extension.
+ If have .exe extension the will be executed
+ If have .dll extension used like MP plugin configuration</Description>
+        </SectionParam>
+        <SectionParam Name="Online Screenshots">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>Online stored screenshot urls separated by ; </Description>
+        </SectionParam>
+        <SectionParam Name="Force to uninstall on update">
+          <Value>NO</Value>
+          <ValueType>Bool</ValueType>
+          <Description>Show dialog and force to uninstall previous version when updating an extension. Should only be disabled if you are using an NSIS/MSI installer.</Description>
+        </SectionParam>
+      </Items>
+    </Params>
+  </GeneralInfo>
+  <UniqueFileList>
+    <Items>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\bin\Release\IptvChannels.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{df8ecdfc-be14-4037-b535-1e0fdefd2748}-IptvChannels.dll</ZipFileName>
+        <DestinationFilename>%TvServerPlugins%\IptvChannels.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x86\sqlite.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{37f4509a-6a11-4ea4-bd46-a67761130bae}-sqlite.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\sqlite.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x64\sqlite.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{d6749bcc-14c2-4b3d-9cde-fb20920a2d7c}-sqlite.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\sqlite.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x86\TvServer\ManagedOpenSsl.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{64bc74ba-f8ce-4065-8ee3-6e21a4761e3e}-ManagedOpenSsl.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\ManagedOpenSsl.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x86\TvServer\MediaPortal.Pbk.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{62ddc6f6-48ff-48e4-9595-3ad13446f391}-MediaPortal.Pbk.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\MediaPortal.Pbk.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x64\TvServer\ManagedOpenSsl.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a60c5497-7b61-4bff-9efd-71a2ab7a1489}-ManagedOpenSsl.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\ManagedOpenSsl.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\..\MediaPortal.Pbk\MediaPortal.Pbk\bin\x64\TvServer\MediaPortal.Pbk.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{5bd2a399-50c2-41ba-8443-521d846bd722}-MediaPortal.Pbk.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\MediaPortal.Pbk.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x86\libcrypto-1_1.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{b8097173-2fd5-4a46-ae4d-776633e5c2cd}-libcrypto-1_1.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\libcrypto-1_1.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x86\libssl-1_1.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{1d01ffc8-421d-479e-b6e9-50a3acfa7b02}-libssl-1_1.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\libssl-1_1.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x64\libcrypto-1_1-x64.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{2be62a6b-2bbc-407e-8d0c-dd2ca5811cd5}-libcrypto-1_1-x64.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\libcrypto-1_1-x64.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x64\libssl-1_1-x64.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a61e90da-2b62-4e08-973c-1109c46417a6}-libssl-1_1-x64.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\libssl-1_1-x64.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\BrotliSharpLib.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{5f961ee9-0878-4834-8d77-3ea4808659c1}-BrotliSharpLib.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\BrotliSharpLib.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\curl-ca-bundle.crt</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{39772c5b-99d8-48a3-8814-061ca0c46454}-curl-ca-bundle.crt</ZipFileName>
+        <DestinationFilename>%TvServerBase%\curl-ca-bundle.crt</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\HtmlAgilityPack.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{23f4cb0d-ac0e-43b7-9e23-8b9db258772d}-HtmlAgilityPack.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\HtmlAgilityPack.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\SgmlReaderDll.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{9b04df64-4d26-46ca-8d54-5ed06afeb8aa}-SgmlReaderDll.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\SgmlReaderDll.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\NLog.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{6867b0ce-9410-4e1d-a5d6-196d4d639df2}-NLog.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\NLog.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Newtonsoft.Json.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{21750904-90f2-434e-8159-27661165f335}-Newtonsoft.Json.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Newtonsoft.Json.dll</DestinationFilename>
+      </FileItem>
+    </Items>
+  </UniqueFileList>
+  <ProjectSettings>
+    <FolderGroups />
+    <ProjectFilename>IptvChannels.xmp2</ProjectFilename>
+    <UpdatePath1 />
+    <UpdatePath2 />
+    <UpdatePath3 />
+  </ProjectSettings>
+  <IsSkin>false</IsSkin>
+</PackageClass>
