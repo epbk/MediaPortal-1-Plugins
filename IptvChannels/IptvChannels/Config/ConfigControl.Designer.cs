@@ -44,6 +44,9 @@ namespace SetupTv.Sections
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.buttonCreateChannel = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.checkBoxUseSplitter = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxFFMPEG = new System.Windows.Forms.TextBox();
@@ -57,8 +60,6 @@ namespace SetupTv.Sections
             this.bSave = new MediaPortal.UserInterface.Controls.MPButton();
             this.tabMain = new System.Windows.Forms.TabControl();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.dataGridView_ConList = new MediaPortal.IptvChannels.Controls.DataGridViewCustom();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -151,7 +152,6 @@ namespace SetupTv.Sections
             this.propertyGridPlugins.LineColor = System.Drawing.SystemColors.ControlDark;
             this.propertyGridPlugins.Location = new System.Drawing.Point(3, 33);
             this.propertyGridPlugins.Name = "propertyGridPlugins";
-            this.propertyGridPlugins.PropertySort = System.Windows.Forms.PropertySort.NoSort;
             this.propertyGridPlugins.Size = new System.Drawing.Size(420, 322);
             this.propertyGridPlugins.TabIndex = 24;
             this.propertyGridPlugins.ToolbarVisible = false;
@@ -192,6 +192,7 @@ namespace SetupTv.Sections
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.buttonCreateChannel);
             this.tabPage5.Controls.Add(this.label5);
             this.tabPage5.Controls.Add(this.label4);
             this.tabPage5.Controls.Add(this.checkBoxUseSplitter);
@@ -211,6 +212,36 @@ namespace SetupTv.Sections
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "Link Generator";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // buttonCreateChannel
+            // 
+            this.buttonCreateChannel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCreateChannel.Enabled = false;
+            this.buttonCreateChannel.Location = new System.Drawing.Point(240, 171);
+            this.buttonCreateChannel.Name = "buttonCreateChannel";
+            this.buttonCreateChannel.Size = new System.Drawing.Size(102, 23);
+            this.buttonCreateChannel.TabIndex = 20;
+            this.buttonCreateChannel.Text = "Create Channel";
+            this.buttonCreateChannel.UseVisualStyleBackColor = true;
+            this.buttonCreateChannel.Click += new System.EventHandler(this.buttonCreateChannel_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(38, 255);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(203, 13);
+            this.label5.TabIndex = 19;
+            this.label5.Text = "(convert input format to Transport Stream)";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(38, 308);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(256, 13);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "(proxy cache media server for HLS and MPEG Dash)";
             // 
             // checkBoxUseSplitter
             // 
@@ -242,6 +273,7 @@ namespace SetupTv.Sections
             this.textBoxFFMPEG.Name = "textBoxFFMPEG";
             this.textBoxFFMPEG.Size = new System.Drawing.Size(414, 20);
             this.textBoxFFMPEG.TabIndex = 15;
+            this.textBoxFFMPEG.TextChanged += new System.EventHandler(this.textBoxSource_TextChanged);
             // 
             // label2
             // 
@@ -286,11 +318,12 @@ namespace SetupTv.Sections
             // buttonCopyToClipboard
             // 
             this.buttonCopyToClipboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCopyToClipboard.Enabled = false;
             this.buttonCopyToClipboard.Location = new System.Drawing.Point(348, 171);
             this.buttonCopyToClipboard.Name = "buttonCopyToClipboard";
             this.buttonCopyToClipboard.Size = new System.Drawing.Size(75, 23);
             this.buttonCopyToClipboard.TabIndex = 10;
-            this.buttonCopyToClipboard.Text = "Copy";
+            this.buttonCopyToClipboard.Text = "Copy Link";
             this.buttonCopyToClipboard.UseVisualStyleBackColor = true;
             this.buttonCopyToClipboard.Click += new System.EventHandler(this.buttonCopyToClipboard_Click);
             // 
@@ -300,6 +333,7 @@ namespace SetupTv.Sections
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxResult.Location = new System.Drawing.Point(9, 145);
             this.textBoxResult.Name = "textBoxResult";
+            this.textBoxResult.ReadOnly = true;
             this.textBoxResult.Size = new System.Drawing.Size(414, 20);
             this.textBoxResult.TabIndex = 9;
             // 
@@ -351,24 +385,6 @@ namespace SetupTv.Sections
             this.imageList.Images.SetKeyName(9, "Warn");
             this.imageList.Images.SetKeyName(10, "ScheduleDisabled.png");
             this.imageList.Images.SetKeyName(11, "Stopping");
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(38, 308);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(249, 13);
-            this.label4.TabIndex = 18;
-            this.label4.Text = "(proxy cache media server for HLS and MPD Dash)";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(38, 255);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(203, 13);
-            this.label5.TabIndex = 19;
-            this.label5.Text = "(convert input format to Transport Stream)";
             // 
             // dataGridView_ConList
             // 
@@ -544,5 +560,6 @@ namespace SetupTv.Sections
         private System.Windows.Forms.CheckBox checkBoxUseSplitter;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button buttonCreateChannel;
     }
 }

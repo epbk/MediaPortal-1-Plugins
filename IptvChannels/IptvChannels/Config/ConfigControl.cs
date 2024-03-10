@@ -362,22 +362,45 @@ namespace SetupTv.Sections
 
         private void updateLinkResult()
         {
-            MediaPortal.IptvChannels.GenerateLinkConfigEnum cfg =this.checkBoxUseSplitter.Checked ?
-                MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER |
-                MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS : MediaPortal.IptvChannels.GenerateLinkConfigEnum.NONE;
+            if (Uri.IsWellFormedUriString(this.textBoxSource.Text, UriKind.Absolute))
+            {
+                MediaPortal.IptvChannels.GenerateLinkConfigEnum cfg = this.checkBoxUseSplitter.Checked ?
+                    MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER |
+                    MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS : MediaPortal.IptvChannels.GenerateLinkConfigEnum.NONE;
 
-            if (this.checkBoxFfmpeg.Checked)
-                cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.FFMPEG;
+                if (this.checkBoxFfmpeg.Checked)
+                    cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.FFMPEG;
 
-            if (this.checkBoxCDN.Checked)
-                cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.CDN;
+                if (this.checkBoxCDN.Checked)
+                    cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.CDN;
 
-            this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(this.textBoxSource.Text, cfg, this.textBoxFFMPEG.Text.Trim());
+                this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(this.textBoxSource.Text, cfg, this.textBoxFFMPEG.Text.Trim());
+
+                this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = this.checkBoxUseSplitter.Checked;
+            }
+            else
+                this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = false;
+        }
+
+        private void buttonCreateChannel_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(this.textBoxResult.Text))
+            {
+                MediaPortal.Pbk.Controls.TextQueryForm f = new MediaPortal.Pbk.Controls.TextQueryForm()
+                {
+                    Text = "Enter Channel name"
+                };
+
+                f.StartPosition = FormStartPosition.CenterParent;
+
+                if (f.ShowDialog() == DialogResult.OK && this._Plugin.CreateChannel(f.Query, this.textBoxResult.Text))
+                    MessageBox.Show("Channel has been created.");
+            }
         }
 
 
         #region CDN
-        
+
         private DataGridViewRow createCDNTaskRow(JToken j)
         {
             DataGridViewRow row = this.dataGridViewCDN.CreateGroupRow(j, false, (string)j["title"]);
@@ -812,7 +835,5 @@ namespace SetupTv.Sections
         #endregion
 
         #endregion
-
-
     }
 }
