@@ -406,7 +406,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 {
                     //Timeout elapsed; no data has been received within the interval
                     this.Info = "No Data. Closing connection with the server. [" + this._HandlerId + "]";
-                    if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][Process] No Data. Closing connection with the server.", this._HandlerId);
+                    _Logger.Error("[{0}][Process] No Data. Closing connection with the server.", this._HandlerId);
 
                     break;
                 }
