@@ -155,7 +155,7 @@ namespace MediaPortal.IptvChannels.Database
             }
         }private string _WorkPath = TEMP_PATH_DEFAULT + "MediaPortalIptvChannels\\";
 
-        [DBFieldAttribute(FieldName = "proxyTimeoutNoClients", Default = "5000")]
+        [DBFieldAttribute(FieldName = "proxyTimeoutNoClients", Default = "15000")]
         [Description("Timeout - no clients.")]
         [DisplayName("Timeout: no clients")]
         [DefaultValue(TIMEOUT_PERIOD_NO_CLIENTS)]
@@ -178,7 +178,7 @@ namespace MediaPortal.IptvChannels.Database
             }
         }private int _TimeoutNoClients = TIMEOUT_PERIOD_NO_CLIENTS;  //[ms]
 
-        [DBFieldAttribute(FieldName = "proxyTimeoutNoData", Default = "5000")]
+        [DBFieldAttribute(FieldName = "proxyTimeoutNoData", Default = "20000")]
         [Description("Timeout - no data.")]
         [DisplayName("Timeout: no data")]
         [DefaultValue(TIMEOUT_PERIOD_NO_DATA)]
