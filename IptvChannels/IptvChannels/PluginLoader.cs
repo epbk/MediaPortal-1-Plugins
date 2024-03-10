@@ -53,10 +53,15 @@ namespace MediaPortal.IptvChannels
             this._Plugins.Clear();
             try
             {
-                int iIdx = System.Reflection.Assembly.GetExecutingAssembly().Location.LastIndexOf("\\");
-                string[] strFiles = System.IO.Directory.GetFiles(System.Reflection.Assembly.GetExecutingAssembly().Location.Substring(0, iIdx + 1) + "IptvChannelsPlugins\\", "*.dll");
-                foreach (string strFile in strFiles)
-                    this.LoadPlugin(strFile);
+                int iIdx = Assembly.GetExecutingAssembly().Location.LastIndexOf("\\");
+                string strDirectory = Assembly.GetExecutingAssembly().Location.Substring(0, iIdx + 1) + "IptvChannelsPlugins\\";
+                if (Directory.Exists(strDirectory))
+                {
+                    foreach (string strFile in Directory.GetFiles(strDirectory, "*.dll"))
+                        this.LoadPlugin(strFile);
+                }
+                else
+                    Directory.CreateDirectory(strDirectory);
             }
             catch (Exception ex)
             {
