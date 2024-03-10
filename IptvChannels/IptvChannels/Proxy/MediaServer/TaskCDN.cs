@@ -49,6 +49,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private int _CleaningPeriod = 5;
         private int _CleaningCountDown = -1;
         private int _AutoTerminateCountDown = -1;
+        private bool _AutoTerminateReset = false;
 
         private bool _QueueStarted = false;
 
@@ -123,7 +124,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 this._Stopping = 0;
                 this.Status = TaskStatusEnum.Starting;
 
-                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                this._AutoTerminateReset = true;
 
                 this._CleaningCountDown = this._CleaningPeriod;
                 this._TimerMaintenance = new System.Timers.Timer();
@@ -212,13 +213,13 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 
         public bool IsRequestAvailable
         {
-            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
+                this._AutoTerminateReset = true;
+
                 if (this.Status != TaskStatusEnum.Running)
                     return false;
-
-                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                
                 return true;
             }
         }
@@ -235,11 +236,11 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             {
                 Interlocked.Increment(ref this._HttpRequestCounter);
 
+                //Reset autoterminate timer
+                this._AutoTerminateReset = true;
+
                 if (this.Status != TaskStatusEnum.Running)
                     return false;
-
-                //Reset autoterminate timer
-                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
 
                 //Process http request
                 if (!uri.LocalPath.StartsWith(this.LeadingUriPath))
@@ -1382,11 +1383,19 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
             lock (this)
             {
-                if (this.Autoterminate && this._AutoTerminateCountDown > 0)
+                if (this._AutoTerminateReset)
                 {
-                    this._AutoTerminateCountDown -= 1000;
-                    if (this._AutoTerminateCountDown <= 0)
-                        this.Stop();
+                    this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                    this._AutoTerminateReset = false;
+                }
+                else
+                {
+                    if (this.Status == TaskStatusEnum.Running && this.Autoterminate && this._AutoTerminateCountDown > 0)
+                    {
+                        this._AutoTerminateCountDown -= 1000;
+                        if (this._AutoTerminateCountDown <= 0)
+                            this.Stop();
+                    }
                 }
             }
         }
