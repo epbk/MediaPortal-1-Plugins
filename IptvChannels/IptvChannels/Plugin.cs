@@ -157,7 +157,9 @@ namespace MediaPortal.IptvChannels
 
                 if ((cfg & GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER) == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER)
                 {
-                    return URL_FILTER_BASE + HttpUtility.UrlEncode(strResult) +
+                    return URL_FILTER_BASE + HttpUtility.UrlEncode(
+                        cfg == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER || cfg == (GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER | GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS)
+                        ? strUrl : strResult) +
                         ((cfg & GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS) == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS
                             ? URL_FILTER_PARAM : null);
                 }
