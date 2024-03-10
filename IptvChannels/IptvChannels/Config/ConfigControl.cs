@@ -137,6 +137,8 @@ namespace SetupTv.Sections
         {
             if (this._SaveRq)
             {
+                this._Plugin.PluginSettings.Save();
+
                 MediaPortal.Pbk.Net.Http.HttpUserWebRequest wr = new MediaPortal.Pbk.Net.Http.HttpUserWebRequest("http://127.0.0.1:" + this._Plugin.Settings.HttpServerPort 
                     + MediaPortal.IptvChannels.Plugin.HTTP_PATH_APPLY_SETTINGS);
                 wr.Post = Encoding.UTF8.GetBytes(this._Plugin.Settings.SerializeJson(new StringBuilder(1024)).ToString());
