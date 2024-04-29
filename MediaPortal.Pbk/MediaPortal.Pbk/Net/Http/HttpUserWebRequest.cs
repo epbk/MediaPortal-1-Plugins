@@ -1033,6 +1033,23 @@ namespace MediaPortal.Pbk.Net.Http
         }
         private string _ServerUrl;
 
+        public HttpUserWebRequestArguments HttpArguments
+        {
+            set
+            {
+                if (value != null)
+                {
+                    if (string.IsNullOrWhiteSpace(this._ServerUrl))
+                    {
+                        _Logger.Error("[{0}][HttpArguments] Server url is null", this._Id);
+                        throw new ArgumentNullException("HttpArguments: Server url is null");
+                    }
+
+                    applyHttpArguments(this._ServerUrl, this, value);
+                }
+            }
+        }
+
         public Uri Uri
         {
             get
@@ -1562,6 +1579,12 @@ namespace MediaPortal.Pbk.Net.Http
         {
             this.init(strUrl);
         }
+        public HttpUserWebRequest(string strUrl, HttpUserWebRequestArguments args)
+            : this()
+        {
+            this.init(strUrl);
+            applyHttpArguments(strUrl, this, args);
+        }
         #endregion
 
         #region Public methods
@@ -1690,6 +1713,38 @@ namespace MediaPortal.Pbk.Net.Http
         }
         public static T Download<T>(
             string strUrl,
+            HttpMethodEnum method = HttpMethodEnum.GET,
+            Encoding enc = null,
+            HttpUserWebRequestArguments args = null,
+            BufferHandler postDataSendHandler = null,
+            string strProxy = null,
+            Utils.OptionEnum useOpenSSL = Utils.OptionEnum.Default,
+            bool bAllowRedirect = true,
+            Utils.OptionEnum allowSystemProxy = Utils.OptionEnum.Default,
+            bool bAllowKeepAlive = true,
+            bool bAllowCookies = true,
+            int iConnectTimout = _CONNECT_TIMEOUT_DEFAULT,
+            int iResponseTimout = _RESPONSE_TIMEOUT_DEFAULT
+            )
+        {
+            using (HttpUserWebRequest wr = new HttpUserWebRequest(strUrl))
+            {
+                applyHttpArguments(strUrl, wr, args);
+                wr.PostDataSendHandler = postDataSendHandler;
+                wr.AllowSystemProxy = allowSystemProxy;
+                wr.AllowRedirect = bAllowRedirect;
+                wr.UseOpenSSL = useOpenSSL;
+                wr.Proxy = strProxy;
+                wr.ConnectTimeout = iConnectTimout;
+                wr.ResponseTimeout = iResponseTimout;
+                wr.Method = method;
+                wr.AllowKeepAlive = bAllowKeepAlive;
+                wr.AllowCookies = bAllowCookies;
+                return wr.Download<T>(enc == null ? Encoding.UTF8 : enc);
+            }
+        }
+        public static T Download<T>(
+            string strUrl,
             out string strRedirect,
             out HttpStatusCode httpResult,
             HttpMethodEnum method = HttpMethodEnum.GET,
@@ -1726,6 +1781,42 @@ namespace MediaPortal.Pbk.Net.Http
                 wr.HttpRequestFields = httpRequestFields;
                 wr.UseOpenSSL = useOpenSSL;
                 wr.Cookies = cookies;
+                wr.Proxy = strProxy;
+                wr.ConnectTimeout = iConnectTimout;
+                wr.ResponseTimeout = iResponseTimout;
+                wr.Method = method;
+                wr.AllowKeepAlive = bAllowKeepAlive;
+                wr.AllowCookies = bAllowCookies;
+                object o = wr.Download<T>(enc == null ? Encoding.UTF8 : enc);
+                httpResult = wr._HttpResponseCode;
+                strRedirect = wr._ServerUrlRedirect;
+                return (T)o;
+            }
+        }
+        public static T Download<T>(
+            string strUrl,
+            out string strRedirect,
+            out HttpStatusCode httpResult,
+            HttpMethodEnum method = HttpMethodEnum.GET,
+            Encoding enc = null,
+            HttpUserWebRequestArguments args = null,
+            BufferHandler postDataSendHandler = null,
+            string strProxy = null,
+            Utils.OptionEnum useOpenSSL = Utils.OptionEnum.Default,
+            bool bAllowRedirect = true,
+            Utils.OptionEnum allowSystemProxy = Utils.OptionEnum.Default,
+            bool bAllowKeepAlive = true,
+            bool bAllowCookies = true,
+            int iConnectTimout = _CONNECT_TIMEOUT_DEFAULT,
+            int iResponseTimout = _RESPONSE_TIMEOUT_DEFAULT)
+        {
+            using (HttpUserWebRequest wr = new HttpUserWebRequest(strUrl))
+            {
+                applyHttpArguments(strUrl, wr, args);
+                wr.PostDataSendHandler = postDataSendHandler;
+                wr.AllowSystemProxy = allowSystemProxy;
+                wr.AllowRedirect = bAllowRedirect;
+                wr.UseOpenSSL = useOpenSSL;
                 wr.Proxy = strProxy;
                 wr.ConnectTimeout = iConnectTimout;
                 wr.ResponseTimeout = iResponseTimout;
@@ -4124,6 +4215,37 @@ namespace MediaPortal.Pbk.Net.Http
                 throw new Exception("Invalid POST request.");
 
             return sb.ToString();
+        }
+
+        private static void applyHttpArguments(string strUrl, HttpUserWebRequest wr, HttpUserWebRequestArguments args)
+        {
+            if (args != null)
+            {
+                wr.UserAgent = args.UserAgent;
+                wr.Accept = args.Accept;
+                wr.AcceptLanguage = args.AcceptLanguage;
+                wr.ContentType = args.ContentType;
+                wr.Referer = args.Referer;
+                wr.HttpRequestFields = args.Fields;
+                wr.Post = args.PostData;
+
+                if (args.Cookies != null)
+                {
+                    Uri uri = new Uri(strUrl);
+                    wr.Cookies = new CookieContainer();
+                    for (int i = 0; i < args.Cookies.Count; i++)
+                        wr.Cookies.Add(uri, new Cookie(args.Cookies.GetKey(i), args.Cookies[i]));
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(wr.UserAgent))
+                wr.UserAgent = HttpHeaderField.HTTP_DEFAULT_USER_AGENT;
+
+            if (string.IsNullOrWhiteSpace(wr.Accept))
+                wr.Accept = HttpHeaderField.HTTP_DEFAULT_ACCEPT;
+
+            if (string.IsNullOrWhiteSpace(wr.AcceptLanguage))
+                wr.AcceptLanguage = HttpHeaderField.HTTP_DEFAULT_ACCEPT_LANGUAGE;
         }
 
         private static Socket createConnection(Uri uri, int iConnectTiemout)

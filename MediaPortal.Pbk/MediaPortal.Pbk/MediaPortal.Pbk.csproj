@@ -496,6 +496,7 @@
     <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventArgs.cs" />
     <Compile Include="Net\Http\HttpUserWebBeforeSaveToFileEventHandler.cs" />
     <Compile Include="Net\Http\HttpUserWebRequest.cs" />
+    <Compile Include="Net\Http\HttpUserWebRequestArguments.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestAsyncResult.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestEventArgs.cs" />
     <Compile Include="Net\Http\HttpUserWebRequestEventHandler.cs" />
