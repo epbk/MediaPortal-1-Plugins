@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Net.Sockets;
+using System.Net;
+using System.IO;
 using NLog;
 
 namespace MediaPortal.IptvChannels.Proxy
@@ -15,6 +17,14 @@ namespace MediaPortal.IptvChannels.Proxy
         public const int TS_BLOCK_MARKER = 0x47;
         private const int REFRESH_PERIOD = 1000; //1s
         #endregion
+
+        private enum ProcessResultEnum
+        {
+            Unknown,
+            NoData,
+            NoClients,
+            Terminate,
+        }
 
         #region Private Fields
 
@@ -36,8 +46,8 @@ namespace MediaPortal.IptvChannels.Proxy
         private int _TimoutNoClients = Database.dbSettings.Instance.TimeoutNoClients;
         private int _TimoutNoData = Database.dbSettings.Instance.TimeoutNoData;
 
-        private DateTime _OpenTS = new DateTime();
-        private DateTime _StartProcesTS = new DateTime();
+        private DateTime _OpenTimeStamp = new DateTime();
+        private DateTime _StartProcesTimeStamp = new DateTime();
 
         private Thread _ThreadProcess = null;
         private bool _ForceTerminate = false;
@@ -47,6 +57,8 @@ namespace MediaPortal.IptvChannels.Proxy
         private static System.Globalization.CultureInfo _CiEn = new System.Globalization.CultureInfo("en-US");
 
         private static List<ConnectionEventHandler> _EventTargets = new List<ConnectionEventHandler>();
+        
+        private Plugin.GetSiteLinkHandler getLinkHandler;
         #endregion
 
         #region Public Fields
@@ -67,8 +79,15 @@ namespace MediaPortal.IptvChannels.Proxy
         }
 
         public bool LogEvents = false;
-        public string ServerUrl;
-        public string Args;
+        public string ServerUrl { get; private set; } = null;
+        public string Args { get; private set; } = null;
+        public string SiteUtil { get; private set; } = null;
+        public string ChannelId { get; private set; } = null;
+        public bool UseMediaServer { get; private set; } = Database.dbSettings.Instance.UseMediaServer;
+        public string DRMLicenceServer { get; private set; } = null;
+        public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments { get; private set; } = null;
+
+        public StreamTypeEnum StreamType { get; private set; } = StreamTypeEnum.Unknown;
 
         public string HandlerId
         { get { return this._HandlerId; } }
@@ -125,23 +144,76 @@ namespace MediaPortal.IptvChannels.Proxy
             this._Id = Interlocked.Increment(ref _IdCnt);
             this._HandlerId = this._Id.ToString("000");
 
-            this._OpenTS = DateTime.Now;
-            this._StartProcesTS = DateTime.Now;
+            this._OpenTimeStamp = DateTime.Now;
             this.ServerUrl = strServerUrl;
+
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ctor] URL: {1}", this._HandlerId, strServerUrl);
         }
         #endregion
 
-        public static ConnectionHandler Get(string strUrl, string strFFfmpegArgs)
+        public static ConnectionHandler Get(Dictionary<string, string> prm, Plugin.GetSiteLinkHandler getLinkHandler)
         {
             lock (_HandlerList)
             {
+                string strSite = null;
+                string strChannel = null;
+
+                if (!prm.TryGetValue(Plugin.URL_PARAMETER_NAME_URL, out string strUrl) || !Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
+                {
+                    //Invalid url; try get site/channel prms
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_SITE, out  strSite) && prm.TryGetValue(Plugin.URL_PARAMETER_NAME_CHANNEL, out strChannel)
+                        && !string.IsNullOrWhiteSpace(strSite) && !string.IsNullOrWhiteSpace(strChannel))
+                    {
+                        strUrl = strSite + '+' + strChannel;
+                    }
+                    else
+                        return null;
+                }
+
+                //Try find existing handler
                 ConnectionHandler handler = _HandlerList.Find(h => h.ServerUrl == strUrl);
                 if (handler == null)
                 {
+                    //New handler
                     handler = new ConnectionHandler(strUrl)
                     {
-                        Args = strFFfmpegArgs
+                        getLinkHandler = getLinkHandler,
+                        SiteUtil = strSite,
+                        ChannelId = strChannel,
+                        Args = prm.TryGetValue(Plugin.URL_PARAMETER_NAME_ARGUMENTS, out string strValue) ? strValue : null
                     };
+
+                    //MediaServer prm
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_MEDIA_SERVER, out strValue))
+                        handler.UseMediaServer = strValue == "1";
+
+                    //StreamType prm
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_STREAM_TYPE, out strValue))
+                    {
+                        switch (strValue)
+                        {
+                            case "ts":
+                                handler.StreamType = StreamTypeEnum.TransportStrem;
+                                break;
+
+                            case "hls":
+                                handler.StreamType = StreamTypeEnum.HLS;
+                                break;
+
+                            case "dash":
+                                handler.StreamType = StreamTypeEnum.Dash;
+                                break;
+                        }
+                    }
+
+                    //DRM LicenceServer
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER, out strValue) && !string.IsNullOrWhiteSpace(strValue))
+                        handler.DRMLicenceServer = strValue;
+
+                    //Http Arguments
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue) && !string.IsNullOrWhiteSpace(strValue))
+                        handler.HttpArguments = Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue);
+
                     _HandlerList.Add(handler);
 
                     if (_EventTargets.Count > 0)
@@ -260,6 +332,199 @@ namespace MediaPortal.IptvChannels.Proxy
 
         private void doProcess()
         {
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][DoProcess] Start...", this._HandlerId);
+
+            bool bHeaderSent = false;
+            int iAttempts = 5;
+            string strUrl;
+            byte[] buffer = null;
+            Stream remoteStream = null;
+            int iDataSize;
+
+            try
+            {
+                while (iAttempts-- > 0)
+                {
+                    if (this.SiteUtil != null)
+                    {
+                        //Get final url from plugin
+                        this.Info = "Getting URL from plugin...";
+                        SiteUtils.LinkResult result = this.getLinkHandler(this.SiteUtil, this.ChannelId);
+                        if (result != null)
+                        {
+                            strUrl = result.Url;
+                            this.DRMLicenceServer = result.DRMLicenceServer;
+                            this.HttpArguments = result.HttpArguments;
+                            this.StreamType = result.StreamType;
+                        }
+                        else
+                            strUrl = null;
+                    }
+                    else
+                        strUrl = this.ServerUrl;
+
+                    switch (this.StreamType)
+                    {
+                        case StreamTypeEnum.TransportStrem:
+                            if (Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
+                            {
+                                //Direct TransportStream
+
+                                this.Info = "Connecting to URL...";
+
+                                Client con = new Client(remoteStream, this.sendToAllClients);
+                                if (con.Connect())
+                                {
+                                    if (!bHeaderSent)
+                                    {
+                                        // Send http OK to the clients
+                                        this.sendToAllClients(null, 0, 0, -1, true, false);
+                                        bHeaderSent = true;
+                                    }
+
+                                    //Start monitoring
+                                    this._StartProcesTimeStamp = DateTime.Now;
+
+                                    ProcessResultEnum result = this.processMonitor(con, null);
+
+                                    if ((DateTime.Now - this._StartProcesTimeStamp).TotalSeconds >= 60)
+                                        iAttempts = 0;
+
+                                    con.Close();
+
+                                    switch (result)
+                                    {
+                                        case ProcessResultEnum.NoClients:
+                                        case ProcessResultEnum.Terminate:
+                                            return; //exit
+
+                                        case ProcessResultEnum.NoData:
+                                            //no data from the source stream; try to connect again
+                                            break;
+                                    }
+                                }
+                            }
+                            break;
+
+                        case StreamTypeEnum.Dash:
+                        case StreamTypeEnum.HLS:
+                            //HLS & DASH: use FFMPEG to convert the source stream to TransportStream
+
+                            if (this.UseMediaServer)
+                            {
+                                //MediaServer http cache is used
+                                StringBuilder sb = new StringBuilder(256);
+
+                                //Server
+                                sb.Append("http://127.0.0.1:");
+                                sb.Append(Database.dbSettings.Instance.HttpServerPort);
+
+                                //Path
+                                sb.Append(Plugin.HTTP_PATH_MEDIA_HANDLER);
+
+                                //Url
+                                sb.Append('?');
+                                sb.Append(Plugin.URL_PARAMETER_NAME_URL);
+                                sb.Append('=');
+                                sb.Append(System.Web.HttpUtility.UrlEncode(strUrl));
+
+                                //DRM licence server
+                                if (!string.IsNullOrWhiteSpace(this.DRMLicenceServer))
+                                {
+                                    sb.Append('&');
+                                    sb.Append(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER);
+                                    sb.Append('=');
+                                    sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMLicenceServer));
+                                }
+
+                                //Http user arguments
+                                if (this.HttpArguments != null)
+                                {
+                                    sb.Append('&');
+                                    sb.Append(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS);
+                                    sb.Append('=');
+                                    sb.Append(System.Web.HttpUtility.UrlEncode(this.HttpArguments.Serialize()));
+                                }
+
+                                strUrl = sb.ToString();
+                            }
+
+                            //Call FFMPEG
+                            this._StartProcesTimeStamp = DateTime.Now;
+                            this.doProcessFFMPEG(strUrl);
+                            return;
+
+                        case StreamTypeEnum.Unknown:
+                        default:
+                            //Unknown type; try determine the type from the response
+
+                            buffer = new byte[TS_BLOCK_SIZE];
+
+                            try
+                            {
+                                Pbk.Net.Http.HttpUserWebRequest rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl, this.HttpArguments);
+                                remoteStream = rq.GetResponseStream();
+                                if (rq.HttpResponseCode == HttpStatusCode.OK)
+                                {
+                                    iDataSize = remoteStream.Read(buffer, 0, buffer.Length);
+                                    if (iDataSize >= 7)
+                                    {
+                                        if (buffer[0] == TS_BLOCK_MARKER)
+                                        {
+                                            //TransportStream
+                                            _Logger.Debug("[{0}][DoProcess] StreamType: TS", this._HandlerId);
+                                            this.StreamType = StreamTypeEnum.TransportStrem;
+                                            goto case StreamTypeEnum.TransportStrem;
+                                        }
+
+                                        if (buffer[0] == '#' && buffer[1] == 'E' && buffer[2] == 'X' && buffer[3] == 'T' && buffer[4] == 'M' && buffer[5] == '3' && buffer[6] == 'U')
+                                        {
+                                            //HLS
+                                            _Logger.Debug("[{0}][DoProcess] StreamType: HLS", this._HandlerId);
+                                            this.StreamType = StreamTypeEnum.HLS;
+                                            rq.Close();
+                                            goto case StreamTypeEnum.HLS;
+                                        }
+
+                                        if (buffer[0] == '<' && (buffer[1] == '?' && buffer[2] == 'x' && buffer[3] == 'm' && buffer[4] == 'l')
+                                            || (buffer[1] == 'M' && buffer[2] == 'P' && buffer[3] == 'D'))
+                                        {
+                                            //MPEG DASH
+                                            _Logger.Debug("[{0}][DoProcess] StreamType: DASH", this._HandlerId);
+                                            this.StreamType = StreamTypeEnum.Dash;
+                                            rq.Close();
+                                            goto case StreamTypeEnum.Dash;
+                                        }
+
+                                        _Logger.Error("[{0}][DoProcess] Unknown stream type.", this._HandlerId);
+                                        return;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _Logger.Error("[{3}][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
+                            }
+
+                            break;
+                    }
+
+                    Thread.Sleep(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                _Logger.Error("[{3}][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
+            }
+            finally
+            {
+                this.close();
+                if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][DoProcess] Closed.", this._HandlerId);
+            }
+        }
+
+        private void doProcessFFMPEG(string strUrl)
+        {
             if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Start...", this._HandlerId);
 
             this.Info = "Connecting to UDP...";
@@ -268,7 +533,7 @@ namespace MediaPortal.IptvChannels.Proxy
             try
             {
                 //Init UDP
-                UdpClient udp = new UdpClient(null, this.sendToAllClients, 0); //port = 0 : pick free port
+                Client udp = new Client(null, this.sendToAllClients, 0); //port = 0 : pick free port
                 if (!udp.Connect())
                     return;
 
@@ -292,7 +557,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 //test.Exited += new EventHandler(restream_Exited);
                 pr.OutputDataReceived += this.outputHandler;
                 pr.ErrorDataReceived += this.errorHandler;
-                startInfo.Arguments = " -re -i " + this.ServerUrl + ' ' + this.Args + " -c copy -f mpegts udp://127.0.0.1:" + udp.Port;
+                startInfo.Arguments = " -re -i " + strUrl + ' ' + this.Args + " -c copy -f mpegts udp://127.0.0.1:" + udp.Port;
 
                 // Send http OK
                 this.sendToAllClients(null, 0, 0, -1, true, false);
@@ -371,8 +636,10 @@ namespace MediaPortal.IptvChannels.Proxy
         }
 
 
-        private void processMonitor(IClient client, Pbk.Utils.Buffering.IBuffer buffer)
+        private ProcessResultEnum processMonitor(IClient client, Pbk.Utils.Buffering.IBuffer buffer)
         {
+            ProcessResultEnum result = ProcessResultEnum.Unknown;
+
             ulong lDownloadedBytes = 0;
             int iTimeOutAct = 0;
 
@@ -381,8 +648,14 @@ namespace MediaPortal.IptvChannels.Proxy
 
             StringBuilder sbInfo = new StringBuilder(256);
 
-            while (!this._ForceTerminate)
+            while (true)
             {
+                if (this._ForceTerminate)
+                {
+                    result = ProcessResultEnum.Terminate;
+                    break;
+                }
+
                 Thread.Sleep(REFRESH_PERIOD);
                 
                 iSocketCnt = this._ClientList.Count;
@@ -393,7 +666,10 @@ namespace MediaPortal.IptvChannels.Proxy
                     iSocketCntTimeout = 0;
 
                 if (iSocketCntTimeout >= this._TimoutNoClients)
+                {
+                    result = ProcessResultEnum.NoClients;
                     break;
+                }
 
                 //Data timeout test
                 ulong lReadDiff = client.DataSent - lDownloadedBytes;
@@ -407,6 +683,8 @@ namespace MediaPortal.IptvChannels.Proxy
                     //Timeout elapsed; no data has been received within the interval
                     this.Info = "No Data. Closing connection with the server. [" + this._HandlerId + "]";
                     _Logger.Error("[{0}][Process] No Data. Closing connection with the server.", this._HandlerId);
+
+                    result = ProcessResultEnum.NoData;
 
                     break;
                 }
@@ -464,7 +742,7 @@ namespace MediaPortal.IptvChannels.Proxy
                         sbInfo.Append('%');
                     }
                     sbInfo.Append("   Handler duration: ");
-                    sbInfo.Append((DateTime.Now - this._OpenTS).ToString("hh\\:mm\\:ss"));
+                    sbInfo.Append((DateTime.Now - this._OpenTimeStamp).ToString("hh\\:mm\\:ss"));
                     this.Info = sbInfo.ToString();
                     #endregion
                 }    
@@ -473,6 +751,8 @@ namespace MediaPortal.IptvChannels.Proxy
             }
 
             this._DataSent = client.DataSent;
+
+            return result;
         }
 
 

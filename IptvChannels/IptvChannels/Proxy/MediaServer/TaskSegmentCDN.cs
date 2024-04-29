@@ -131,14 +131,13 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         public long Length = 0;
         public long BytesProcessed = 0;
-        public System.Threading.ManualResetEvent Downloaded = new System.Threading.ManualResetEvent(false);
+        public ManualResetEvent Downloaded = new ManualResetEvent(false);
         public object LockDataAvailable = new object();
         public ManualResetEvent FlagProcessing = new ManualResetEvent(false);
         public volatile bool IsContentLengthKnown = false;
 
         public TaskSegmentTypeEnum TaskSegmentType = TaskSegmentTypeEnum.File;
-        public string MP4_DecryptingKey = null;
-        public string MP4_InitFilePath = null;
+        public ContentProtection ContentProtection = null;
         public HlsDecryptor HLS_Decryptor = null;
 
         public Pbk.Net.Http.HttpUserWebRequest DownloadTask;
@@ -331,6 +330,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             using (Pbk.Net.Http.HttpUserWebRequest wr = resources.WebRequest)
                             {
                                 wr.Url = strUrl;
+                                wr.HttpArguments = this.HttpArguments;
+
                                 this.DownloadTask = wr;
 
                                 const int _TIMEOUT = 5000;
@@ -534,44 +535,103 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 case TaskSegmentTypeEnum.MP4EncryptedInit:
                 case TaskSegmentTypeEnum.MP4EncryptedMedia:
 
+                    #region MP4 decryption
                     string strFileSrc = this.FullPath + ".tmp";
                     string strFileDst = this.FullPath;
                     string strArgs;
-                    
+                    string strInitPath = this.ContentProtection.InitFileFullPath;
+                    string strKID = this.ContentProtection.KID;
+                    string strPSSH = this.ContentProtection.PSSH;
+                    string strKey = this.ContentProtection.DecryptionKey;
+
                     if (this.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit)
                     {
-                        //We need to backup encrypted init file for decrypting individual m4s fragments
-                        if (!File.Exists(this.MP4_InitFilePath))
-                            File.Copy(this.FullPath, this.MP4_InitFilePath);
+                        if (strKey == null) //do not decrypt
+                        {
+                            if (!File.Exists(strInitPath))
+                                File.Copy(this.FullPath, strInitPath);
 
-                        strArgs = string.Format(" --key {0} \"{1}\" \"{2}\"", this.MP4_DecryptingKey, strFileSrc, strFileDst);
+                            if (strKID == null)
+                            {
+                                byte[] kid = mp4GetDefaultKID(File.ReadAllBytes(this.FullPath));
+                                if (kid != null)
+                                {
+                                    this.ContentProtection.KID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
+                                    _Logger.Debug("[doPostProcess][{0}] MP4 Init - default KID: {0}", this.FullPath, this.ContentProtection.KID);
+                                }
+                            }
+
+                            break;
+                        }
+
+                        //We need to backup init file for decrypting individual m4s fragments
+                        if (!File.Exists(strInitPath))
+                            File.Copy(this.FullPath, strInitPath);
+
+                        strArgs = string.Format(" --key {0}:{1} \"{2}\" \"{3}\"", strKID, strKey, strFileSrc, strFileDst);
                     }
                     else
                     {
-                        //For m4s decryption we need encrypted init file
-                        if (!File.Exists(this.MP4_InitFilePath))
+                        //For m4s decryption we need init file
+                        if (!File.Exists(strInitPath))
                         {
                             _Logger.Error("[doPostProcess][decrypt][{0}] Init file doesn't exist.", this.FullPath);
-                            return MediaServer.JobStatus.Failed;
+                            return JobStatus.Failed;
                         }
 
-                        strArgs = string.Format(" --key {0} --fragments-info \"{1}\" \"{2}\" \"{3}\"", this.MP4_DecryptingKey, this.MP4_InitFilePath, strFileSrc, strFileDst);
+                        if (strKey == null)
+                        {
+                            //Key not specified; get PSSH & KID from m4s segment file
+                            using (FileStream fs = new FileStream(this.FullPath, FileMode.Open))
+                            {
+                                if (mp4TryGetEncryptionData(fs, strPSSH == null, strKID == null, out byte[] pssh, out byte[] kid))
+                                {
+                                    if (strPSSH == null)
+                                        strPSSH = Convert.ToBase64String(pssh);
+
+                                    if (strKID == null)
+                                        strKID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
+
+                                    strKey = Widevine.GetKey(strPSSH, strKID.Length > 32 ? strKID.Substring(strKID.Length - 32, 32) : strKID,
+                                        this.ContentProtection.LicenceServer);
+                                    if (strKey == null)
+                                    {
+                                        _Logger.Error("[doPostProcess][decrypt][{0}] Failed to get decryption Widevine key.", this.FullPath);
+                                        return JobStatus.Failed;
+                                    }
+
+                                    _Logger.Debug("[doPostProcess][decrypt][{0}] Mp4Decrypt Key: {1}", this.FullPath, strKey);
+                                }
+                                else
+                                {
+                                    _Logger.Error("[doPostProcess][decrypt][{0}] Failed to get Widevine data from M4S file.", this.FullPath);
+                                    return JobStatus.Failed;
+                                }
+                            }
+                        }
+
+                        strArgs = string.Format(" --key {0}:{1} --fragments-info \"{2}\" \"{3}\" \"{4}\"", strKID, strKey, strInitPath, strFileSrc, strFileDst);
                     }
 
-                    ///Rename encrypted file to tmp
+                    //Rename encrypted file to tmp
                     File.Move(this.FullPath, strFileSrc);
 
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.Arguments = strArgs;
-                    startInfo.FileName = "\"Widevine\\mp4decrypt.exe\"";
-                    startInfo.UseShellExecute = false;
-                    startInfo.ErrorDialog = false;
-                    startInfo.RedirectStandardError = true;
-                    startInfo.RedirectStandardOutput = true;
-                    startInfo.CreateNoWindow = true;
-                    Process pr = new Process();
-                    pr.StartInfo = startInfo;
-                    //test.Exited += new EventHandler(restream_Exited);
+                    #region Mp4Decrypt process
+                    ProcessStartInfo psi = new ProcessStartInfo()
+                    {
+                        Arguments = strArgs,
+                        FileName = "\"Widevine\\mp4decrypt.exe\"",
+                        UseShellExecute = false,
+                        ErrorDialog = false,
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    };
+                    Process pr = new Process
+                    {
+                        StartInfo = psi
+                    };
+                    //pr.Exited += new EventHandler(restream_Exited);
                     pr.OutputDataReceived += this.outputHandler;
                     pr.ErrorDataReceived += this.errorHandler;
 
@@ -585,18 +645,19 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                     pr.CancelOutputRead();
                     pr.CancelErrorRead();
+                    #endregion
 
                     if (!File.Exists(this.FullPath))
                     {
                         _Logger.Error("[doPostProcess][decrypt][{0}] Decrypting failed: result file doesn't exist.", this.FullPath);
-                        return MediaServer.JobStatus.Failed;
+                        return JobStatus.Failed;
                     }
 
                     FileInfo fi = new FileInfo(this.FullPath);
                     if (fi.Length == 0)
                     {
                         _Logger.Error("[doPostProcess][decrypt][{0}] Decrypting failed: result file length is zero.", this.FullPath);
-                        return MediaServer.JobStatus.Failed;
+                        return JobStatus.Failed;
                     }
 
                     lock (this.LockDataAvailable)
@@ -609,12 +670,13 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                     //Rise init complete flag
                     if (this.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit && this.Tag is ContentProtection)
-                        ((ContentProtection)this.Tag).FlagInitComplete.Set();
+                        this.ContentProtection.FlagInitComplete.Set();
 
                     _Logger.Debug("[doPostProcess][decrypt][{0}] Decrypting complete. Size: {1}", this.FullPath, this.Length);
 
                     //Delete encrypted file
                     File.Delete(strFileSrc);
+                    #endregion
 
                     break;
             }
@@ -635,6 +697,130 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         {
             if (!string.IsNullOrWhiteSpace(e.Data))
                 _Logger.Debug("[mp4decrypt][error] " + e.Data);
+        }
+
+
+        private static bool mp4TryGetEncryptionData(Stream stream, bool bPssh, bool bKID, out byte[] pssh, out byte[] kid)
+        {
+            pssh = null; //path: moof/pssh
+            kid = null;  //path: moof/traf/sgpd/seig
+
+            if (!bPssh && !bKID)
+                return false;
+
+            //box structure:
+            // int32 size
+            // int32 code
+            //  int8 data[size - 8]
+
+            const int HEADER_SIZE = 8;
+
+            while (stream.Position < stream.Length)
+            {
+                int iSize = mp4ReadInt32(stream) - HEADER_SIZE;
+                string strCode = mp4ReadCode(stream);
+                long lEndBox1 = stream.Position + iSize;
+                if (strCode == "moof")
+                {
+                    while (stream.Position < lEndBox1)
+                    {
+                        iSize = mp4ReadInt32(stream) - HEADER_SIZE;
+                        strCode = mp4ReadCode(stream);
+                        long lEndBox2 = stream.Position + iSize;
+                        switch (strCode)
+                        {
+                            case "pssh":
+                                stream.Position -= HEADER_SIZE;
+                                pssh = new byte[iSize + HEADER_SIZE];
+                                stream.Read(pssh, 0, pssh.Length);
+
+                                if (!bKID || kid != null)
+                                    return true;
+
+                                break;
+
+                            case "traf":
+                                while (stream.Position < lEndBox2)
+                                {
+                                    iSize = mp4ReadInt32(stream) - HEADER_SIZE;
+                                    strCode = mp4ReadCode(stream);
+                                    long lEndBox3 = stream.Position + iSize;
+                                    if (strCode == "sgpd")
+                                    {
+                                        stream.Position += 4; //version & flag
+                                        if (mp4ReadCode(stream) == "seig")
+                                        {
+                                            int iLength = mp4ReadInt32(stream); //length
+                                            stream.Position += 4; //count
+                                            //stream.Position += 4; //0,0,flag,iv_size
+                                            //we have to include preceeding 4 bytes because of bug in mp4decrypt
+                                            kid = new byte[iLength];
+                                            stream.Read(kid, 0, kid.Length);
+                                            if (!bPssh || pssh != null)
+                                                return true;
+
+                                            break;
+                                        }
+                                    }
+                                    //next box
+                                    stream.Position = lEndBox3;
+                                }
+                                break;
+                        }
+                        //next box
+                        stream.Position = lEndBox2;
+                    }
+                    //end of moof
+                    break;
+                }
+                //next box
+                stream.Position = lEndBox1;
+            }
+            //end of stream
+            return false;
+        }
+
+        private static byte[] mp4GetDefaultKID(byte[] mp4InitData)
+        {
+            //Pattern to search; this is faster than parse every box
+
+            int iIdx = 4;
+            while (iIdx < mp4InitData.Length)
+            {
+                if (mp4InitData[iIdx] == 't' && mp4InitData[iIdx + 1] == 'e' && mp4InitData[iIdx + 2] == 'n' && mp4InitData[iIdx + 3] == 'c'
+                    && mp4InitData[iIdx - 4] == 0 && mp4InitData[iIdx - 3] == 0 && mp4InitData[iIdx - 2] == 0 && mp4InitData[iIdx - 1] >= 32)
+                {
+                    //Match
+                    iIdx += 12; //offset to KID
+                    break;
+                }
+                iIdx++;
+            }
+
+            if (iIdx + 16 <= mp4InitData.Length)
+            {
+                byte[] kid = new byte[16];
+                Buffer.BlockCopy(mp4InitData, iIdx, kid, 0, 16);
+
+                //Check for non empty KID
+                if (!kid.All(b => b == 0))
+                    return kid;
+            }
+
+            return null;
+        }
+        private static string mp4ReadCode(Stream stream)
+        {
+            char[] code = new char[4];
+            int i = 0;
+            while(i < code.Length)
+             code[i++] = (char)stream.ReadByte();
+            return new String(code);
+        }
+
+        private static int mp4ReadInt32(Stream stream)
+        {
+            return (stream.ReadByte() << 24) | (stream.ReadByte() << 16) | (stream.ReadByte() << 8) | (stream.ReadByte());
         }
 
 

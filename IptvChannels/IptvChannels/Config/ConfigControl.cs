@@ -32,6 +32,7 @@ namespace SetupTv.Sections
         private const int _COLUMN_CDN_INDEX_TITLE = 1;
         private const int _COLUMN_CDN_INDEX_URL = 2;
         private const int _COLUMN_CDN_INDEX_STATUS = 3;
+        private const int _COLUMN_CDN_INDEX_DRM = 4;
 
         private const int _ICON_IDX_ERROR = 0;
         private const int _ICON_IDX_DONE = 1;
@@ -102,6 +103,10 @@ namespace SetupTv.Sections
                     this.comboBox_Sites.SelectedIndex = 0;
                     this.propertyGridPlugins.SelectedObject = this._Plugin.Sites[0];
                 }
+
+                //StreamType combobox
+                this.comboBoxStreamType.Items.AddRange(Enum.GetNames(typeof(StreamTypeEnum)));
+                this.comboBoxStreamType.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -335,11 +340,6 @@ namespace SetupTv.Sections
             this.updateLinkResult();
         }
 
-        private void checkBoxFfmpeg_CheckedChanged(object sender, EventArgs e)
-        {
-            this.updateLinkResult();
-        }
-
         private void checkBoxUseSplitter_CheckedChanged(object sender, EventArgs e)
         {
             this.updateLinkResult();
@@ -351,7 +351,7 @@ namespace SetupTv.Sections
             Clipboard.SetData("System.String", this.textBoxResult.Text);
         }
 
-        private void textBoxSource_TextChanged(object sender, EventArgs e)
+        private void textBox_TextChanged(object sender, EventArgs e)
         {
             this.updateLinkResult();
         }
@@ -362,6 +362,11 @@ namespace SetupTv.Sections
                 this.updateLinkResult();
         }
 
+        private void comboBoxStreamType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.updateLinkResult();
+        }
+
         private void updateLinkResult()
         {
             if (Uri.IsWellFormedUriString(this.textBoxSource.Text, UriKind.Absolute))
@@ -370,13 +375,12 @@ namespace SetupTv.Sections
                     MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER |
                     MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS : MediaPortal.IptvChannels.GenerateLinkConfigEnum.NONE;
 
-                if (this.checkBoxFfmpeg.Checked)
-                    cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.FFMPEG;
-
                 if (this.checkBoxCDN.Checked)
                     cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.CDN;
 
-                this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(this.textBoxSource.Text, cfg, this.textBoxFFMPEG.Text.Trim());
+                this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(
+                    this.textBoxSource.Text, cfg, (StreamTypeEnum)this.comboBoxStreamType.SelectedIndex, 
+                    this.textBoxArgs.Text.Trim(), this.textBoxDrmServer.Text.Trim());
 
                 this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = this.checkBoxUseSplitter.Checked;
             }
@@ -410,6 +414,7 @@ namespace SetupTv.Sections
             row.Cells[_COLUMN_CDN_INDEX_STATUS].Value = (string)j["status"];
             row.Cells[_COLUMN_CDN_INDEX_URL].Value = (string)j["url"];
             row.Cells[_COLUMN_CDN_INDEX_STATUS].Style.Font = new Font(this.dataGridViewCDN.DefaultCellStyle.Font, FontStyle.Bold);
+            row.Cells[_COLUMN_CDN_INDEX_DRM].Value = (string)j["drm"];
             row.Tag = j;
             return row;
         }
@@ -569,7 +574,7 @@ namespace SetupTv.Sections
                 Rectangle rectText = new Rectangle(
                     iX - 1,
                     cellBounds.Y + col.DefaultCellStyle.Padding.Top - 1,
-                    e.RowBounds.Width - iX - row.Cells[_COLUMN_CDN_INDEX_STATUS].Size.Width,
+                    e.RowBounds.Width - iX - row.Cells[_COLUMN_CDN_INDEX_STATUS].Size.Width - row.Cells[_COLUMN_CDN_INDEX_DRM].Size.Width,
                     cellBounds.Height);
                 Pen pen = MediaPortal.Pbk.Controls.Renderer.Renderer.GetCachedPen(row.Selected ?
                     this.dataGridViewCDN.DefaultCellStyle.SelectionForeColor : this.dataGridViewCDN.DefaultCellStyle.ForeColor);
@@ -740,9 +745,9 @@ namespace SetupTv.Sections
         }
 
 
-        private DataGridViewRow findConnectionHandlerRow(JToken j)
+        private DataGridViewRow findConnectionHandlerRow(JToken j, string strIdName = "id")
         {
-            return findConnectiontRow(j, "ConnectionHandler");
+            return findConnectiontRow(j, "ConnectionHandler", strIdName);
         }
 
         private DataGridViewRow findConnectionClientRow(JToken j)
@@ -750,13 +755,13 @@ namespace SetupTv.Sections
             return findConnectiontRow(j, "RemoteClient");
         }
 
-        private DataGridViewRow findConnectiontRow(JToken j, string strType)
+        private DataGridViewRow findConnectiontRow(JToken j, string strType, string strIdName = "id")
         {
             for (int i = 0; i < this.dataGridView_ConList.Rows.Count; i++)
             {
                 DataGridViewRow row = this.dataGridView_ConList.Rows[i];
                 JToken jRow = (JToken)row.Tag;
-                if ((string)jRow["type"] == strType && (string)jRow["id"] == (string)j["id"])
+                if ((string)jRow["type"] == strType && (string)jRow["id"] == (string)j[strIdName])
                     return row;
             }
 
@@ -807,7 +812,7 @@ namespace SetupTv.Sections
 
         private void connectionClientAdd(JToken j)
         {
-            DataGridViewRow row = this.findConnectionHandlerRow(j);
+            DataGridViewRow row = this.findConnectionHandlerRow(j, "parentId");
             if (row != null &&
                 ((MediaPortal.IptvChannels.Controls.DataGridViewCustomRow)row).ItemType == MediaPortal.IptvChannels.Controls.DataGridViewRowTypeEnum.GroupUncolapsed)
             {
@@ -834,8 +839,11 @@ namespace SetupTv.Sections
 
 
 
+
         #endregion
 
         #endregion
+
+        
     }
 }

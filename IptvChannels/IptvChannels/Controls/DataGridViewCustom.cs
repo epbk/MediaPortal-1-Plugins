@@ -700,8 +700,8 @@ namespace MediaPortal.IptvChannels.Controls
                         { }
 
                         //Group item row
-                        rowNew.ItemType = DataGridViewRowTypeEnum.GroupItem;
                         this.Rows.Insert(iIdx, rowNew);
+                        ((DataGridViewCustomRow)this.Rows[iIdx]).ItemType = DataGridViewRowTypeEnum.GroupItem;
 
                         //If the previous row is group item then we need redraw tree symbol
                         if (iIdx - row.Index > 1)

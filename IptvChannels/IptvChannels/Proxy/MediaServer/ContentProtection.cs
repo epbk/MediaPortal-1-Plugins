@@ -12,12 +12,14 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private Regex _RegexInit = null;
         private Regex _RegexMedia = null;
 
+        public ContentProtectionTypeEnum Type = ContentProtectionTypeEnum.Unknown;
         public string RepresentationID;
         public string PSSH;
         public string KID;
         public string DecryptionKey;
         public string SegmentTemplateMedia;
         public string SegmentTemplateInit;
+        public string LicenceServer = null;
 
         public string InitFileFullPath = null;
 
@@ -55,7 +57,15 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
             strPattern = Tools.RegularExpressions.Escape(strPattern);
             strPattern = strPattern.Replace("\\$RepresentationID\\$", "(?<rid>[^/]+)");
-            strPattern = strPattern.Replace("\\$Number\\$", "(?<nr>[^/]+)");
+
+            int i = strPattern.IndexOf("\\$Number");
+            if (i > 0)
+            {
+                string s = strPattern.Substring(i, strPattern.IndexOf("\\$", i + 8) - i + 2);
+                strPattern = strPattern.Replace(s, "(?<nr>[^/]+)");
+            }
+
+            
             strPattern += "\\z";
 
             return new Regex(strPattern, RegexOptions.Compiled);

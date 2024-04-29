@@ -58,7 +58,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public CeskaTelevize()
         {
             //Basics
-            this._Version = "1.1.3";
+            this._Version = "1.1.4";
             this._Author = "Pbk";
             this._Description = "Česká Televize";
             this._EpgRefreshPeriod = 15 * 60000;
@@ -94,18 +94,25 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             this._ChannelList.Add(new IptvChannel(this, "CTMOBILE04", "CH_MP_04", "CTMOBILE04") { Tag = "ČT sport Plus" });
             this._ChannelList.Add(new IptvChannel(this, "CTMOBILE05", "CH_MP_05", "CTMOBILE05") { Tag = "ČT sport Plus" });
 
+            //Test MEPG-DASH with Widevine
+            this._ChannelList.Add(new IptvChannel(this, "CT2_DASH", "2", "CT2 - DASH") { Tag = "DASH" });
+
             //Initialize base
             base.Initialize();
 
         }
 
-        public override string GetStreamUrl(IptvChannel channel)
+        public override LinkResult GetStreamUrl(IptvChannel channel)
         {
             lock (channel)
             {
+                LinkResult result = new LinkResult();
                 this._Logger.Debug("[GetStreamUrl] Query:" + channel.Name + "  ID:" + channel.Id);
 
-                return getStreamUrl(channel.Url);
+                if (channel.Tag is string && (string)channel.Tag == "DASH")
+                    return getStreamUrlDash(channel.Url);
+                else
+                    return getStreamUrl(channel.Url);
             }
         }
 
@@ -118,13 +125,13 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                 this._ChannelList.ForEach(channel =>
                 {
+                    if (channel.EpgProgramList == null)
+                        channel.EpgProgramList = new ProgramList();
+                    else
+                        channel.EpgProgramList.Clear();
+
                     if ((string)channel.Tag == "ČT sport Plus")
                     {
-                        if (channel.EpgProgramList == null)
-                            channel.EpgProgramList = new ProgramList();
-                        else
-                            channel.EpgProgramList.Clear();
-
                         channel.EpgProgramList.AddRange(this.getEventListOnline2(channel, timeNow));
 
                         //this.getEventListOnline(channel, timeNow).ForEach(p =>
@@ -150,6 +157,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                 return false;
             }
         }
+
         #endregion
 
         #region Private methods
@@ -270,7 +278,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             return result;
         }
 
-        private string getStreamUrl(string strId)
+        private LinkResult getStreamUrl(string strId)
         {
 
             if (string.IsNullOrEmpty(strId))
@@ -290,7 +298,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
             try
             {
-                return (string)j.SelectToken("detail.playlist[0].streamUrls.main");
+                return new LinkResult() { Url = (string)j.SelectToken("detail.playlist[0].streamUrls.main") };
             }
             catch (Exception ex)
             {
@@ -300,6 +308,45 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
             //this._Logger.Error("[getStreamUrl] Stream link not found: " + strLink);
             //return null;
+        }
+
+        private LinkResult getStreamUrlDash(string strId)
+        {
+            if (string.IsNullOrEmpty(strId))
+            {
+                this._Logger.Error("[getStreamUrlDash] Invalid video ID.");
+                return null;
+            }
+
+            byte[] post = Encoding.UTF8.GetBytes(string.Format("playlist%5B0%5D%5Btype%5D=channel&playlist%5B0%5D%5Bid%5D={0}&requestUrl=%2Fivysilani%2Fembed%2FiFramePlayer.php&requestSource=iVysilani&type=html&canPlayDRM=true&streamingProtocol=dash", strId));
+
+            JToken j = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>("https://www.ceskatelevize.cz/ivysilani/ajax/get-client-playlist/", post: post);
+            if (j == null)
+            {
+                this._Logger.Error("[getStreamUrlDash] Failed to get player data: " + strId);
+                return null;
+            }
+
+            j = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>((string)j["url"]);
+            if (j == null)
+            {
+                this._Logger.Error("[getStreamUrlDash] Failed to get player data: " + strId);
+                return null;
+            }
+
+            try
+            {
+                return new LinkResult()
+                {
+                    Url = (string)j.SelectToken("playlist[0].streamUrls.main"),
+                    DRMLicenceServer = "https://ivys-wvproxy.o2tv.cz/license?access_token=c3RlcGFuLWEtb25kcmEtanNvdS1wcm9zdGUtbmVqbGVwc2k="
+                };
+            }
+            catch (Exception ex)
+            {
+                _Logger.Error("[getStreamUrlDash] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                return null;
+            }
         }
         #endregion
     }

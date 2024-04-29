@@ -52,19 +52,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Gentle.Common">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Common.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\Gentle.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Gentle.Framework">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Framework.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\Gentle.Framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="IptvChannels">
       <HintPath>..\..\IptvChannels\bin\Release\IptvChannels.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MediaPortal.Pbk">
+      <HintPath>C:\Program Files\Team MediaPortal\MediaPortal TV Server\MediaPortal.Pbk.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="NLog">
-      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Plugins\NLog.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\NLog.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -76,15 +80,15 @@
     <Reference Include="System.Xml" />
     <Reference Include="TvBusinessLayer, Version=1.11.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TvBusinessLayer.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\TvBusinessLayer.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TVDatabase">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TVDatabase.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\TVDatabase.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TVLibrary">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\TVLibrary.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\TVLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -94,8 +98,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"
-Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

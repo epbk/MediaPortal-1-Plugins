@@ -15,6 +15,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         public string Filename;
         public string FullPath;
         public string Url;
+        public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments;
         public int ID;
         public int UID { get; private set; }
 

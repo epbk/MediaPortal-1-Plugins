@@ -22,7 +22,7 @@ namespace MediaPortal.IptvChannels.Database
     public class dbSettings : DbTable
     {
         public const int DATABASE_VERSION_CURRENT = 1;
-        
+
         public const int HTTP_SERVER_PORT_DEFAULT = 8100;
 
         public static readonly string TEMP_PATH_DEFAULT = System.IO.Path.GetTempPath();
@@ -55,7 +55,7 @@ namespace MediaPortal.IptvChannels.Database
         public bool DeleteUnreferencedChannels
         { get; set; }
 
-        
+
 
         #region System
 
@@ -72,7 +72,7 @@ namespace MediaPortal.IptvChannels.Database
         {
             get { return this._UseOpenSsl; }
             set { this._UseOpenSsl = value; Pbk.Net.Http.HttpUserWebRequest.UseOpenSSLDefault = value; }
-        }private bool _UseOpenSsl = false;
+        } private bool _UseOpenSsl = false;
 
         [DBFieldAttribute(FieldName = "allowSystemProxy", Default = "True")]
         [DisplayName("Allow system proxy")]
@@ -83,7 +83,7 @@ namespace MediaPortal.IptvChannels.Database
         {
             get { return this._AllowSystemProxy; }
             set { this._AllowSystemProxy = value; Pbk.Net.Http.HttpUserWebRequest.AllowSystemProxyDefault = value; }
-        }private bool _AllowSystemProxy = true;
+        } private bool _AllowSystemProxy = true;
 
         [DBFieldAttribute(FieldName = "httpServerPort", Default = "8100")]
         [DisplayName("Http server port")]
@@ -134,7 +134,7 @@ namespace MediaPortal.IptvChannels.Database
 
                 this._WorkPath = this._TempPath + "MediaPortalIptvChannels\\";
             }
-        }private string _TempPath = TEMP_PATH_DEFAULT;
+        } private string _TempPath = TEMP_PATH_DEFAULT;
 
         [Browsable(false)]
         public string WorkPath
@@ -153,7 +153,7 @@ namespace MediaPortal.IptvChannels.Database
 
                 return this._WorkPath;
             }
-        }private string _WorkPath = TEMP_PATH_DEFAULT + "MediaPortalIptvChannels\\";
+        } private string _WorkPath = TEMP_PATH_DEFAULT + "MediaPortalIptvChannels\\";
 
         [DBFieldAttribute(FieldName = "proxyTimeoutNoClients", Default = "15000")]
         [Description("Timeout - no clients.")]
@@ -169,14 +169,14 @@ namespace MediaPortal.IptvChannels.Database
             }
             set
             {
-                if (value > 60000) 
+                if (value > 60000)
                     this._TimeoutNoClients = 60000;
-                else if (value < 100) 
+                else if (value < 100)
                     this._TimeoutNoClients = 100;
-                else 
+                else
                     this._TimeoutNoClients = value;
             }
-        }private int _TimeoutNoClients = TIMEOUT_PERIOD_NO_CLIENTS;  //[ms]
+        } private int _TimeoutNoClients = TIMEOUT_PERIOD_NO_CLIENTS;  //[ms]
 
         [DBFieldAttribute(FieldName = "proxyTimeoutNoData", Default = "20000")]
         [Description("Timeout - no data.")]
@@ -192,14 +192,14 @@ namespace MediaPortal.IptvChannels.Database
             }
             set
             {
-                if (value > 60000) 
+                if (value > 60000)
                     this._TimeoutNoData = 60000;
                 else if (value < 100)
                     this._TimeoutNoData = 100;
                 else
                     this._TimeoutNoData = value;
             }
-        }private int _TimeoutNoData = TIMEOUT_PERIOD_NO_DATA;  //[ms]
+        } private int _TimeoutNoData = TIMEOUT_PERIOD_NO_DATA;  //[ms]
 
         [DBFieldAttribute(FieldName = "proxyClientMemoryBufferSize", Default = "2097152")]
         [Description("Client memory buffer size.")]
@@ -222,11 +222,18 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._ClientMemoryBufferSize = value / (256 * 1024) * (256 * 1024);
             }
-        }private int _ClientMemoryBufferSize = Proxy.RemoteClient.DEFAULT_BUFFER_SIZE;
+        } private int _ClientMemoryBufferSize = Proxy.RemoteClient.DEFAULT_BUFFER_SIZE;
 
         #endregion
 
         #region MediaServer
+        [DBFieldAttribute(FieldName = "mediaServerUse", Default = "True")]
+        [Category("Media Server"), Description("Use http cache media server (HLS, MPEG-DASH)"), DisplayName("Use Media Server")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [DefaultValue(true)]
+        public bool UseMediaServer
+        { get; set; } = true;
+
         [DBFieldAttribute(FieldName = "mediaServerMaxSimultaneousDownloads", Default = "2")]
         [DefaultValue(2)]
         [Description("Maximum simultaneous downloads per application. Unlimited: < 1")]
@@ -244,7 +251,7 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerMaxSimultaneousDownloads = value;
             }
-        }private int _MediaServerMaxSimultaneousDownloads = 2;
+        } private int _MediaServerMaxSimultaneousDownloads = 2;
 
         [DBFieldAttribute(FieldName = "mediaServerMaxSimultaneousDownloadsPerTask", Default = "2")]
         [DefaultValue(2)]
@@ -263,7 +270,7 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerMaxSimultaneousDownloadsPerTask = value;
             }
-        }private int _MediaServerMaxSimultaneousDownloadsPerTask = 2;
+        } private int _MediaServerMaxSimultaneousDownloadsPerTask = 2;
 
         [DBFieldAttribute(FieldName = "mediaServerDownloadOnRequest", Default = "True")]
         [DefaultValue(true)]
@@ -290,8 +297,16 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerAutoterminatePeriod = value;
             }
-        }private int _MediaServerAutoterminatePeriod = 60000;
+        } private int _MediaServerAutoterminatePeriod = 60000;
 
+        [DBFieldAttribute(FieldName = "mediaServerStreamSelection", Default = "Default")]
+        [DefaultValue(Proxy.MediaServer.StreamQualityEnum.Default)]
+        [Description("Stream quality selection. Default for automatic selection.")]
+        [Category("Media Server")]
+        [DisplayName("Stream Selection")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.EnumUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public Proxy.MediaServer.StreamQualityEnum StreamQualitySelection
+        { get; set; }
         #endregion
 
 
@@ -361,7 +376,12 @@ namespace MediaPortal.IptvChannels.Database
             {
                 PropertyInfo p = t.GetProperty(((JProperty)jItem).Name, BindingFlags.Instance | BindingFlags.Public);
                 if (p != null)
-                    p.SetValue(this, Convert.ChangeType((string)jItem, p.PropertyType), null);
+                {
+                    if (p.PropertyType.IsEnum)
+                        p.SetValue(this, Enum.Parse(p.PropertyType, (string)jItem), null);
+                    else
+                        p.SetValue(this, Convert.ChangeType((string)jItem, p.PropertyType), null);
+                }
             }
         }
 

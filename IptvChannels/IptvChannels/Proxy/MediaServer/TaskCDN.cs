@@ -34,11 +34,20 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             MPD
         }
 
+        private class MediaStream
+        {
+            public string Url;
+            public object Tag;
+            public int Bandwidth = -1;
+            public int Width = -1;
+            public int Height = -1;
+        }
+
         #region Database Fields
         #endregion
 
         #region Private fields
-        
+
         private VideoTypeEnum _VideoType = VideoTypeEnum.Unknown;
         private StringBuilder _SbMasterList = new StringBuilder(1024);
         private volatile byte[] _MasterListRaw = null;
@@ -67,11 +76,15 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private string _UrlFinal;
 
         private List<ContentProtection> _ContentProtection = null;
-        private List<Database.dbContentProtectionKey> _WidevineKeys = null;
-
+        
         private List<HlsDecryptor> _DecryptorBuffer = new List<HlsDecryptor>();
         private object _DecryptorPadlock = new object();
 
+        private static readonly Regex _RegexXparam = new Regex("(?<key>[^,=]+)=(?<value>[^,]+)");
+        private static readonly Regex _RegexResolution = new Regex("(?<resx>\\d+)x(?<resy>\\d+)");
+
+        private List<MediaStream> _StreamList = new List<MediaStream>();
+        private StreamQualityEnum _StreamQualitySelection = Database.dbSettings.Instance.StreamQualitySelection;
 
         #endregion
 
@@ -224,6 +237,12 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             }
         }
 
+        public string DRMLicenceServer
+        { get; set; }
+
+        public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments
+        { get; set; }
+
         /// <summary>
         /// Handle http request
         /// </summary>
@@ -327,6 +346,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 {
                                     Index = this._FileIdCounter,
                                     Url = this.getFullUrl(strUrlPath),
+                                    HttpArguments = this.HttpArguments,
                                     Filename = Path.GetFileName(strFile),
                                     FullPath = strFile,
                                     LastAccess = DateTime.Now
@@ -336,9 +356,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 {
                                     //DRM data
                                     segment.TaskSegmentType = bIsInit ? TaskSegmentTypeEnum.MP4EncryptedInit : TaskSegmentTypeEnum.MP4EncryptedMedia;
-                                    segment.MP4_InitFilePath = cp.InitFileFullPath;
-                                    segment.MP4_DecryptingKey = cp.KID + ':' + cp.DecryptionKey;
-                                    segment.Tag = cp;
+                                    segment.ContentProtection = cp;
                                 }
 
 
@@ -544,7 +562,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void refreshMasterList()
         {
-            if ((DateTime.Now - this._MasterListRefreshTs).TotalMilliseconds >= (this._CleaningPeriod - 1))
+            if ((DateTime.Now - this._MasterListRefreshTs).TotalSeconds >= (this._CleaningPeriod - 1))
             {
                 DateTime dtRefreshRequest = DateTime.Now;
 
@@ -554,15 +572,17 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                 if (this._Request == null)
                 {
-                    this._Request = new Pbk.Net.Http.HttpUserWebRequest(this.Url);
-                    this._Request.AllowSystemProxy = Database.dbSettings.Instance.AllowSystemProxy ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No;
-                    this._Request.UseOpenSSL = Database.dbSettings.Instance.UseOpenSsl ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No;
+                    this._Request = new Pbk.Net.Http.HttpUserWebRequest(this.Url, this.HttpArguments)
+                    {
+                        AllowSystemProxy = Database.dbSettings.Instance.AllowSystemProxy ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No,
+                        UseOpenSSL = Database.dbSettings.Instance.UseOpenSsl ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No
+                    };
                 }
 
                 string strResult = this._Request.Download<string>();
                 if (this._UrlFinal == null)
                 {
-                    this._UrlFinal = this._Request.ServerUrlRedirect != null ? this._Request.ServerUrlRedirect : this.Url;
+                    this._UrlFinal = this._Request.ServerUrlRedirect ?? this.Url;
                     this._Request.Url = this._UrlFinal;
                 }
 
@@ -585,17 +605,14 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                         double dTargetDuration = 0;
                         HlsDecryptor dec = null;
 
+                        this._StreamList.Clear();
+                        MediaStream media = null;
+
                         const string MPD_NS = "urn:mpeg:dash:schema:mpd:2011";
 
                         if (strResult.Contains(MPD_NS))
                         {
-                            #region MPD_DASH
-                            //https://cdn.bitmovin.com/content/assets/sintel/sintel.mpd
-
-                            //https://dash.akamaized.net/dash264/TestCasesIOP33/adapatationSetSwitching/5/manifest.mpd
-
-                            //DRM Widevine
-                            //https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/mpds/11331.mpd
+                            #region MPEG_DASH
 
                             XmlDocument xml = new XmlDocument();
                             xml.LoadXml(strResult);
@@ -652,126 +669,129 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             nodesToRemove.ForEach(n => n.ParentNode.RemoveChild(n));
 
                             #region ContentProtection
-                            List<ContentProtection> prot = new List<ContentProtection>();
-                            XmlNodeList nodesDRM = nodeMPD.SelectNodes(".//ns:Representation|.//ns:AdaptationSet", mgr);
-                            nodesDRM.ForEach(n =>
-                                {
-                                    XmlNode nodeKID = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:mpeg:dash:mp4protection:2011']/@*[name()='cenc:default_KID']", mgr);
-                                    XmlNode nodePssh = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed']/*[name()='cenc:pssh']/text()", mgr);
-                                    XmlNode nodeID = n.Name == "Representation" ? n.SelectSingleNode("./@id", mgr) : null;
-                                    XmlNode nodeTemplate = n.SelectSingleNode("./ns:SegmentTemplate", mgr);
-                                    if (nodeTemplate == null && n.Name == "Representation")
-                                        nodeTemplate = n.ParentNode.SelectSingleNode("./ns:SegmentTemplate", mgr);
-
-                                    if (nodeKID != null && nodePssh != null)
-                                        prot.Add(new ContentProtection()
-                                        {
-                                            RepresentationID =  nodeID != null ? nodeID.Value : null,
-                                            KID = nodeKID.Value.Replace("-" , ""),
-                                            PSSH = nodePssh.Value,
-                                            SegmentTemplateInit = nodeTemplate != null ? nodeTemplate.Attributes["initialization"].Value : null,
-                                            SegmentTemplateMedia = nodeTemplate != null ? nodeTemplate.Attributes["media"].Value : null,
-                                            InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString()
-                                        });
-                                });
-
-                            if (prot.Count > 0)
+                            if (this._ContentProtection == null) //??? to do
                             {
-                                Database.dbContentProtection dbCp;
-                                List<Database.dbContentProtectionKey> keys;
-                                prot.ForEach(p =>
+                                List<ContentProtection> prot = new List<ContentProtection>();
+                                XmlNodeList nodesDRM = nodeMPD.SelectNodes(".//ns:Representation|.//ns:AdaptationSet", mgr);
+                                nodesDRM.ForEach(n =>
                                     {
-                                        dbCp = Database.dbContentProtection.Get(p.PSSH);
-                                        if (dbCp == null)
-                                        {
-                                            #region Retrieve keys from Widevine client
+                                        XmlNode nodeProt = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:mpeg:dash:mp4protection:2011']", mgr);
+                                        XmlNode nodeWv = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed']", mgr);
+                                        XmlNode nodeID = n.Name == "Representation" ? n.SelectSingleNode("./@id", mgr) : null;
+                                        XmlNode nodeTemplate = n.SelectSingleNode("./ns:SegmentTemplate", mgr);
+                                        XmlNode node;
+                                        if (nodeTemplate == null && n.Name == "Representation")
+                                            nodeTemplate = n.ParentNode.SelectSingleNode("./ns:SegmentTemplate", mgr);
 
-#if _WIDEVINE_TEST
-                                            //just for testing;
-                                            k = new DecryptingKey[4]
-                                                {
-                                                    new DecryptingKey(){ ID = "9bf0e9cf0d7b55aeb4b289a63bab8610", Key = "90f52fd8ca48717b21d0c2fed7a12ae1"},
-                                                    new DecryptingKey(){ ID = "eb676abbcb345e96bbcf616630f1a3da", Key = "100b6c20940f779a4589152b57d2dacb"},
-                                                    new DecryptingKey(){ ID = "0294b9599d755de2bbf0fdca3fa5eab7", Key = "3bda2f40344c7def614227b9c0f03e26"},
-                                                    new DecryptingKey(){ ID = "639da80cf23b55f3b8cab3f64cfa5df6", Key = "229f5f29b643e203004b30c4eaf348f4"},
-                                                };
-#else
-
-                                            if (this._WidevineKeys == null)
-                                                this._WidevineKeys = new List<Database.dbContentProtectionKey>();
-                                            else
-                                                this._WidevineKeys.Clear();
-
-                                            ProcessStartInfo startInfo = new ProcessStartInfo();
-                                            startInfo.Arguments = " --pssh " + p.PSSH;
-                                            startInfo.FileName = "\"Widevine\\WidevineClient.exe\"";
-                                            startInfo.UseShellExecute = false;
-                                            startInfo.ErrorDialog = false;
-                                            startInfo.RedirectStandardError = true;
-                                            startInfo.RedirectStandardOutput = true;
-                                            startInfo.CreateNoWindow = true;
-                                            startInfo.WorkingDirectory = "Widevine";
-                                            Process pr = new Process();
-                                            pr.StartInfo = startInfo;
-                                            //test.Exited += new EventHandler(restream_Exited);
-                                            pr.OutputDataReceived += this.cbWidevineClientOutputHandler;
-                                            pr.ErrorDataReceived += this.cbWidevineClientErrorHandler;
-
-                                            //Start
-                                            pr.Start();
-                                            pr.BeginOutputReadLine();
-                                            pr.BeginErrorReadLine();
-
-                                            //Wait for finish
-                                            pr.WaitForExit();
-
-                                            pr.CancelOutputRead();
-                                            pr.CancelErrorRead();
-
-                                            if (this._WidevineKeys.Count == 0)
+                                        if (nodeProt != null && nodeWv != null)
+                                            //Widevine detected
+                                            prot.Add(new ContentProtection()
                                             {
-                                                this.Logger.Error("[{0}][refreshMasterList] Failed to get Widevine keys: {1}", this._Identifier, p.PSSH);
+                                                RepresentationID = nodeID?.Value,
+                                                KID = (node = nodeProt.SelectSingleNode("./@*[name()='cenc:default_KID']")) != null ? node.Value.Replace("-", "") : null,
+                                                PSSH = nodeWv.SelectSingleNode("./*[name()='cenc:pssh']/text()")?.Value,
+                                                SegmentTemplateInit = nodeTemplate.Attributes["initialization"]?.Value,
+                                                SegmentTemplateMedia = nodeTemplate.Attributes["media"]?.Value,
+                                                InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString(),
+                                                LicenceServer = this.DRMLicenceServer,
+                                                Type = ContentProtectionTypeEnum.Widevine
+                                            });
+                                    });
+
+                                if (prot.Count > 0)
+                                {
+                                    for (int i = 0; i < prot.Count; i++)
+                                    {
+                                        ContentProtection p = prot[i];
+                                        if (p.PSSH != null && p.KID != null)
+                                        {
+                                            p.DecryptionKey = Widevine.GetKey(p.PSSH, p.KID, p.LicenceServer);
+                                            if (p.DecryptionKey == null)
+                                            {
+                                                this.Logger.Error("[{0}][refreshMasterList] ContentProtection: Failed to get the Key: {1}", this._Identifier, p.KID);
                                                 return;
                                             }
-                                            else
-                                            {
-                                                keys = this._WidevineKeys;
-
-                                                dbCp = new Database.dbContentProtection() { PSSH = p.PSSH };
-                                                dbCp.CommitNeeded = true;
-                                                dbCp.Commit();
-
-                                                keys.ForEach(k =>
-                                                    {
-                                                        k.IdParent = (int)dbCp.ID;
-                                                        k.CommitNeeded = true;
-                                                        k.Commit();
-                                                    });
-                                            }
-#endif
-                                            #endregion
                                         }
-                                        else
-                                            keys = Database.dbContentProtectionKey.Get((int)dbCp.ID);
+                                    };
 
-                                        Database.dbContentProtectionKey key = keys.Find(k => k.KID.Equals(p.KID));
-                                        if (key != null)
-                                            p.DecryptionKey = key.Key;
-                                        else
+                                    if (prot.All(p => p.PSSH == null || p.DecryptionKey != null))
+                                    {
+                                        //Remove all protections
+                                        nodeMPD.SelectNodes(".//ns:ContentProtection", mgr).ForEach(n => n.ParentNode.RemoveChild(n));
+
+                                        //Set protection list
+                                        this._ContentProtection = prot;
+                                    }
+                                }
+                            }
+                            #endregion
+
+                            #region Manual stream filtering
+                            if (this._StreamQualitySelection != StreamQualityEnum.Default)
+                            {
+                                nodeMPD.SelectNodes(".//ns:AdaptationSet", mgr).ForEach(nodeAdpt =>
+                                {
+                                    this._StreamList.Clear();
+                                    nodeAdpt.SelectNodes(".//ns:Representation[@width]", mgr).ForEach(nodeRepr =>
+                                    {
+                                        if (int.TryParse(nodeRepr.Attributes["width"].Value, out int iW))
                                         {
-                                            this.Logger.Error("[{0}][refreshMasterList] Key not found: {1}", this._Identifier, p.KID);
-                                            return;
+                                            int.TryParse(nodeRepr.Attributes["height"]?.Value, out int iH);
+                                            int.TryParse(nodeRepr.Attributes["bandwidth"]?.Value, out int iB);
+
+                                            this._StreamList.Add(new MediaStream()
+                                            {
+                                                Width = iW,
+                                                Height = iH,
+                                                Bandwidth = iB,
+                                                Tag = nodeRepr
+                                            });
                                         }
                                     });
 
-                                if (prot.All(p => p.DecryptionKey != null))
-                                {
-                                    //Remove all protections
-                                    nodeMPD.SelectNodes(".//ns:ContentProtection", mgr).ForEach(n => n.ParentNode.RemoveChild(n));
+                                    if (this._StreamList.Count > 1)
+                                    {
+                                        //sort order: BANDWITH, WIDTH, HEIGHT
+                                        this._StreamList.Sort((p1, p2) =>
+                                        {
+                                            if (p1.Bandwidth > p2.Bandwidth)
+                                                return 1;
+                                            else if (p1.Bandwidth < p2.Bandwidth)
+                                                return -1;
+                                            else if (p1.Width > p2.Width)
+                                                return 1;
+                                            else if (p1.Width < p2.Width)
+                                                return -1;
+                                            else if (p1.Height > p2.Height)
+                                                return 1;
+                                            else if (p1.Height < p2.Height)
+                                                return -1;
+                                            else
+                                                return 0;
+                                        });
 
-                                    //Set protection list
-                                    this._ContentProtection = prot;
+                                        bool bAccepted = false;
+                                        for (int i = this._StreamList.Count - 1; i >= 0; i--)
+                                        {
+                                            media = this._StreamList[i];
+                                            if (!bAccepted)
+                                            {
+                                                if (media.Width <= 0 || (int)this._StreamQualitySelection >= media.Width)
+                                                {
+                                                    //Accepted quality; remove others
+                                                    bAccepted = true;
+                                                    continue;
+                                                }
+                                                else if (i == 0)
+                                                    break; //keep at least one representation
+                                            }
+
+                                            //Remove the representation
+                                            ((XmlNode)media.Tag).ParentNode.RemoveChild((XmlNode)media.Tag);
+                                        }
+                                    }
                                 }
+                                );
                             }
                             #endregion
 
@@ -794,42 +814,10 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                         {
                             #region M3U
 
-                            //hls: 'https://cdn.bitmovin.com/content/assets/sintel/hls/playlist.m3u8',
-
-                            //#EXTM3U
-
-                            //#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="stereo",LANGUAGE="en",NAME="English",DEFAULT=YES,AUTOSELECT=YES,URI="audio/stereo/en/128kbit.m3u8"
-                            //#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="stereo",LANGUAGE="dubbing",NAME="Dubbing",DEFAULT=NO,AUTOSELECT=YES,URI="audio/stereo/none/128kbit.m3u8"
-
-                            //#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="surround",LANGUAGE="en",NAME="English",DEFAULT=YES,AUTOSELECT=YES,URI="audio/surround/en/320kbit.m3u8"
-                            //#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="surround",LANGUAGE="dubbing",NAME="Dubbing",DEFAULT=NO,AUTOSELECT=YES,URI="audio/stereo/none/128kbit.m3u8"
-
-                            //#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Deutsch",DEFAULT=NO,AUTOSELECT=YES,FORCED=NO,LANGUAGE="de",URI="subtitles_de.m3u8"
-                            //#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE="en",URI="subtitles_en.m3u8"
-                            //#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Espanol",DEFAULT=NO,AUTOSELECT=YES,FORCED=NO,LANGUAGE="es",URI="subtitles_es.m3u8"
-                            //#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Français",DEFAULT=NO,AUTOSELECT=YES,FORCED=NO,LANGUAGE="fr",URI="subtitles_fr.m3u8"
-
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=258157,CODECS="avc1.4d400d,mp4a.40.2",AUDIO="stereo",RESOLUTION=422x180,SUBTITLES="subs"
-                            //video/250kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=520929,CODECS="avc1.4d4015,mp4a.40.2",AUDIO="stereo",RESOLUTION=638x272,SUBTITLES="subs"
-                            //video/500kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=831270,CODECS="avc1.4d4015,mp4a.40.2",AUDIO="stereo",RESOLUTION=638x272,SUBTITLES="subs"
-                            //video/800kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1144430,CODECS="avc1.4d401f,mp4a.40.2",AUDIO="surround",RESOLUTION=958x408,SUBTITLES="subs"
-                            //video/1100kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1558322,CODECS="avc1.4d401f,mp4a.40.2",AUDIO="surround",RESOLUTION=1277x554,SUBTITLES="subs"
-                            //video/1500kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=4149264,CODECS="avc1.4d4028,mp4a.40.2",AUDIO="surround",RESOLUTION=1921x818,SUBTITLES="subs"
-                            //video/4000kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=6214307,CODECS="avc1.4d4028,mp4a.40.2",AUDIO="surround",RESOLUTION=1921x818,SUBTITLES="subs"
-                            //video/6000kbit.m3u8
-                            //#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=10285391,CODECS="avc1.4d4033,mp4a.40.2",AUDIO="surround",RESOLUTION=4096x1744,SUBTITLES="subs"
-                            //video/10000kbit.m3u8
-
-
                             this._Segments.ForEach(t => t.IsInCurrentHlsListTmp = false);
                             string[] lines = strResult.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
+                            #region Parsing
                             for (int i = 0; i < lines.Length; i++)
                             {
                                 string strLine = lines[i].Trim();
@@ -872,6 +860,59 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     else if (strLine.StartsWith("#EXT-X-STREAM-INF:", StringComparison.CurrentCultureIgnoreCase))
                                     {
                                         bFlagUrlMasterLink = true;
+                                        if (this._StreamQualitySelection != StreamQualityEnum.Default)
+                                        {
+                                            int iBandwidth = -1;
+                                            int iResolutionX = -1;
+                                            int iResolutionY = -1;
+
+                                            MatchCollection mc = _RegexXparam.Matches(strLine.Substring(18));
+                                            if (mc.Count > 0)
+                                            {
+                                                //Atributes
+                                                //Mandatory: BANDWIDTH
+                                                //Optional: AVERAGE-BANDWIDTH, CODECS, RESOLUTION, FRAME-RATE, AUDIO, VIDEO, SUBTITLES, CLOSED-CAPTIONS
+
+                                                foreach (Match m in mc)
+                                                {
+                                                    string strValue = m.Groups["value"].Value.Trim();
+                                                    switch (m.Groups["key"].Value)
+                                                    {
+                                                        case "BANDWIDTH":
+                                                            int iTmp;
+                                                            if (int.TryParse(strValue, out iTmp))
+                                                                iBandwidth = iTmp;
+                                                            break;
+
+                                                        case "RESOLUTION":
+                                                            Match mRes = _RegexResolution.Match(strValue);
+                                                            if (mRes.Success)
+                                                            {
+                                                                iResolutionX = int.Parse(mRes.Groups["resx"].Value);
+                                                                iResolutionY = int.Parse(mRes.Groups["resy"].Value);
+                                                            }
+                                                            break;
+                                                    }
+                                                }
+                                            }
+
+                                            if (mc.Count <= 0 || iBandwidth < 0)
+                                            {
+                                                this.Logger.Error("[{0}][refreshMasterList] Invalid M3U content. Missing EXT-X-STREAM-IN attributes. '{1}'",
+                                                    this._Identifier, strLine);
+
+                                                return;
+                                            }
+
+                                            media = new MediaStream()
+                                            {
+                                                Tag = strLine,
+                                                Bandwidth = iBandwidth,
+                                                Width = iResolutionX,
+                                                Height = iResolutionY
+                                            };
+                                            continue;
+                                        }
                                     }
                                     else if (strLine.StartsWith("#EXT-X-PROGRAM-DATE-TIME:", StringComparison.CurrentCultureIgnoreCase))
                                     {
@@ -908,10 +949,10 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                             MatchCollection mc = HlsSequencer.RegexXparam.Matches(strLine.Substring(11).Trim());
                                             if (mc.Count > 0)
                                             {
-                                                string strMethod = "";
-                                                string strKeyUri = "";
-                                                string strIV = "";
-                                                string strKeyformat = "";
+                                                string strMethod = string.Empty;
+                                                string strKeyUri = string.Empty;
+                                                string strIV = string.Empty;
+                                                string strKeyformat = string.Empty;
 
                                                 foreach (Match m in mc)
                                                 {
@@ -923,7 +964,14 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                                             break;
 
                                                         case "URI":
-                                                            strKeyUri = this.getFullUrl(strValue.Trim('\"'));
+                                                            strValue = strValue.Trim('\"');
+                                                            if (strValue.StartsWith("skd://"))
+                                                            {
+                                                                this.Logger.Error("[{0}][refreshMasterList] DRM FairPlay is not supported: {1}", this._Identifier, strLine);
+                                                                this.clearDecryptors();
+                                                                return;
+                                                            }
+                                                            strKeyUri = this.getFullUrl(strValue);
                                                             break;
 
                                                         case "IV":
@@ -991,7 +1039,6 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                             this.clearDecryptors();
                                             return;
                                         }
-                                        //#EXT-X-KEY:METHOD=AES-128,URI="https://sslhls.m6tv.cdn.sfr.net/hls-key/m6_music_hits_hls_aes.bin",IV=0xa690c26b8a71ad0916caf88d363b6303
                                         #endregion
                                     }
                                     else if (strLine.StartsWith("#EXT-X-VERSION:", StringComparison.CurrentCultureIgnoreCase))
@@ -1017,8 +1064,6 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                             this._SbMasterList.Append("\r\n");
 
                                             continue;
-
-                                            //#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="stereo",LANGUAGE="en",NAME="English",DEFAULT=YES,AUTOSELECT=YES,URI="audio/stereo/en/128kbit.m3u8"
                                         }
                                     }
                                     else if (strLine.StartsWith("#EXT-X-", StringComparison.CurrentCultureIgnoreCase))
@@ -1026,8 +1071,17 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     }
                                     else if (bFlagUrlMasterLink)
                                     {
-                                        this._SbMasterList.Append("/GetMediaHandler?url=");
-                                        this._SbMasterList.AppendLine(System.Web.HttpUtility.UrlEncode(this.getFullUrl(strLine)));
+                                        string strUrl = System.Web.HttpUtility.UrlEncode(this.getFullUrl(strLine));
+                                        if (this._StreamQualitySelection != StreamQualityEnum.Default)
+                                        {
+                                            media.Url = "/GetMediaHandler?url=" + strUrl;
+                                            this._StreamList.Add(media);
+                                        }
+                                        else
+                                        {
+                                            this._SbMasterList.Append("/GetMediaHandler?url=");
+                                            this._SbMasterList.AppendLine(strUrl);
+                                        }
                                         bFlagUrlMasterLink = false;
                                         continue;
                                     }
@@ -1044,6 +1098,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                             {
                                                 Index = this._FileIdCounter,
                                                 Url = strFullUrl,
+                                                HttpArguments = this.HttpArguments,
                                                 Filename = strFilename,
                                                 FullPath = strPath + strFilename,
                                                 IsInCurrentHlsList = true,
@@ -1081,6 +1136,48 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                                 this._VideoType = VideoTypeEnum.HLS;
                             }
+                            #endregion
+
+                            #region Manual stream filtering
+                            if (this._StreamList.Count > 0)
+                            {
+                                media = this._StreamList[0];
+                                if (this._StreamList.Count > 1)
+                                {
+                                    //sort order: BANDWITH, WIDTH, HEIGHT
+                                    this._StreamList.Sort((p1, p2) =>
+                                    {
+                                        if (p1.Bandwidth > p2.Bandwidth)
+                                            return 1;
+                                        else if (p1.Bandwidth < p2.Bandwidth)
+                                            return -1;
+                                        else if (p1.Width > p2.Width)
+                                            return 1;
+                                        else if (p1.Width < p2.Width)
+                                            return -1;
+                                        else if (p1.Height > p2.Height)
+                                            return 1;
+                                        else if (p1.Height < p2.Height)
+                                            return -1;
+                                        else
+                                            return 0;
+                                    });
+
+                                    //check from best one
+                                    for (int i = this._StreamList.Count - 1; i >= 0; i--)
+                                    {
+                                        media = this._StreamList[i];
+                                        if (media.Width <= 0 || (int)this._StreamQualitySelection >= media.Width)
+                                            break;
+                                    }
+                                }
+
+                                //Place selected media to the master list
+                                this._SbMasterList.AppendLine((string)media.Tag);
+                                this._SbMasterList.AppendLine(media.Url);
+                            }
+                            #endregion
+
                             #endregion
                         }
 
@@ -1246,10 +1343,10 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             list.Clear();
 
             XmlNode nodeOrig = node;
-            if (node is XmlAttribute)
+            if (node is XmlAttribute atr)
             {
                 list.Insert(0, node.Value);
-                node = ((XmlAttribute)node).OwnerElement;
+                node = atr.OwnerElement;
             }
             else
             {
@@ -1408,26 +1505,6 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         }
 
-
-        private void cbWidevineClientOutputHandler(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
-            {
-                this.Logger.Debug("[cbWidevineClientOutputHandler] " + e.Data);
-                if (e.Data.StartsWith("KEY: "))
-                {
-                    string[] parts = e.Data.Substring(5).Split(':');
-                    if (parts.Length == 2)
-                        this._WidevineKeys.Add(new Database.dbContentProtectionKey() { KID = parts[0], Key = parts[1] });
-                }
-            }
-        }
-
-        private void cbWidevineClientErrorHandler(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
-                this.Logger.Debug("[cbWidevineClientErrorHandler] " + e.Data);
-        }
         #endregion
 
         #region Decryptor buffer
@@ -1514,6 +1591,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             sb.Append(this.Status);
             sb.Append("\",\"title\":\"");
             Tools.Json.AppendAndValidate(this.Title, sb);
+            sb.Append("\",\"drm\":\"");
+            sb.Append(this._ContentProtection != null ? "Widevine" : null);
             sb.Append("\"}");
 
             return sb;

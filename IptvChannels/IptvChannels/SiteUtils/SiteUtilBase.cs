@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using MediaPortal.Pbk.Cornerstone.Database;
+using System.Web;
 using NLog;
 
 namespace MediaPortal.IptvChannels.SiteUtils
@@ -19,10 +20,10 @@ namespace MediaPortal.IptvChannels.SiteUtils
         protected string _Version = "1.0.0";
         protected string _Author = "Unknown";
         protected string _Description = "";
-        protected NLog.Logger _Logger = LogManager.GetCurrentClassLogger();
+        protected Logger _Logger = LogManager.GetCurrentClassLogger();
         protected List<IptvChannel> _ChannelList = new List<IptvChannel>();
         protected DateTime _EpgLastRefresh = DateTime.MinValue;
-        protected int _EpgRefreshPeriod = 60; //[minutes]
+        protected int _EpgRefreshPeriod = 1440 * 60000; //[minutes]
         protected VideoQualityTypes _VideoQuality = VideoQualityTypes.Highest;
         #endregion
 
@@ -44,6 +45,7 @@ namespace MediaPortal.IptvChannels.SiteUtils
         [Category("EPG"), Description("EPG refresh enable."), DisplayName("Epg Refresh Enabled")]
         [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         [DBField()]
+        [DefaultValue(false)]
         public bool EpgRefreshEnabled
         { get; set; }
 
@@ -55,8 +57,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
         {
             get
             {
-                if (this._EpgRefreshPeriod < 1) 
-                    return 1;
+                if (this._EpgRefreshPeriod < 60000) 
+                    return 60000;
                 else
                     return this._EpgRefreshPeriod;
             }
@@ -169,8 +171,9 @@ namespace MediaPortal.IptvChannels.SiteUtils
         /// Get stream url
         /// </summary>
         /// <param name="channel">Channel for which to get the stream url</param>
+        /// <param name="prms">Extra url arguments</param>
         /// <returns>Stream url</returns>
-        public virtual string GetStreamUrl(IptvChannel channel)
+        public virtual LinkResult GetStreamUrl(IptvChannel channel)
         {
             return null;
         }
@@ -182,6 +185,19 @@ namespace MediaPortal.IptvChannels.SiteUtils
         public virtual bool RefreshEpg()
         {
             return false; 
+        }
+
+        /// <summary>
+        /// Get channel url
+        /// </summary>
+        /// <param name="channel">Channel for which to get the channel url</param>
+        /// <returns>Channel url</returns>
+        public virtual string GetChannelUrl(IptvChannel channel)
+        {
+            return Plugin.URL_FILTER_BASE + HttpUtility.UrlEncode("http://127.0.0.1:" + Database.dbSettings.Instance.HttpServerPort 
+                + Plugin.HTTP_PATH_STREAM + "?site=" + HttpUtility.UrlEncode(this.Name) + "&channel=" + channel.Id)
+                + (channel.PmtID >= 32 && channel.PmtID <= 8191 ? "&Mpeg2TsTransportStreamID=" + channel.TransportStreamID +
+                    "&Mpeg2TsProgramNumber=" + channel.ServiceID + "&Mpeg2TsProgramMapPID=" + channel.PmtID + "&HttpOpenConnectionTimeout=30000" : Plugin.URL_FILTER_PARAM);
         }
         #endregion
 

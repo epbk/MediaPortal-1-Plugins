@@ -72,23 +72,23 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
         }
 
-        public override string GetStreamUrl(IptvChannel channel)
+        public override LinkResult GetStreamUrl(IptvChannel channel)
         {
             lock (channel)
             {
-                this.Logger.Debug("[GetStreamUrl] Query:" + channel.Name + "  ID:" + channel.Id);
+                this._Logger.Debug("[GetStreamUrl] Query:" + channel.Name + "  ID:" + channel.Id);
 
                 //Try use cached url first
                 if (!string.IsNullOrEmpty(channel.LastFinalUrl) && (DateTime.Now - channel.LastFinalUrlTS).TotalSeconds < 60)
                 {
-                    this.Logger.Debug("[GetStreamUrl] Cached url:" + channel.LastFinalUrl);
-                    return channel.LastFinalUrl;
+                    this._Logger.Debug("[GetStreamUrl] Cached url:" + channel.LastFinalUrl);
+                    return new LinkResult() { Url = channel.LastFinalUrl };
                 }
 
-                XmlDocument xmldoc = WebTools.GetWebData<XmlDocument>(URL_BASE + channel.Url);
+                XmlDocument xmldoc = Pbk.Net.Http.HttpUserWebRequest.Download<XmlDocument>(URL_BASE + channel.Url);
                 if (xmldoc == null)
                 {
-                    this.Logger.Error("[GetStreamUrl] Failed to get web page.");
+                    this._Logger.Error("[GetStreamUrl] Failed to get web page.");
                     return null;
                 }
 
@@ -101,7 +101,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                     Match m = regexPlaylistUrl.Match(nodePlaylist.Value);
                     if (m.Success)
                     {
-                        string strFileContent = WebTools.GetWebData<string>(m.Groups["url"].Value);
+                        string strFileContent = Pbk.Net.Http.HttpUserWebRequest.Download<string>(m.Groups["url"].Value);
                         if (!string.IsNullOrEmpty(strFileContent))
                         {
                             m = regexFinalUrl.Match(strFileContent);
@@ -109,7 +109,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                             {
                                 //Load m3u8 content
                                 string strLinkUrl = m.Groups["url"].Value;
-                                string strM3u8Content = WebTools.GetWebData<string>(strLinkUrl, Encoding.UTF8);
+                                string strM3u8Content = Pbk.Net.Http.HttpUserWebRequest.Download<string>(strLinkUrl);
                                 if (!string.IsNullOrEmpty(strM3u8Content))
                                 {
                                     string strResult = strLinkUrl;
@@ -143,14 +143,14 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                                         strResult = strLinkUrl.Substring(0, strLinkUrl.LastIndexOf("/") + 1) + linkList[0].Url;
                                     }
 
-                                    this.Logger.Debug("[GetStreamUrl] Link found:" + strResult);
+                                    this._Logger.Debug("[GetStreamUrl] Link found:" + strResult);
                                     channel.LastFinalUrl = strResult;
                                     channel.LastFinalUrlTS = DateTime.Now;
-                                    return strResult;
+                                    return new LinkResult() { Url = strResult };
                                 }
                                 else
                                 {
-                                    this.Logger.Debug("[GetStreamUrl] Link not found.");
+                                    this._Logger.Debug("[GetStreamUrl] Link not found.");
                                     return null;
                                 }
                             }
@@ -159,7 +159,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                 }
 
-                this.Logger.Error("[GetStreamUrl] Link not found.");
+                this._Logger.Error("[GetStreamUrl] Link not found.");
                 return null;
             }
 
@@ -167,7 +167,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
         public override bool RefreshEpg()
         {
-            this.Logger.Debug("[RefreshEpg] RefreshEpg started...");
+            this._Logger.Debug("[RefreshEpg] RefreshEpg started...");
             try
             {
                 foreach (IptvChannel channel in this._ChannelList)
@@ -184,10 +184,10 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                 foreach (DateTime dt in dayList)
                 {
-                    XmlDocument xmldoc = WebTools.GetWebData<XmlDocument>(string.Format("{0}{1}-{2}-{3}", URL_EPG, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00")), Encoding.UTF8);
+                    XmlDocument xmldoc = Pbk.Net.Http.HttpUserWebRequest.Download<XmlDocument>(string.Format("{0}{1}-{2}-{3}", URL_EPG, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00")));
                     if (xmldoc == null)
                     {
-                        this.Logger.Error("[RefreshEpg] Failed to get web page.");
+                        this._Logger.Error("[RefreshEpg] Failed to get web page.");
                         return false;
                     }
 
@@ -195,7 +195,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                     if (nodePrg == null)
                     {
-                        this.Logger.Error("[RefreshEpg] No EPG data.");
+                        this._Logger.Error("[RefreshEpg] No EPG data.");
                         return false;
                     }
 
@@ -250,7 +250,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                                 if (m.Success)
                                 {
                                     int iChannelId = int.Parse(m.Groups["channel"].Value);
-                                    
+
                                     IptvChannel channel = this._ChannelList.Find(p => p.Url.EndsWith("/" + iChannelId));
                                     if (channel != null)
                                     {
@@ -260,7 +260,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                                             string strTitle = m.Groups["title"].Value;
 
-                                            this.Logger.Debug("[RefreshEpg] Program added:{0}  StartTime:{1}  EndTime:{2}  Channel:{3}", strTitle, dtStart, dtEnd, channel.Name);
+                                            this._Logger.Debug("[RefreshEpg] Program added:{0}  StartTime:{1}  EndTime:{2}  Channel:{3}", strTitle, dtStart, dtEnd, channel.Name);
 
                                             channel.EpgProgramList.Add(new Program(channel.Channel.IdChannel, dtStart, dtEnd, strTitle, strTitle, "Sport",
                                                        Program.ProgramState.None, System.Data.SqlTypes.SqlDateTime.MinValue.Value, String.Empty, String.Empty,
@@ -268,40 +268,28 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                                             iCnt++;
                                         }
                                     }
-                                    //else this.Logger.Error("[RefreshEpg] Invalid channel id:" + iChannelId);
+                                    //else this._Logger.Error("[RefreshEpg] Invalid channel id:" + iChannelId);
                                 }
                             }
                         }
                     }
 
-
-                    this.Logger.Debug("[RefreshEpg] Programs found:" + iCnt);
-
-
-
+                    this._Logger.Debug("[RefreshEpg] Programs found:" + iCnt);
                 }
 
                 //Complete
-                this.Logger.Debug("[RefreshEpg] RefreshEpg finished.");
+                this._Logger.Debug("[RefreshEpg] RefreshEpg finished.");
 
                 return true;
 
             }
             catch (Exception ex)
             {
-                this.Logger.Error("[RefreshEpg] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                this._Logger.Error("[RefreshEpg] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
                 return false;
             }
         }
 
-        protected override NLog.Logger Logger
-        {
-            get
-            {
-                if (this._Logger == null) this._Logger = LogManager.GetCurrentClassLogger();
-                return this._Logger;
-            }
-        }
         #endregion
 
     }

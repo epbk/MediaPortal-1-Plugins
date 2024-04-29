@@ -44,15 +44,17 @@ namespace SetupTv.Sections
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.buttonCreateChannel = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxDrmServer = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.comboBoxStreamType = new System.Windows.Forms.ComboBox();
+            this.buttonCreateChannel = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.checkBoxUseSplitter = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBoxFFMPEG = new System.Windows.Forms.TextBox();
+            this.textBoxArgs = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBoxFfmpeg = new System.Windows.Forms.CheckBox();
             this.checkBoxCDN = new System.Windows.Forms.CheckBox();
             this.buttonCopyToClipboard = new System.Windows.Forms.Button();
             this.textBoxResult = new System.Windows.Forms.TextBox();
@@ -70,6 +72,7 @@ namespace SetupTv.Sections
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnDRM = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.bsMergedChannel)).BeginInit();
             this.tabGeneral.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -192,15 +195,17 @@ namespace SetupTv.Sections
             // 
             // tabPage5
             // 
-            this.tabPage5.Controls.Add(this.buttonCreateChannel);
+            this.tabPage5.Controls.Add(this.label6);
+            this.tabPage5.Controls.Add(this.textBoxDrmServer);
             this.tabPage5.Controls.Add(this.label5);
+            this.tabPage5.Controls.Add(this.comboBoxStreamType);
+            this.tabPage5.Controls.Add(this.buttonCreateChannel);
             this.tabPage5.Controls.Add(this.label4);
             this.tabPage5.Controls.Add(this.checkBoxUseSplitter);
             this.tabPage5.Controls.Add(this.label3);
-            this.tabPage5.Controls.Add(this.textBoxFFMPEG);
+            this.tabPage5.Controls.Add(this.textBoxArgs);
             this.tabPage5.Controls.Add(this.label2);
             this.tabPage5.Controls.Add(this.label1);
-            this.tabPage5.Controls.Add(this.checkBoxFfmpeg);
             this.tabPage5.Controls.Add(this.checkBoxCDN);
             this.tabPage5.Controls.Add(this.buttonCopyToClipboard);
             this.tabPage5.Controls.Add(this.textBoxResult);
@@ -213,11 +218,49 @@ namespace SetupTv.Sections
             this.tabPage5.Text = "Link Generator";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 115);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(135, 13);
+            this.label6.TabIndex = 24;
+            this.label6.Text = "DRM Licence Server URL:";
+            // 
+            // textBoxDrmServer
+            // 
+            this.textBoxDrmServer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxDrmServer.Location = new System.Drawing.Point(9, 131);
+            this.textBoxDrmServer.Name = "textBoxDrmServer";
+            this.textBoxDrmServer.Size = new System.Drawing.Size(414, 20);
+            this.textBoxDrmServer.TabIndex = 23;
+            this.textBoxDrmServer.TextChanged += new System.EventHandler(this.textBox_TextChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(9, 247);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(67, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "Stream Type";
+            // 
+            // comboBoxStreamType
+            // 
+            this.comboBoxStreamType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxStreamType.FormattingEnabled = true;
+            this.comboBoxStreamType.Location = new System.Drawing.Point(82, 244);
+            this.comboBoxStreamType.Name = "comboBoxStreamType";
+            this.comboBoxStreamType.Size = new System.Drawing.Size(143, 21);
+            this.comboBoxStreamType.TabIndex = 21;
+            this.comboBoxStreamType.SelectedIndexChanged += new System.EventHandler(this.comboBoxStreamType_SelectedIndexChanged);
+            // 
             // buttonCreateChannel
             // 
             this.buttonCreateChannel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCreateChannel.Enabled = false;
-            this.buttonCreateChannel.Location = new System.Drawing.Point(240, 171);
+            this.buttonCreateChannel.Location = new System.Drawing.Point(240, 327);
             this.buttonCreateChannel.Name = "buttonCreateChannel";
             this.buttonCreateChannel.Size = new System.Drawing.Size(102, 23);
             this.buttonCreateChannel.TabIndex = 20;
@@ -225,19 +268,10 @@ namespace SetupTv.Sections
             this.buttonCreateChannel.UseVisualStyleBackColor = true;
             this.buttonCreateChannel.Click += new System.EventHandler(this.buttonCreateChannel_Click);
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(38, 255);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(203, 13);
-            this.label5.TabIndex = 19;
-            this.label5.Text = "(convert input format to Transport Stream)";
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(38, 308);
+            this.label4.Location = new System.Drawing.Point(26, 204);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(256, 13);
             this.label4.TabIndex = 18;
@@ -248,7 +282,7 @@ namespace SetupTv.Sections
             this.checkBoxUseSplitter.AutoSize = true;
             this.checkBoxUseSplitter.Checked = true;
             this.checkBoxUseSplitter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUseSplitter.Location = new System.Drawing.Point(21, 186);
+            this.checkBoxUseSplitter.Location = new System.Drawing.Point(9, 162);
             this.checkBoxUseSplitter.Name = "checkBoxUseSplitter";
             this.checkBoxUseSplitter.Size = new System.Drawing.Size(192, 17);
             this.checkBoxUseSplitter.TabIndex = 17;
@@ -259,26 +293,26 @@ namespace SetupTv.Sections
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 70);
+            this.label3.Location = new System.Drawing.Point(6, 65);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(106, 13);
+            this.label3.Size = new System.Drawing.Size(60, 13);
             this.label3.TabIndex = 16;
-            this.label3.Text = "FFMPEG Arguments:";
+            this.label3.Text = "Arguments:";
             // 
-            // textBoxFFMPEG
+            // textBoxArgs
             // 
-            this.textBoxFFMPEG.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxArgs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxFFMPEG.Location = new System.Drawing.Point(9, 86);
-            this.textBoxFFMPEG.Name = "textBoxFFMPEG";
-            this.textBoxFFMPEG.Size = new System.Drawing.Size(414, 20);
-            this.textBoxFFMPEG.TabIndex = 15;
-            this.textBoxFFMPEG.TextChanged += new System.EventHandler(this.textBoxSource_TextChanged);
+            this.textBoxArgs.Location = new System.Drawing.Point(9, 81);
+            this.textBoxArgs.Name = "textBoxArgs";
+            this.textBoxArgs.Size = new System.Drawing.Size(414, 20);
+            this.textBoxArgs.TabIndex = 15;
+            this.textBoxArgs.TextChanged += new System.EventHandler(this.textBox_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 129);
+            this.label2.Location = new System.Drawing.Point(9, 285);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(40, 13);
             this.label2.TabIndex = 14;
@@ -293,21 +327,10 @@ namespace SetupTv.Sections
             this.label1.TabIndex = 13;
             this.label1.Text = "URL:";
             // 
-            // checkBoxFfmpeg
-            // 
-            this.checkBoxFfmpeg.AutoSize = true;
-            this.checkBoxFfmpeg.Location = new System.Drawing.Point(21, 235);
-            this.checkBoxFfmpeg.Name = "checkBoxFfmpeg";
-            this.checkBoxFfmpeg.Size = new System.Drawing.Size(91, 17);
-            this.checkBoxFfmpeg.TabIndex = 12;
-            this.checkBoxFfmpeg.Text = "Use FFMPEG";
-            this.checkBoxFfmpeg.UseVisualStyleBackColor = true;
-            this.checkBoxFfmpeg.CheckedChanged += new System.EventHandler(this.checkBoxFfmpeg_CheckedChanged);
-            // 
             // checkBoxCDN
             // 
             this.checkBoxCDN.AutoSize = true;
-            this.checkBoxCDN.Location = new System.Drawing.Point(21, 288);
+            this.checkBoxCDN.Location = new System.Drawing.Point(9, 184);
             this.checkBoxCDN.Name = "checkBoxCDN";
             this.checkBoxCDN.Size = new System.Drawing.Size(111, 17);
             this.checkBoxCDN.TabIndex = 11;
@@ -319,7 +342,7 @@ namespace SetupTv.Sections
             // 
             this.buttonCopyToClipboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCopyToClipboard.Enabled = false;
-            this.buttonCopyToClipboard.Location = new System.Drawing.Point(348, 171);
+            this.buttonCopyToClipboard.Location = new System.Drawing.Point(348, 327);
             this.buttonCopyToClipboard.Name = "buttonCopyToClipboard";
             this.buttonCopyToClipboard.Size = new System.Drawing.Size(75, 23);
             this.buttonCopyToClipboard.TabIndex = 10;
@@ -331,7 +354,7 @@ namespace SetupTv.Sections
             // 
             this.textBoxResult.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxResult.Location = new System.Drawing.Point(9, 145);
+            this.textBoxResult.Location = new System.Drawing.Point(9, 301);
             this.textBoxResult.Name = "textBoxResult";
             this.textBoxResult.ReadOnly = true;
             this.textBoxResult.Size = new System.Drawing.Size(414, 20);
@@ -345,7 +368,7 @@ namespace SetupTv.Sections
             this.textBoxSource.Name = "textBoxSource";
             this.textBoxSource.Size = new System.Drawing.Size(414, 20);
             this.textBoxSource.TabIndex = 8;
-            this.textBoxSource.TextChanged += new System.EventHandler(this.textBoxSource_TextChanged);
+            this.textBoxSource.TextChanged += new System.EventHandler(this.textBox_TextChanged);
             this.textBoxSource.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxSource_KeyPress);
             // 
             // bSave
@@ -453,7 +476,8 @@ namespace SetupTv.Sections
             this.dataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn2,
             this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn5});
+            this.dataGridViewTextBoxColumn5,
+            this.ColumnDRM});
             this.dataGridViewCDN.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewCDN.GroupRowBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.dataGridViewCDN.Location = new System.Drawing.Point(3, 3);
@@ -496,6 +520,14 @@ namespace SetupTv.Sections
             this.dataGridViewTextBoxColumn5.HeaderText = "Status";
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Width = 80;
+            // 
+            // ColumnDRM
+            // 
+            this.ColumnDRM.HeaderText = "DRM";
+            this.ColumnDRM.Name = "ColumnDRM";
+            this.ColumnDRM.ReadOnly = true;
+            this.ColumnDRM.Width = 70;
             // 
             // Setup
             // 
@@ -543,9 +575,8 @@ namespace SetupTv.Sections
     private System.Windows.Forms.TextBox textBoxResult;
     private System.Windows.Forms.TextBox textBoxSource;
     private System.Windows.Forms.CheckBox checkBoxCDN;
-    private System.Windows.Forms.CheckBox checkBoxFfmpeg;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBoxFFMPEG;
+        private System.Windows.Forms.TextBox textBoxArgs;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
@@ -553,13 +584,17 @@ namespace SetupTv.Sections
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.ImageList imageList;
+        private System.Windows.Forms.CheckBox checkBoxUseSplitter;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button buttonCreateChannel;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox comboBoxStreamType;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBoxDrmServer;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private System.Windows.Forms.CheckBox checkBoxUseSplitter;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button buttonCreateChannel;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColumnDRM;
     }
 }

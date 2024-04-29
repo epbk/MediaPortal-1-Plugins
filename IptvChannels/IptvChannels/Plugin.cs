@@ -52,9 +52,19 @@ namespace MediaPortal.IptvChannels
         public const string HTTP_PATH_EVENTS = "/GetEvents";
         public const string HTTP_PATH_APPLY_SETTINGS = "/ApplySettings";
 
+        public const string URL_PARAMETER_NAME_URL = "url";
+        public const string URL_PARAMETER_NAME_SITE = "site";
+        public const string URL_PARAMETER_NAME_CHANNEL = "channel";
+        public const string URL_PARAMETER_NAME_MEDIA_SERVER = "cdn";
+        public const string URL_PARAMETER_NAME_ARGUMENTS = "args";
+        public const string URL_PARAMETER_NAME_STREAM_TYPE = "streamType";
+        public const string URL_PARAMETER_NAME_DRM_LICENCE_SERVER = "drmLicenceServer";
+        public const string URL_PARAMETER_NAME_HTTP_ARGUMENTS = "httpArguments";
+
         #endregion
 
         #region Types
+        public delegate SiteUtils.LinkResult GetSiteLinkHandler(string strSite, string strChannel);
 
         #endregion
 
@@ -139,29 +149,43 @@ namespace MediaPortal.IptvChannels
         #endregion
 
         #region Public methods
-        public static string GenerateLink(string strUrl, GenerateLinkConfigEnum cfg, string strFfmpegArgs)
+        public static string GenerateLink(string strUrl, GenerateLinkConfigEnum cfg, Proxy.StreamTypeEnum streamType, string strArgs, string strDrmLicenceServer)
         {
             if (!string.IsNullOrWhiteSpace(strUrl))
             {
-                if (cfg == GenerateLinkConfigEnum.NONE)
-                    return strUrl;
+                //if (cfg == GenerateLinkConfigEnum.NONE)
+                //    return strUrl;
 
-                string strResult = string.Format("http://127.0.0.1:{0}{1}?url={2}{3}{4}",
+                string strStreamType = null;
+                switch(streamType)
+                {
+                    case Proxy.StreamTypeEnum.TransportStrem:
+                        strStreamType = "&streamType=ts";
+                            break;
+
+                    case Proxy.StreamTypeEnum.HLS:
+                        strStreamType = "&streamType=hls";
+                        break;
+
+                    case Proxy.StreamTypeEnum.Dash:
+                        strStreamType = "&streamType=dash";
+                        break;
+                }
+
+                string strResult = string.Format("http://127.0.0.1:{0}{1}?url={2}{3}&cdn={4}{5}{6}",
                            Database.dbSettings.Instance.HttpServerPort,
-                           (cfg & GenerateLinkConfigEnum.FFMPEG) == GenerateLinkConfigEnum.FFMPEG
-                                ? HTTP_PATH_STREAM : HTTP_PATH_MEDIA_HANDLER,
+                           HTTP_PATH_STREAM,
                            HttpUtility.UrlEncode(strUrl),
-                           (cfg & GenerateLinkConfigEnum.CDN) == GenerateLinkConfigEnum.CDN ? "&cdn=1" : null,
-                           !string.IsNullOrWhiteSpace(strFfmpegArgs) ? "&ffmpegArgs=" + HttpUtility.UrlEncode(strFfmpegArgs) : null
+                           strStreamType,
+                           (cfg & GenerateLinkConfigEnum.CDN) == GenerateLinkConfigEnum.CDN ? "1" : "0",
+                           !string.IsNullOrWhiteSpace(strArgs) ? "&args=" + HttpUtility.UrlEncode(strArgs) : null,
+                           !string.IsNullOrWhiteSpace(strDrmLicenceServer) ? "&drmLicenceServer=" + HttpUtility.UrlEncode(strDrmLicenceServer) : null
                            );
 
                 if ((cfg & GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER) == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER)
                 {
-                    return URL_FILTER_BASE + HttpUtility.UrlEncode(
-                        cfg == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER || cfg == (GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER | GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS)
-                        ? strUrl : strResult) +
-                        ((cfg & GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS) == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS
-                            ? URL_FILTER_PARAM : null);
+                    return URL_FILTER_BASE + HttpUtility.UrlEncode(strResult +
+                        ((cfg & GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS) == GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS ? URL_FILTER_PARAM : null));
                 }
                 else
                     return strResult;
@@ -178,19 +202,21 @@ namespace MediaPortal.IptvChannels
             if (this._IptvCards != null)
             {
                 //Create TV channel
-                DVBIPChannel channel = new DVBIPChannel();
-                channel.IsTv = true;
-                channel.IsRadio = false;
+                DVBIPChannel channel = new DVBIPChannel
+                {
+                    IsTv = true,
+                    IsRadio = false,
 
-                channel.Url = strChannelUrl;
-                channel.PmtPid = _PMT_PID_DEFAULT;
-                channel.ServiceId = _PROGRAM_ID_DEFAULT;
-                channel.NetworkId = _NETWORK_ID_DEFAULT;
-                channel.TransportId = _TS_ID_DEFAULT;
+                    Url = strChannelUrl,
+                    PmtPid = _PMT_PID_DEFAULT,
+                    ServiceId = _PROGRAM_ID_DEFAULT,
+                    NetworkId = _NETWORK_ID_DEFAULT,
+                    TransportId = _TS_ID_DEFAULT,
 
-                channel.Provider = _PROVIDER_PREFIX;
-                channel.FreeToAir = true;
-                channel.Name = strChannelName;
+                    Provider = _PROVIDER_PREFIX,
+                    FreeToAir = true,
+                    Name = strChannelName
+                };
 
                 Channel dbChannel = this._TvLayer.AddNewChannel(strChannelName, channel.LogicalChannelNumber);
                 dbChannel.SortOrder = 10000;
@@ -200,9 +226,9 @@ namespace MediaPortal.IptvChannels
 
                 dbChannel.IsTv = true;
                 dbChannel.IsRadio = false;
-                dbChannel.Persist();
                 dbChannel.GrabEpg = false;
                 dbChannel.VisibleInGuide = true;
+                dbChannel.Persist();
 
                 this._TvLayer.AddChannelToGroup(dbChannel, TvConstants.TvGroupNames.AllChannels);
                 this._TvLayer.AddTuningDetails(dbChannel, channel);
@@ -242,7 +268,7 @@ namespace MediaPortal.IptvChannels
 
             bool bRefreshNeeded = false;
 
-            int iMinRefreshPeriod = 60;
+            int iMinRefreshPeriod = 60000 * 60;
 
             try
             {
@@ -254,7 +280,7 @@ namespace MediaPortal.IptvChannels
                             continue;
 
                         //Check last refresh time stamp
-                        if ((DateTime.Now - util.EpgLastRefresh.AddMinutes(util.EpgRefreshPeriod)).TotalSeconds < -30)
+                        if ((DateTime.Now - util.EpgLastRefresh.AddMilliseconds(util.EpgRefreshPeriod)).TotalSeconds < -30)
                             continue;
 
                         //Refresh EPG in SiteUtil
@@ -327,8 +353,11 @@ namespace MediaPortal.IptvChannels
                     if (bRefreshNeeded)
                         this._TvLayer.WaitForInsertPrograms();
 
+                    if (iMinRefreshPeriod < 60000)
+                        iMinRefreshPeriod = 60000;
+
                     this.LastRefresh = DateTime.Now;
-                    this.NextRefresh = DateTime.Now.AddMinutes(iMinRefreshPeriod);
+                    this.NextRefresh = DateTime.Now.AddMilliseconds(iMinRefreshPeriod);
 
                     _Logger.Debug("[RefreshEpg] RefreshEpg finished. Next refresh:" + this.NextRefresh);
                 }
@@ -414,17 +443,15 @@ namespace MediaPortal.IptvChannels
 
                 try
                 {
-                    string strUrlChannelBase = "http://127.0.0.1:" + Database.dbSettings.Instance.HttpServerPort + HTTP_PATH_LINK + "?site=" + HttpUtility.UrlEncode(site.Name) + "&channel=";
-
                     if (this._IptvCards.Count > 0)
                     {
                         foreach (SiteUtils.IptvChannel iptvChannel in site.Channels)
                         {
                             Channel dbChannel;
+                            string strChannelUrl = site.GetChannelUrl(iptvChannel);
+                            string strChannelProvider = _PROVIDER_PREFIX + site.Name + '|' + iptvChannel.Id;
 
-                            string strChannelUrl = URL_FILTER_BASE + HttpUtility.UrlEncode(strUrlChannelBase + HttpUtility.UrlEncode(iptvChannel.Id));
-
-                            if (!getChannel(strChannelUrl, true, out dbChannel))
+                            if ((dbChannel = getChannel(strChannelProvider)) == null)
                             {
                                 if (!site.Enabled)
                                 {
@@ -434,13 +461,15 @@ namespace MediaPortal.IptvChannels
                                 }
 
                                 //Create TV channel
-                                DVBIPChannel channel = new DVBIPChannel();
-                                channel.IsTv = true;
-                                channel.IsRadio = false;
+                                DVBIPChannel channel = new DVBIPChannel
+                                {
+                                    IsTv = true,
+                                    IsRadio = false,
+                                    Url = strChannelUrl
+                                };
 
                                 if (iptvChannel.PmtID >= 32 && iptvChannel.PmtID <= 8191)
                                 {
-                                    channel.Url = strChannelUrl;
                                     channel.PmtPid = iptvChannel.PmtID;
                                     channel.ServiceId = iptvChannel.ServiceID;
                                     channel.NetworkId = iptvChannel.NetworkID;
@@ -448,14 +477,13 @@ namespace MediaPortal.IptvChannels
                                 }
                                 else
                                 {
-                                    channel.Url = strChannelUrl + URL_FILTER_PARAM;
                                     channel.PmtPid = _PMT_PID_DEFAULT;
                                     channel.ServiceId = _PROGRAM_ID_DEFAULT;
                                     channel.NetworkId = _NETWORK_ID_DEFAULT;
                                     channel.TransportId = _TS_ID_DEFAULT;
                                 }
 
-                                channel.Provider = _PROVIDER_PREFIX + site.Name;
+                                channel.Provider = strChannelProvider;
                                 channel.FreeToAir = true;
                                 channel.Name = iptvChannel.Name;
 
@@ -467,9 +495,9 @@ namespace MediaPortal.IptvChannels
 
                                 dbChannel.IsTv = true;
                                 dbChannel.IsRadio = false;
-                                dbChannel.Persist();
                                 dbChannel.GrabEpg = false;
                                 dbChannel.VisibleInGuide = true;
+                                dbChannel.Persist();
 
                                 this._TvLayer.AddChannelToGroup(dbChannel, TvConstants.TvGroupNames.AllChannels);
                                 this._TvLayer.AddTuningDetails(dbChannel, channel);
@@ -488,6 +516,12 @@ namespace MediaPortal.IptvChannels
                                     _Logger.Debug("[CheckChannels] Site not enabled. Delete channel:" + dbChannel.DisplayName);
                                     delList.Add(dbChannel);
                                     continue;
+                                }
+                                else if (site.Enabled && dbChannel.ReferringTuningDetail()[0].Url != strChannelUrl)
+                                {
+                                    _Logger.Debug("[CheckChannels] Updating channel '{0}' url: {1}", dbChannel.DisplayName, strChannelUrl);
+                                    dbChannel.ReferringTuningDetail()[0].Url = strChannelUrl;
+                                    dbChannel.ReferringTuningDetail()[0].Persist();
                                 }
                             }
 
@@ -600,6 +634,24 @@ namespace MediaPortal.IptvChannels
 
             _Logger.Debug("[GetChannel] Channel not found: " + strUrl);
             return false;
+        }
+
+        private Channel getChannel(string strChnnelProvider)
+        {
+            _Logger.Debug("[GetChannel] Looking for channel: " + strChnnelProvider);
+
+            if (this._TvLayer.Channels != null)
+            {
+                foreach (Channel ch in this._TvLayer.Channels)
+                {
+                    IList<TuningDetail> tun = ch.ReferringTuningDetail();
+                    if (tun[0].Provider == strChnnelProvider)
+                        return ch;
+                }
+            }
+
+            _Logger.Debug("[GetChannel] Channel not found: " + strChnnelProvider);
+            return null;
         }
 
         private void deleteChannels(List<Channel> channels)
@@ -716,10 +768,9 @@ namespace MediaPortal.IptvChannels
             catch { }
         }
 
-        private SiteUtils.IptvChannel getIptvChannelByUrlParam(Dictionary<string, string> prm)
+        private SiteUtils.IptvChannel getIptvChannelByUrlParam(string strSite, string strChannel)
         {
-            string strSite, strChannel;
-            if (prm.TryGetValue("site", out strSite) && prm.TryGetValue("channel", out strChannel))
+            if (strSite != null && strChannel != null)
             {
                 SiteUtils.SiteUtilBase site = this._Sites.Find(p => p.Name == strSite && p.Enabled);
                 if (site == null)
@@ -796,9 +847,6 @@ namespace MediaPortal.IptvChannels
                 this._HttpServer = new Pbk.Net.Http.HttpUserServer();
                 this._HttpServer.RequestReceived += this.cbHttpServer;
             }
-
-
-            
 
             this._HttpServer.Start(Database.dbSettings.Instance.HttpServerPort);
 
@@ -934,21 +982,13 @@ namespace MediaPortal.IptvChannels
                     {
                         #region /GetStream
                         case HTTP_PATH_STREAM:
-                            if (prm.TryGetValue("url", out strUrl) && Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
+                            if (!prm.TryGetValue(URL_PARAMETER_NAME_URL, out strUrl))
+                                strUrl = null;
+
+                            Proxy.ConnectionHandler con = Proxy.ConnectionHandler.Get(prm, this.GetLinkFromSite);
+                            if (con != null)
                             {
-                                if (prm.TryGetValue("cdn", out strValue) && strValue == "1")
-                                {
-                                    strUrl = string.Format("http://127.0.0.1:{0}{1}?url={2}",
-                                        this.Settings.HttpServerPort,
-                                        HTTP_PATH_MEDIA_HANDLER,
-                                        HttpUtility.UrlEncode(strUrl));
-                                }
-
-                                //FFMPEG extra arguments
-                                if (!prm.TryGetValue("ffmpegArgs", out strValue))
-                                    strValue = null;
-
-                                Proxy.ConnectionHandler.Get(strUrl, strValue).AddClient(e.RemoteSocket);
+                                con.AddClient(e.RemoteSocket);
                                 e.KeepAlive = false;
                                 e.Handled = true;
                                 e.ResponseSent = true;
@@ -959,7 +999,7 @@ namespace MediaPortal.IptvChannels
 
                         #region /GetMediaHandler
                         case HTTP_PATH_MEDIA_HANDLER:
-                            if (prm.TryGetValue("url", out strUrl))
+                            if (prm.TryGetValue(URL_PARAMETER_NAME_URL, out strUrl))
                             {
                                 //Enter lock
                                 Monitor.Enter(this._HttpServer, ref bLocked);
@@ -979,6 +1019,9 @@ namespace MediaPortal.IptvChannels
                                         Url = strUrl,
                                         Title = strUrl,
                                         Autoterminate = true,
+                                        DRMLicenceServer = prm.TryGetValue(URL_PARAMETER_NAME_DRM_LICENCE_SERVER, out strValue) ? strValue : null,
+                                        HttpArguments = prm.TryGetValue(URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue) 
+                                            ? Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue) : null,
                                     };
                                     this.cdnTaskAdd(cdnTask);
                                     cdnTask.Event += this.cbTaskEvent;
@@ -1211,41 +1254,16 @@ namespace MediaPortal.IptvChannels
         private void httpHandleChannelRequest(Dictionary<string, string> prm, Pbk.Net.Http.HttpUserServerEventArgs e)
         {
             //Get final url from site
-            string strResponse = null;
-            SiteUtils.IptvChannel channel = this.getIptvChannelByUrlParam(prm);
-            if (channel != null)
-            {
-                //Channel found; call site to get the final url
-                try
-                {
-                    Thread thread = new Thread(new ThreadStart(() =>
-                        {
-                            strResponse = channel.SiteUtil.GetStreamUrl(channel);
-                        }));
-
-                    thread.Start();
-
-                    //Wait for thread
-                    if (!thread.Join(60000))
-                    {
-                        thread.Abort();
-                        strResponse = null;
-                        _Logger.Error("[httpHandleChannelRequest] Function timeout:GetStreamUrl(IptvChannel channel)");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _Logger.Error("[httpHandleChannelRequest] Plugin error:GetStreamUrl(IptvChannel channel) {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
-                    strResponse = null;
-                }
-            }
+            SiteUtils.LinkResult response = null;
+            if (prm.TryGetValue("site", out string strSite) && prm.TryGetValue("channel", out string strChannel))
+                response = GetLinkFromSite(strSite, strChannel);
 
             #region Response
-            if (!string.IsNullOrEmpty(strResponse))
+            if (response != null && response.Url != null)
             {
                 e.ResponseCode = HttpStatusCode.Moved;
                 e.ResponseHeaderFields = new Dictionary<string, string>();
-                e.ResponseHeaderFields.Add("Location", strResponse);
+                e.ResponseHeaderFields.Add("Location", response.Url);
             }
             else
             {
@@ -1255,8 +1273,44 @@ namespace MediaPortal.IptvChannels
 
             e.Handled = true;
 
-            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[httpHandleChannelRequest][{0}] Response:\r\n{1}", e.RemoteSocket.RemoteEndPoint.ToString(), strResponse);
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[httpHandleChannelRequest][{0}] Response:\r\n{1}",
+                e.RemoteSocket.RemoteEndPoint.ToString(), response != null ? response.Url : null);
             #endregion
+        }
+
+        public SiteUtils.LinkResult GetLinkFromSite(string strSite, string strChannel)
+        {
+            //Get final url from site
+            SiteUtils.LinkResult response = null;
+            SiteUtils.IptvChannel channel = this.getIptvChannelByUrlParam(strSite, strChannel);
+            if (channel != null)
+            {
+                //Channel found; call site to get the final url
+                try
+                {
+                    Thread thread = new Thread(new ThreadStart(() =>
+                    {
+                        response = channel.SiteUtil.GetStreamUrl(channel);
+                    }));
+
+                    thread.Start();
+
+                    //Wait for thread
+                    if (!thread.Join(60000))
+                    {
+                        thread.Abort();
+                        response = null;
+                        _Logger.Error("[GetLinkFromSite] Function timeout:GetStreamUrl(IptvChannel channel)");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _Logger.Error("[GetLinkFromSite] Plugin error:GetStreamUrl(IptvChannel channel) {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                    response = null;
+                }
+            }
+
+            return response;
         }
 
         /// <summary>

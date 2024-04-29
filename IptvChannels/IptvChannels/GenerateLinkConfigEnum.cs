@@ -9,9 +9,8 @@ namespace MediaPortal.IptvChannels
     public enum GenerateLinkConfigEnum
     {
         NONE = 0,
-        FFMPEG = 1,
-        CDN = 2,
-        MPURL_SOURCE_SPLITTER = 4,
-        MPURL_SOURCE_SPLITTER_ARGS = 8
+        CDN = 1,
+        MPURL_SOURCE_SPLITTER = 2,
+        MPURL_SOURCE_SPLITTER_ARGS = 4
     }
 }

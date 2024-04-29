@@ -53,11 +53,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Gentle.Common">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Common.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\Gentle.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Gentle.Framework">
-      <HintPath>c:\Program Files (x86)\Team MediaPortal\MediaPortal TV Server\Gentle.Framework.dll</HintPath>
+      <HintPath>c:\Program Files\Team MediaPortal\MediaPortal TV Server\Gentle.Framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="IptvChannels">
@@ -101,8 +101,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "$(ProgramFiles)\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"
-Copy "$(TargetDir)$(TargetName).pdb" "$(ProgramFiles)\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"</PostBuildEvent>
+    <PostBuildEvent>Copy "$(TargetDir)$(TargetName)$(TargetExt)" "c:\Program Files\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"
+Copy "$(TargetDir)$(TargetName).pdb" "c:\Program Files\Team MediaPortal\MediaPortal TV Server\Plugins\IptvChannelsPlugins\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
