@@ -12,6 +12,12 @@ namespace MediaPortal.Pbk.Extensions
     {
         private static readonly char[] _WhiteSpaceChars = new char[] { ' ', '\t', '\r', '\n', '\f', (char)0xA0 };
 
+        /// <summary>
+        /// Deletes all occurrences of a specified <see cref="System.Char" /> from this instance.
+        /// </summary>
+        /// <param name="self">The current <see cref="System.Text.StringBuilder" /> instance.</param>
+        /// <param name="c"><see cref="System.Char" /> to remove.</param>
+        /// <returns>The current <see cref="System.Text.StringBuilder" /> that remains after all occurrences of a specified <see cref="System.Char" /> are removed of the current <see cref="System.Text.StringBuilder" />.</returns>
         public static StringBuilder Remove(this StringBuilder self, char c)
         {
             int iIdx = 0;
@@ -373,10 +379,6 @@ namespace MediaPortal.Pbk.Extensions
 
                 int iValue = self[iIdxSb];
 
-                //surrogate code check
-                if (iValue >= 0xd800 && iValue <= 0xdbff && (iIdxSb + 1) < self.Length && self[iIdxSb + 1] >= 0xdc00 && self[iIdxSb + 1] <= 0xdfff)
-                    iValue = 0x10000 + (((iValue - 0xd800) << 10) | (self[++iIdxSb] - 0xdc00));
-
                 if (iValue <= 0x7F)
                     data[iSize++] = (byte)iValue;
                 else
@@ -385,6 +387,10 @@ namespace MediaPortal.Pbk.Extensions
                         data[iSize++] = (byte)((iValue >> 6) | 0xC0);
                     else
                     {
+                        //surrogate code check
+                        if (iValue >= 0xd800 && iValue <= 0xdbff && (iIdxSb + 1) < self.Length && self[iIdxSb + 1] >= 0xdc00 && self[iIdxSb + 1] <= 0xdfff)
+                            iValue = 0x10000 + (((iValue - 0xd800) << 10) | (self[++iIdxSb] - 0xdc00));
+                        
                         if (iValue <= 0xFFFF)
                             data[iSize++] = (byte)((iValue >> 12) | 0xE0);
                         else if (iValue <= 0x10FFFF)
