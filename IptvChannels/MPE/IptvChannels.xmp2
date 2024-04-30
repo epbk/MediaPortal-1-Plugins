@@ -151,6 +151,113 @@
           </Items>
         </Files>
       </GroupItem>
+      <GroupItem Name="Widevine">
+        <DisplayName>Widevine</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Widevine</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\BouncyCastle.Crypto.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{1585412c-e8c2-4232-8ca3-1a5d64cc2e05}-BouncyCastle.Crypto.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\BouncyCastle.Crypto.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\mp4decrypt.exe</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{928af393-6a01-4c2a-8327-a4b69f08fad8}-mp4decrypt.exe</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\mp4decrypt.exe</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\Newtonsoft.Json.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{7cb1b9a2-c760-41ed-ac12-7634a0239387}-Newtonsoft.Json.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\Newtonsoft.Json.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\protobuf-net.Core.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{df0d8b39-c474-407a-a706-4c6d76844b68}-protobuf-net.Core.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\protobuf-net.Core.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\protobuf-net.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{67ef766d-8071-4fb8-bd47-23ea2581d36a}-protobuf-net.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\protobuf-net.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\System.Collections.Immutable.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a88fcd92-c3ab-4bbc-8190-3e05414a4bec}-System.Collections.Immutable.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\System.Collections.Immutable.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\System.Runtime.CompilerServices.Unsafe.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{3b27592c-da2a-429e-9668-cd4a5af808a2}-System.Runtime.CompilerServices.Unsafe.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\System.Runtime.CompilerServices.Unsafe.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\WidevineClient.deps.json</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{c48cf7e2-16ff-4532-a099-aa988cc77c44}-WidevineClient.deps.json</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.deps.json</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\WidevineClient.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{6dec39f7-862f-4dc4-a56f-2093d53628d2}-WidevineClient.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\WidevineClient.exe</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{de8b6a2d-7200-4c18-a697-10877e2eb97b}-WidevineClient.exe</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.exe</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\WidevineClient.runtimeconfig.json</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{d85148f1-0456-422f-b4cb-2a33e6860592}-WidevineClient.runtimeconfig.json</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.runtimeconfig.json</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\device_client_id_blob</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{7de7dae8-d5b8-40fd-a114-d1d898ef8db6}-device_client_id_blob</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\device_client_id_blob</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\device_private_key</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{6a42c52b-001d-4dce-852c-d6c97324121e}-device_private_key</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\device_private_key</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\Readme.txt</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{3f6f86e8-c787-4315-a56f-47396ce6ecdf}-Readme.txt</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\Readme.txt</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
     </Items>
   </Groups>
   <Sections>
@@ -645,14 +752,14 @@ public class Script
     <Version>
       <Major>0</Major>
       <Minor>9</Minor>
-      <Build>0</Build>
+      <Build>1</Build>
       <Revision>0</Revision>
     </Version>
     <ExtensionDescription>IPTV channels</ExtensionDescription>
     <VersionDescription />
     <DevelopmentStatus>Stable</DevelopmentStatus>
     <OnlineLocation />
-    <ReleaseDate>2024-03-09T18:27:26</ReleaseDate>
+    <ReleaseDate>2024-04-30T18:27:26</ReleaseDate>
     <Tags>iptv,tv server plugins</Tags>
     <PlatformCompatibility>AnyCPU</PlatformCompatibility>
     <Location>.\IptvChannels.v[Version].mpe1</Location>
@@ -809,10 +916,119 @@ public class Script
         <ZipFileName>Installer{CopyFile}\{21750904-90f2-434e-8159-27661165f335}-Newtonsoft.Json.dll</ZipFileName>
         <DestinationFilename>%TvServerBase%\Newtonsoft.Json.dll</DestinationFilename>
       </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\BouncyCastle.Crypto.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{1585412c-e8c2-4232-8ca3-1a5d64cc2e05}-BouncyCastle.Crypto.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\BouncyCastle.Crypto.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\mp4decrypt.exe</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{928af393-6a01-4c2a-8327-a4b69f08fad8}-mp4decrypt.exe</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\mp4decrypt.exe</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\Newtonsoft.Json.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{7cb1b9a2-c760-41ed-ac12-7634a0239387}-Newtonsoft.Json.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\Newtonsoft.Json.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\protobuf-net.Core.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{df0d8b39-c474-407a-a706-4c6d76844b68}-protobuf-net.Core.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\protobuf-net.Core.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\protobuf-net.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{67ef766d-8071-4fb8-bd47-23ea2581d36a}-protobuf-net.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\protobuf-net.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\System.Collections.Immutable.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a88fcd92-c3ab-4bbc-8190-3e05414a4bec}-System.Collections.Immutable.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\System.Collections.Immutable.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\System.Runtime.CompilerServices.Unsafe.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{3b27592c-da2a-429e-9668-cd4a5af808a2}-System.Runtime.CompilerServices.Unsafe.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\System.Runtime.CompilerServices.Unsafe.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\WidevineClient.deps.json</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{c48cf7e2-16ff-4532-a099-aa988cc77c44}-WidevineClient.deps.json</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.deps.json</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\WidevineClient.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{6dec39f7-862f-4dc4-a56f-2093d53628d2}-WidevineClient.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\WidevineClient.exe</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{de8b6a2d-7200-4c18-a697-10877e2eb97b}-WidevineClient.exe</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.exe</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\WidevineClient.runtimeconfig.json</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{d85148f1-0456-422f-b4cb-2a33e6860592}-WidevineClient.runtimeconfig.json</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\WidevineClient.runtimeconfig.json</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\device_client_id_blob</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{7de7dae8-d5b8-40fd-a114-d1d898ef8db6}-device_client_id_blob</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\device_client_id_blob</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\device_private_key</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{6a42c52b-001d-4dce-852c-d6c97324121e}-device_private_key</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\device_private_key</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\Widevine\cdm\devices\generic_x86_arm\Readme.txt</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{3f6f86e8-c787-4315-a56f-47396ce6ecdf}-Readme.txt</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine\cdm\devices\generic_x86_arm\Readme.txt</DestinationFilename>
+      </FileItem>
     </Items>
   </UniqueFileList>
   <ProjectSettings>
-    <FolderGroups />
+    <FolderGroups>
+      <FolderGroup InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName />
+        <ZipFileName>Installer{CopyFile}\{34bc5728-7cca-407a-a6fd-6f046c599d6a}-</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Widevine</DestinationFilename>
+        <Folder>..\Widevine</Folder>
+        <Group>Widevine</Group>
+        <Recursive>true</Recursive>
+      </FolderGroup>
+    </FolderGroups>
     <ProjectFilename>IptvChannels.xmp2</ProjectFilename>
     <UpdatePath1 />
     <UpdatePath2 />
