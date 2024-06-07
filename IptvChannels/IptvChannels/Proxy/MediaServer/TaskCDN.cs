@@ -240,6 +240,9 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         public string DRMLicenceServer
         { get; set; }
 
+        public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments
+        { get; set; }
+
         public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments
         { get; set; }
 
@@ -694,6 +697,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                                 SegmentTemplateMedia = nodeTemplate.Attributes["media"]?.Value,
                                                 InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString(),
                                                 LicenceServer = this.DRMLicenceServer,
+                                                HttpArguments = this.DRMHttpArguments,
                                                 Type = ContentProtectionTypeEnum.Widevine
                                             });
                                     });
@@ -705,7 +709,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         ContentProtection p = prot[i];
                                         if (p.PSSH != null && p.KID != null)
                                         {
-                                            p.DecryptionKey = Widevine.GetKey(p.PSSH, p.KID, p.LicenceServer);
+                                            p.DecryptionKey = Widevine.GetKey(p.PSSH, p.KID, p.LicenceServer, p.HttpArguments);
                                             if (p.DecryptionKey == null)
                                             {
                                                 this.Logger.Error("[{0}][refreshMasterList] ContentProtection: Failed to get the Key: {1}", this._Identifier, p.KID);

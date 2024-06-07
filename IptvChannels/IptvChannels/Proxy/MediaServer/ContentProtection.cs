@@ -20,7 +20,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         public string SegmentTemplateMedia;
         public string SegmentTemplateInit;
         public string LicenceServer = null;
-
+        public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments;
         public string InitFileFullPath = null;
 
         public ManualResetEvent FlagInitComplete = new ManualResetEvent(false);

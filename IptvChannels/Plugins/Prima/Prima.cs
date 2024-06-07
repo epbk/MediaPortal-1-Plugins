@@ -41,7 +41,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #endregion
 
         #region Overrides
-        public override void Initialize()
+        public override void Initialize(Plugin plugin)
         {
             //this._ChannelList.Add(new IptvChannel(this, "PRIMA", "p111013", "Prima Web") { Tag = "iPrima" });
             this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "p111015", "Prima ZOOM Web") { Tag = "iPrima" });
@@ -54,7 +54,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             //this._ChannelList.Add(new IptvChannel(this, "STAR", "p846043", "Prima STAR Web") { Tag = "iPrima" });
 
             //Initialize base
-            base.Initialize();
+            base.Initialize(plugin);
         }
 
         public override LinkResult GetStreamUrl(IptvChannel channel)
@@ -97,6 +97,9 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
             this._Logger.Error("[getStreamUrl] Stream link not found: " + strId);
             return null;
+            
+            
+            //https://api.play-backend.iprima.cz/api/v1/products/id-p111015/play
         }
         #endregion
     }

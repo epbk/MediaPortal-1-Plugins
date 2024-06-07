@@ -50,7 +50,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #endregion
 
         #region Overrides
-        public override void Initialize()
+        public override void Initialize(Plugin plugin)
         {
             //Create Channel list
             if (this.IncludeBasicChannels)
@@ -68,7 +68,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             this._ChannelList.Add(new IptvChannel(this, "stvrio8", "/rio2016/live/14", "RIO 8"));
 
             //Initialize base
-            base.Initialize();
+            base.Initialize(plugin);
 
         }
 

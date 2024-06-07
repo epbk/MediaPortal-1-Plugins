@@ -134,10 +134,14 @@
     <Compile Include="Controls\DataGridViewDropEventArgs.cs" />
     <Compile Include="Controls\DataGridViewDropEventHandler.cs" />
     <Compile Include="Controls\DataGridViewRowTypeEnum.cs" />
-    <Compile Include="GenerateLinkConfigEnum.cs" />
+    <Compile Include="GenerateLinkConfiguration.cs" />
+    <Compile Include="Controls\UIEditor\HttpCookiesUIEditor.cs" />
+    <Compile Include="Controls\UIEditor\HttpFieldsUIEditor.cs" />
+    <Compile Include="HttpUserWebRequestArgumentsWrapper.cs" />
     <Compile Include="Proxy\MediaServer\ContentProtectionTypeEnum.cs" />
     <Compile Include="Proxy\MediaServer\StreamQualityEnum.cs" />
     <Compile Include="Proxy\MediaServer\Widevine.cs" />
+    <Compile Include="Proxy\MediaServer\WidevineProcess.cs" />
     <Compile Include="Proxy\StreamTypeEnum.cs" />
     <Compile Include="SendEventTypeEnum.cs" />
     <Compile Include="Controls\UIEditor\FileSizeConverter.cs" />
@@ -191,6 +195,12 @@
     <Compile Include="SiteUtils\LinkResult.cs" />
     <Compile Include="SiteUtils\SiteUtilBase.cs" />
     <Compile Include="SiteUtils\VideoDescription.cs" />
+    <Compile Include="Controls\UIEditor\StringDictionaryEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\UIEditor\StringDictionaryEditorForm.Designer.cs">
+      <DependentUpon>StringDictionaryEditorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Json.cs" />
     <Compile Include="Tools\RegularExpressions.cs" />
     <Compile Include="Tools\Utils.cs">
@@ -200,6 +210,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Config\ConfigControl.resx">
       <DependentUpon>ConfigControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UIEditor\StringDictionaryEditorForm.resx">
+      <DependentUpon>StringDictionaryEditorForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

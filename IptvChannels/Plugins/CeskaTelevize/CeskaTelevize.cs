@@ -32,7 +32,6 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         //[\"ct1\",\"ct2\",\"sport\",\"ct24\",\"art\",\"decko\",\"ct3\",\"ct24plus\",\"ctSportExtra\"]
         private const string _QUERY_POST_PROGRAM_DAILY = "{{\"query\":\"query TVProgramDailyChannelsPlanV2($channels: [String!]!, $date: Date!){{TVProgramDailyChannelsPlanV2(channels: $channels, date: $date) {{channel, channelSettings {{channelColor, channelLogo, channelName}}, currentBroadcast {{legacyEncoder, item {{aboveTitle, alternative, description, genre, idec, imageUrl, ivysilani, length, liveOnly, originalTitle, part, programSource, properties {{code, description}}, regional, show, sidp, startTime, title, vps, playable, isPlayableNow, start, end}}}}, program {{aboveTitle, alternative, description, genre, idec, imageUrl, ivysilani, length, liveOnly, originalTitle, part, programSource, properties {{code, description}}, regional, show, sidp, startTime, title, vps, playable, isPlayableNow, start, end}}}}}}\",\"variables\":{{\"channels\":[\"ctSportExtra\"],\"date\":\"{0}\"}}}}";
 
-
         #endregion
 
         #region Variables
@@ -40,14 +39,33 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         private JToken _CacheOnline = null;
         private DateTime _CacheOnline2Ts = DateTime.MinValue;
         private JToken _CacheOnline2 = null;
+        private IptvChannel[] _BasicChannels = null;
         #endregion
 
         #region Properties
-        [Category("Channels"), Description("Include channels ČT 1, ČT 2, ČT 24, ČT Sport and ČT :D/Art"), DisplayName("Include Basic Channels"), Browsable(false)]
+        [Category("Channels"), Description("Include channels ČT 1, ČT 2, ČT 24, ČT Sport and ČT :D/Art"), DisplayName("Include Basic Channels"), Browsable(true)]
         [DBField()]
         [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public bool IncludeBasicChannels
-        { get; set; }
+        { 
+            get
+            {
+                return this._IncludeBasicChannels;
+            }
+            set
+            {
+                if (value != this._IncludeBasicChannels)
+                {
+                    this._IncludeBasicChannels = value;
+
+                    this.updateChannelList();
+
+                    if (this._Initialized)
+                        this._ParentPlugin.CheckSiteChannels(this);
+
+                }
+            }
+        }private bool _IncludeBasicChannels = false;
 
         [Browsable(false)]
         public override VideoQualityTypes VideoQuality
@@ -66,18 +84,19 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #endregion
 
         #region Overrides
-        public override void Initialize()
+        public override void Initialize(Plugin plugin)
         {
-            if (this.IncludeBasicChannels)
+            this._BasicChannels = new IptvChannel[]
             {
-                this._ChannelList.Add(new IptvChannel(this, "CT1", "CH_1", "ČT 1"));
-                this._ChannelList.Add(new IptvChannel(this, "CT2", "CH_2", "ČT 2"));
-                this._ChannelList.Add(new IptvChannel(this, "CT3", "CH_3", "ČT 24"));
-                this._ChannelList.Add(new IptvChannel(this, "CT4", "CH_4", "ČT sport"));
-                this._ChannelList.Add(new IptvChannel(this, "CT5", "CH_5", "ČT :D"));
-                this._ChannelList.Add(new IptvChannel(this, "CT6", "CH_6", "ČT art"));
-                //this._ChannelList.Add(new IptvChannel(this, "CT7", string.Empty, "ČT 3"));
-            }
+              new IptvChannel(this, "CT1", "CH_1", "ČT 1"),
+              new IptvChannel(this, "CT2", "CH_2", "ČT 2"),
+              new IptvChannel(this, "CT3", "CH_3", "ČT 24"),
+              new IptvChannel(this, "CT4", "CH_4", "ČT sport"),
+              new IptvChannel(this, "CT5", "CH_5", "ČT :D"),
+              new IptvChannel(this, "CT6", "CH_6", "ČT art")
+            };
+
+            this._ChannelList.AddRange(this._BasicChannels);
 
             this._ChannelList.Add(new IptvChannel(this, "CT9", "CT9", "CT9") { Tag = "ČT sport Plus" });
             this._ChannelList.Add(new IptvChannel(this, "CT25", "CH_25", "CT25") { Tag = "ČT sport Plus" });
@@ -97,8 +116,10 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             //Test MEPG-DASH with Widevine
             this._ChannelList.Add(new IptvChannel(this, "CT2_DASH", "2", "CT2 - DASH") { Tag = "DASH" });
 
+            this.updateChannelList();
+
             //Initialize base
-            base.Initialize();
+            base.Initialize(plugin);
 
         }
 
@@ -124,30 +145,33 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                 DateTime timeNow = DateTime.Now;
 
                 this._ChannelList.ForEach(channel =>
-                {
-                    if (channel.EpgProgramList == null)
-                        channel.EpgProgramList = new ProgramList();
-                    else
-                        channel.EpgProgramList.Clear();
-
-                    if ((string)channel.Tag == "ČT sport Plus")
                     {
-                        channel.EpgProgramList.AddRange(this.getEventListOnline2(channel, timeNow));
+                        if (!channel.Enabled)
+                            return;
 
-                        //this.getEventListOnline(channel, timeNow).ForEach(p =>
-                        //    {
-                        //        if (!string.IsNullOrWhiteSpace(p.Description))
-                        //        {
-                        //            Program pr = channel.EpgProgramList.Find(item => string.IsNullOrWhiteSpace(item.Description) 
-                        //                && item.StartTime == p.StartTime && item.EndTime == p.StartTime);
+                        if (channel.EpgProgramList == null)
+                            channel.EpgProgramList = new ProgramList();
+                        else
+                            channel.EpgProgramList.Clear();
 
-                        //            if (pr != null)
-                        //                pr.Description = p.Description;
-                        //        }
+                        if ((string)channel.Tag == "ČT sport Plus")
+                        {
+                            channel.EpgProgramList.AddRange(this.getEventListOnline2(channel, timeNow));
 
-                        //    });
-                    }
-                });
+                                //this.getEventListOnline(channel, timeNow).ForEach(p =>
+                                //    {
+                                //        if (!string.IsNullOrWhiteSpace(p.Description))
+                                //        {
+                                //            Program pr = channel.EpgProgramList.Find(item => string.IsNullOrWhiteSpace(item.Description) 
+                                //                && item.StartTime == p.StartTime && item.EndTime == p.StartTime);
+
+                                //            if (pr != null)
+                                //                pr.Description = p.Description;
+                                //        }
+
+                                //    });
+                            }
+                    });
 
                 return true;
             }
@@ -268,9 +292,9 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
                     if (dtStart.Date.Equals(dt.Date))
                     {
-                        result.Add(new Program(iptvChannel.Channel.IdChannel, dtStart, dtStop, (string)j["programTitle"], String.Empty, "Sport",
-                            Program.ProgramState.None, System.Data.SqlTypes.SqlDateTime.MinValue.Value, String.Empty, String.Empty,
-                            String.Empty, String.Empty, 0, String.Empty, 0));
+                        result.Add(new Program(iptvChannel.Channel.IdChannel, dtStart, dtStop, (string)j["programTitle"], string.Empty, "Sport",
+                            Program.ProgramState.None, System.Data.SqlTypes.SqlDateTime.MinValue.Value, string.Empty, string.Empty,
+                            string.Empty, string.Empty, 0, string.Empty, 0));
                     }
                 }
             }
@@ -346,6 +370,14 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             {
                 _Logger.Error("[getStreamUrlDash] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
                 return null;
+            }
+        }
+
+        private void updateChannelList()
+        {
+            for (int i = 0; i < this._BasicChannels.Length; i++)
+            {
+                this._BasicChannels[i].Enabled = this._IncludeBasicChannels;
             }
         }
         #endregion

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
-
+using MediaPortal.Pbk.Extensions;
 namespace MediaPortal.IptvChannels.Controls
 {
     internal class DataGridViewCustom : DataGridView
@@ -146,6 +146,24 @@ namespace MediaPortal.IptvChannels.Controls
 
             if (this.AfterCellMouseDown != null)
                 this.AfterCellMouseDown(this, e);
+        }
+
+        protected override void OnCellMouseUp(DataGridViewCellMouseEventArgs e)
+        {
+            base.OnCellMouseUp(e);
+
+            if (ModifierKeys == Keys.None && (e.Button & MouseButtons.Left) == MouseButtons.Left && this._RowsFromMouseDown != null)
+            {
+                // Deselect all rows from drag&drop except the current clicked row
+                this._RowsFromMouseDown.ForEach(r =>
+                {
+                    if (r.Selected && e.RowIndex != r.Index)
+                        r.Selected = false;
+                });
+
+                //Clear drag&drop;
+                this.resetDragDrop();
+            }
         }
         #endregion
 
@@ -308,7 +326,7 @@ namespace MediaPortal.IptvChannels.Controls
 
         private void cbAfterCellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if ((e.Button & MouseButtons.Left) == MouseButtons.Left && this._RowsFromMouseDown != null)
+            if (ModifierKeys == Keys.None && (e.Button & MouseButtons.Left) == MouseButtons.Left && this._RowsFromMouseDown != null)
             {
                 //Make sure, all rows are selected when drag&drop
                 this._RowsFromMouseDown.ForEach(r =>
@@ -321,42 +339,41 @@ namespace MediaPortal.IptvChannels.Controls
 
         private void cbMouseDown(object sender, MouseEventArgs e)
         {
-            // Get the index of the item the mouse is below.
-            DataGridView.HitTestInfo ht = this.HitTest(e.X - 20, e.Y);
-
-            if (ht.ColumnIndex != -1 && ht.RowIndex != -1)
+            if (ModifierKeys == Keys.None)
             {
-                DataGridViewRow rowHit = this.Rows[ht.RowIndex];
+                // Get the index of the item the mouse is below.
+                DataGridView.HitTestInfo ht = this.HitTest(e.X - 20, e.Y);
 
-                //Create list of selected rows
-                this._RowsFromMouseDown = new List<DataGridViewRow>();
-                foreach (DataGridViewRow r in this.SelectedRows)
-                    this._RowsFromMouseDown.Add(r);
-
-                //Sort selected rows
-                this._RowsFromMouseDown.Sort((r1, r2) => r1.Index.CompareTo(r2.Index));
-
-                //Row(s) check
-                if (this._RowsFromMouseDown.Exists(r => r == rowHit) && (this.RowPredicateDrag == null || this.RowPredicateDrag(this._RowsFromMouseDown)))
+                if (ht.ColumnIndex != -1 && ht.RowIndex != -1)
                 {
-                    //OK
+                    DataGridViewRow rowHit = this.Rows[ht.RowIndex];
 
-                    // Remember the point where the mouse down occurred. 
-                    // The DragSize indicates the size that the mouse can move before a drag event should be started.
-                    Size sizeDrag = SystemInformation.DragSize;
+                    //Create list of selected rows
+                    this._RowsFromMouseDown = new List<DataGridViewRow>();
+                    this.SelectedRows.ForEach(r => this._RowsFromMouseDown.Add(r));
 
-                    // Create a rectangle using the DragSize, with the mouse position being at the center of the rectangle.
-                    this._DragBoxFromMouseDown = new Rectangle(new Point(e.X - (sizeDrag.Width / 2), e.Y - (sizeDrag.Height / 2)), sizeDrag);
-                    this._ColumnIdx = ht.ColumnIndex;
-                    return;
+                    //Sort selected rows
+                    this._RowsFromMouseDown.Sort((r1, r2) => r1.Index.CompareTo(r2.Index));
+
+                    //Row(s) check
+                    if (this._RowsFromMouseDown.Exists(r => r == rowHit) && (this.RowPredicateDrag == null || this.RowPredicateDrag(this._RowsFromMouseDown)))
+                    {
+                        //OK
+
+                        // Remember the point where the mouse down occurred. 
+                        // The DragSize indicates the size that the mouse can move before a drag event should be started.
+                        Size sizeDrag = SystemInformation.DragSize;
+
+                        // Create a rectangle using the DragSize, with the mouse position being at the center of the rectangle.
+                        this._DragBoxFromMouseDown = new Rectangle(new Point(e.X - (sizeDrag.Width / 2), e.Y - (sizeDrag.Height / 2)), sizeDrag);
+                        this._ColumnIdx = ht.ColumnIndex;
+                        return;
+                    }
                 }
             }
 
             // Reset the rectangle if the mouse is not over an item in the ListBox.
-            this._DragBoxFromMouseDown = Rectangle.Empty;
-            this._RowsFromMouseDown = null;
-            this._RowIdxOver = -1;
-            this._RowsFromMouseDown = null;
+            this.resetDragDrop();
         }
 
         private void cbMouseMove(object sender, MouseEventArgs e)
@@ -565,7 +582,7 @@ namespace MediaPortal.IptvChannels.Controls
 
         private void rowClicked(DataGridViewRow row)
         {
-            if (row is DataGridViewCustomRow)
+            if (ModifierKeys == Keys.None && row is DataGridViewCustomRow)
             {
                 //Colapse/uncolapse box
 
@@ -614,7 +631,7 @@ namespace MediaPortal.IptvChannels.Controls
         /// <param name="iIdx">Index of the row to be colapsed.</param>
         private void rowColapse(int iIdx)
         {
-            RowColapse(this.Rows[iIdx]);
+            this.RowColapse(this.Rows[iIdx]);
         }
         /// <summary>
         /// Colapse selected row.
@@ -827,6 +844,14 @@ namespace MediaPortal.IptvChannels.Controls
                 return this.GroupRowPredicateEqual(parent, o);
 
             return (o is string && parent is string && ((string)o).Equals((string)parent)) || o == parent;
+        }
+
+        private void resetDragDrop()
+        {
+            this._DragBoxFromMouseDown = Rectangle.Empty;
+            this._RowsFromMouseDown = null;
+            this._RowIdxOver = -1;
+            this._RowsFromMouseDown = null;
         }
     }
 }

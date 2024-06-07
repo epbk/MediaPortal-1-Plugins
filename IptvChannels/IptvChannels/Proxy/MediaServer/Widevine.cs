@@ -4,123 +4,114 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using NLog;
 
 namespace MediaPortal.IptvChannels.Proxy.MediaServer
 {
     public class Widevine
     {
-        private static Logger _Logger = LogManager.GetCurrentClassLogger();
-        private static readonly List<ContentProtectionKey> _Keys = new List<ContentProtectionKey>();
+        private static readonly Logger _Logger = LogManager.GetCurrentClassLogger();
         private static readonly List<ContentProtectionBox> _Boxes = new List<ContentProtectionBox>();
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static string GetKey(string strPSSH, string strKID, string strLicenceServer)
+        public static string GetKey(string strPSSH, string strKID, string strLicenceServer, Pbk.Net.Http.HttpUserWebRequestArguments httpArgs)
         {
-            ContentProtectionBox box = _Boxes.Find(b => b.PSSH == strPSSH);
-            while (true)
+            bool bLocked = false;
+            try
             {
-                if (box != null)
+                Monitor.Enter(_Boxes, ref bLocked);
+                ContentProtectionBox box = _Boxes.Find(b => b.PSSH == strPSSH);
+                while (true)
                 {
-                    box.LastAccess = DateTime.Now;
-                    ContentProtectionKey key = box.Keys.Find(k => k.KID == strKID);
-                    if (key != null)
-                        return key.Key; //got it
-
-                    //Check last refresh
-                    if ((DateTime.Now - box.LastRefresh).TotalSeconds <= 60)
+                    if (box != null)
                     {
-                        _Logger.Error("[GetKey] Key not found: {0}", strKID);
-                        return null;
+                        box.LastAccess = DateTime.Now;
+                        ContentProtectionKey key = box.Keys.Find(k => k.KID == strKID);
+                        if (key != null)
+                            return key.Key; //got it
+
+                        //Check last refresh
+                        if ((DateTime.Now - box.LastRefresh).TotalSeconds <= 60)
+                        {
+                            _Logger.Error("[GetKey] Key not found: {0}", strKID);
+                            return null;
+                        }
                     }
-
-                    //Clear all keys
-                    box.Keys.Clear();
-                }
-
-                //Maintenance
-                for (int i = _Boxes.Count - 1; i >= 0; i--)
-                {
-                    if ((DateTime.Now - _Boxes[i].LastAccess).TotalMinutes >= 60)
-                        _Boxes.RemoveAt(i);
-                }
-
-                #region Retrieve keys from Widevine client
-
-                _Keys.Clear();
-
-                _Logger.Debug("[GetKey] Call Widevine client: PSSH:{0} LicenceServer:{1}", strPSSH, strLicenceServer);
-
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    Arguments = (!string.IsNullOrWhiteSpace(strLicenceServer) ? " --licence-server " + strLicenceServer : string.Empty) + " --pssh " + strPSSH,
-                    FileName = "\"Widevine\\WidevineClient.exe\"",
-                    UseShellExecute = false,
-                    ErrorDialog = false,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                    WorkingDirectory = "Widevine"
-                };
-                Process pr = new Process
-                {
-                    StartInfo = startInfo
-                };
-                //pr.Exited += new EventHandler(restream_Exited);
-                pr.OutputDataReceived += cbWidevineClientOutputHandler;
-                pr.ErrorDataReceived += cbWidevineClientErrorHandler;
-
-                //Start
-                pr.Start();
-                pr.BeginOutputReadLine();
-                pr.BeginErrorReadLine();
-
-                //Wait for finish
-                pr.WaitForExit();
-
-                pr.CancelOutputRead();
-                pr.CancelErrorRead();
-
-                if (_Keys.Count == 0)
-                {
-                    _Logger.Error("[GetKey] Failed to get Widevine keys: {0}", strPSSH);
-                    return null;
-                }
-                else
-                {
-                    if (box == null)
+                    else
                     {
-                        box = new ContentProtectionBox(strPSSH);
+                        //New box
+                        box = new ContentProtectionBox(strPSSH) { LastAccess = DateTime.Now };
                         _Boxes.Add(box);
                     }
 
-                    box.Keys.AddRange(_Keys);
-                    box.LastRefresh = DateTime.Now;
-                    box.LastAccess = DateTime.Now;
+                    //Maintenance
+                    for (int i = _Boxes.Count - 1; i >= 0; i--)
+                    {
+                        if ((DateTime.Now - _Boxes[i].LastAccess).TotalMinutes >= 60)
+                            _Boxes.RemoveAt(i);
+                    }
+
+                    if (box.Refreshing)
+                    {
+                        Monitor.Exit(_Boxes);
+                        bLocked = false;
+
+                        //Already processing; wait for result
+                        box.FlagRefreshDone.WaitOne();
+
+                        //Reenter boxes lock
+                        Monitor.Enter(_Boxes, ref bLocked);
+                    }
+                    else
+                    {
+                        //Clear all keys
+                        box.Keys.Clear();
+
+                        box.Refreshing = true;
+                        box.FlagRefreshDone.Reset();
+
+                        //Leave boxes lock
+                        Monitor.Exit(_Boxes);
+                        bLocked = false;
+
+                        List<ContentProtectionKey> keys = null;
+
+                        try
+                        {
+                            //Retrieve keys from Widevine client
+                            WidevineProcess procWv = new WidevineProcess();
+                            keys = procWv.GetKeys(strPSSH, strLicenceServer, httpArgs);
+                        }
+                        finally
+                        {
+                            //Reenter boxes lock
+                            Monitor.Enter(_Boxes, ref bLocked);
+
+                            //Refresh complete
+                            box.Refreshing = false;
+                            box.FlagRefreshDone.Set();
+                        }
+
+                        //Update the box
+                        if (keys != null && keys.Count > 0)
+                        {
+                            box.Keys.AddRange(keys);
+                            box.LastRefresh = DateTime.Now;
+                            box.LastAccess = DateTime.Now;
+                        }
+                        else
+                        {
+                            _Logger.Error("[GetKey] Failed to get Widevine keys: {0}", strPSSH);
+                            return null;
+                        }
+                    }
                 }
-
-                #endregion
             }
-        }
-
-        private static void cbWidevineClientOutputHandler(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
+            finally
             {
-                _Logger.Debug("[cbWidevineClientOutputHandler] " + e.Data);
-                if (e.Data.StartsWith("KEY: "))
-                {
-                    string[] parts = e.Data.Substring(5).Split(':');
-                    if (parts.Length == 2)
-                        _Keys.Add(new ContentProtectionKey(parts[0], parts[1]));
-                }
+                if (bLocked)
+                    Monitor.Exit(_Boxes);
             }
-        }
-
-        private static void cbWidevineClientErrorHandler(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
-                _Logger.Debug("[cbWidevineClientErrorHandler] " + e.Data);
         }
     }
 }

@@ -62,6 +62,8 @@ namespace SetupTv.Sections
         private byte[] _ConnectionData;
         private int _LastEventId = -1;
 
+        private MediaPortal.IptvChannels.GenerateLinkConfiguration _LinkArguments = new MediaPortal.IptvChannels.GenerateLinkConfiguration();
+
         private static Logger _Logger;
 
         #endregion
@@ -105,8 +107,7 @@ namespace SetupTv.Sections
                 }
 
                 //StreamType combobox
-                this.comboBoxStreamType.Items.AddRange(Enum.GetNames(typeof(StreamTypeEnum)));
-                this.comboBoxStreamType.SelectedIndex = 0;
+                this.propertyGridLink.SelectedObject = this._LinkArguments;
             }
             catch (Exception ex)
             {
@@ -335,14 +336,12 @@ namespace SetupTv.Sections
         }
 
 
-        private void checkBoxCDN_CheckedChanged(object sender, EventArgs e)
+        private void buttonReset_Click(object sender, EventArgs e)
         {
-            this.updateLinkResult();
-        }
-
-        private void checkBoxUseSplitter_CheckedChanged(object sender, EventArgs e)
-        {
-            this.updateLinkResult();
+            this._LinkArguments = new MediaPortal.IptvChannels.GenerateLinkConfiguration();
+            this.propertyGridLink.SelectedObject = this._LinkArguments;
+            this.textBoxResult.Text = string.Empty;
+            this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = false;
         }
 
         private void buttonCopyToClipboard_Click(object sender, EventArgs e)
@@ -351,41 +350,18 @@ namespace SetupTv.Sections
             Clipboard.SetData("System.String", this.textBoxResult.Text);
         }
 
-        private void textBox_TextChanged(object sender, EventArgs e)
-        {
-            this.updateLinkResult();
-        }
-
-        private void textBoxSource_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Enter)
-                this.updateLinkResult();
-        }
-
-        private void comboBoxStreamType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            this.updateLinkResult();
-        }
-
         private void updateLinkResult()
         {
-            if (Uri.IsWellFormedUriString(this.textBoxSource.Text, UriKind.Absolute))
+            if (Uri.IsWellFormedUriString(this._LinkArguments.Url, UriKind.Absolute))
             {
-                MediaPortal.IptvChannels.GenerateLinkConfigEnum cfg = this.checkBoxUseSplitter.Checked ?
-                    MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER |
-                    MediaPortal.IptvChannels.GenerateLinkConfigEnum.MPURL_SOURCE_SPLITTER_ARGS : MediaPortal.IptvChannels.GenerateLinkConfigEnum.NONE;
-
-                if (this.checkBoxCDN.Checked)
-                    cfg |= MediaPortal.IptvChannels.GenerateLinkConfigEnum.CDN;
-
-                this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(
-                    this.textBoxSource.Text, cfg, (StreamTypeEnum)this.comboBoxStreamType.SelectedIndex, 
-                    this.textBoxArgs.Text.Trim(), this.textBoxDrmServer.Text.Trim());
-
-                this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = this.checkBoxUseSplitter.Checked;
+                this.textBoxResult.Text = MediaPortal.IptvChannels.Plugin.GenerateLink(this._LinkArguments);
+                this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = !string.IsNullOrWhiteSpace(this.textBoxResult.Text);
             }
             else
+            {
+                this.textBoxResult.Text = string.Empty;
                 this.buttonCreateChannel.Enabled = this.buttonCopyToClipboard.Enabled = false;
+            }
         }
 
         private void buttonCreateChannel_Click(object sender, EventArgs e)
@@ -402,6 +378,11 @@ namespace SetupTv.Sections
                 if (f.ShowDialog() == DialogResult.OK && this._Plugin.CreateChannel(f.Query, this.textBoxResult.Text))
                     MessageBox.Show("Channel has been created.");
             }
+        }
+
+        private void propertyGridLink_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            this.updateLinkResult();
         }
 
 
@@ -840,10 +821,9 @@ namespace SetupTv.Sections
 
 
 
-        #endregion
 
         #endregion
 
-        
+        #endregion
     }
 }

@@ -57,7 +57,7 @@ namespace MediaPortal.IptvChannels.Proxy
         private static System.Globalization.CultureInfo _CiEn = new System.Globalization.CultureInfo("en-US");
 
         private static List<ConnectionEventHandler> _EventTargets = new List<ConnectionEventHandler>();
-        
+
         private Plugin.GetSiteLinkHandler getLinkHandler;
         #endregion
 
@@ -85,6 +85,7 @@ namespace MediaPortal.IptvChannels.Proxy
         public string ChannelId { get; private set; } = null;
         public bool UseMediaServer { get; private set; } = Database.dbSettings.Instance.UseMediaServer;
         public string DRMLicenceServer { get; private set; } = null;
+        public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments { get; private set; } = null;
         public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments { get; private set; } = null;
 
         public StreamTypeEnum StreamType { get; private set; } = StreamTypeEnum.Unknown;
@@ -161,7 +162,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 if (!prm.TryGetValue(Plugin.URL_PARAMETER_NAME_URL, out string strUrl) || !Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
                 {
                     //Invalid url; try get site/channel prms
-                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_SITE, out  strSite) && prm.TryGetValue(Plugin.URL_PARAMETER_NAME_CHANNEL, out strChannel)
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_SITE, out strSite) && prm.TryGetValue(Plugin.URL_PARAMETER_NAME_CHANNEL, out strChannel)
                         && !string.IsNullOrWhiteSpace(strSite) && !string.IsNullOrWhiteSpace(strChannel))
                     {
                         strUrl = strSite + '+' + strChannel;
@@ -188,27 +189,16 @@ namespace MediaPortal.IptvChannels.Proxy
                         handler.UseMediaServer = strValue == "1";
 
                     //StreamType prm
-                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_STREAM_TYPE, out strValue))
-                    {
-                        switch (strValue)
-                        {
-                            case "ts":
-                                handler.StreamType = StreamTypeEnum.TransportStrem;
-                                break;
-
-                            case "hls":
-                                handler.StreamType = StreamTypeEnum.HLS;
-                                break;
-
-                            case "dash":
-                                handler.StreamType = StreamTypeEnum.Dash;
-                                break;
-                        }
-                    }
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_STREAM_TYPE, out strValue) && Enum.TryParse(strValue, true, out StreamTypeEnum type))
+                        handler.StreamType = type;
 
                     //DRM LicenceServer
                     if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER, out strValue) && !string.IsNullOrWhiteSpace(strValue))
                         handler.DRMLicenceServer = strValue;
+
+                    //DRM HttpHeaders
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS, out strValue) && !string.IsNullOrWhiteSpace(strValue))
+                        handler.DRMHttpArguments = Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue);
 
                     //Http Arguments
                     if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue) && !string.IsNullOrWhiteSpace(strValue))
@@ -354,6 +344,7 @@ namespace MediaPortal.IptvChannels.Proxy
                         {
                             strUrl = result.Url;
                             this.DRMLicenceServer = result.DRMLicenceServer;
+                            this.DRMHttpArguments = result.DRMHttpArguments;
                             this.HttpArguments = result.HttpArguments;
                             this.StreamType = result.StreamType;
                         }
@@ -363,11 +354,21 @@ namespace MediaPortal.IptvChannels.Proxy
                     else
                         strUrl = this.ServerUrl;
 
-                    switch (this.StreamType)
+                    if (Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
                     {
-                        case StreamTypeEnum.TransportStrem:
-                            if (Uri.IsWellFormedUriString(strUrl, UriKind.Absolute))
-                            {
+                        //If the scheme is not http then use ffmpeg process
+                        if (!strUrl.StartsWith("http://") && !strUrl.StartsWith("https://"))
+                        {
+                            //Call FFMPEG
+                            this._StartProcesTimeStamp = DateTime.Now;
+                            this.doProcessFFMPEG(strUrl);
+                            return;
+                        }
+
+                        switch (this.StreamType)
+                        {
+                            case StreamTypeEnum.TransportStrem:
+
                                 //Direct TransportStream
 
                                 this.Info = "Connecting to URL...";
@@ -403,110 +404,120 @@ namespace MediaPortal.IptvChannels.Proxy
                                             break;
                                     }
                                 }
-                            }
-                            break;
 
-                        case StreamTypeEnum.Dash:
-                        case StreamTypeEnum.HLS:
-                            //HLS & DASH: use FFMPEG to convert the source stream to TransportStream
+                                break;
 
-                            if (this.UseMediaServer)
-                            {
-                                //MediaServer http cache is used
-                                StringBuilder sb = new StringBuilder(256);
+                            case StreamTypeEnum.Dash:
+                            case StreamTypeEnum.HLS:
+                                //HLS & DASH: use FFMPEG to convert the source stream to TransportStream
 
-                                //Server
-                                sb.Append("http://127.0.0.1:");
-                                sb.Append(Database.dbSettings.Instance.HttpServerPort);
-
-                                //Path
-                                sb.Append(Plugin.HTTP_PATH_MEDIA_HANDLER);
-
-                                //Url
-                                sb.Append('?');
-                                sb.Append(Plugin.URL_PARAMETER_NAME_URL);
-                                sb.Append('=');
-                                sb.Append(System.Web.HttpUtility.UrlEncode(strUrl));
-
-                                //DRM licence server
-                                if (!string.IsNullOrWhiteSpace(this.DRMLicenceServer))
+                                if (this.UseMediaServer)
                                 {
-                                    sb.Append('&');
-                                    sb.Append(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER);
+                                    //MediaServer http cache is used
+                                    StringBuilder sb = new StringBuilder(256);
+
+                                    //Server
+                                    sb.Append("http://127.0.0.1:");
+                                    sb.Append(Database.dbSettings.Instance.HttpServerPort);
+
+                                    //Path
+                                    sb.Append(Plugin.HTTP_PATH_MEDIA_HANDLER);
+
+                                    //Url
+                                    sb.Append('?');
+                                    sb.Append(Plugin.URL_PARAMETER_NAME_URL);
                                     sb.Append('=');
-                                    sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMLicenceServer));
-                                }
+                                    sb.Append(System.Web.HttpUtility.UrlEncode(strUrl));
 
-                                //Http user arguments
-                                if (this.HttpArguments != null)
-                                {
-                                    sb.Append('&');
-                                    sb.Append(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS);
-                                    sb.Append('=');
-                                    sb.Append(System.Web.HttpUtility.UrlEncode(this.HttpArguments.Serialize()));
-                                }
-
-                                strUrl = sb.ToString();
-                            }
-
-                            //Call FFMPEG
-                            this._StartProcesTimeStamp = DateTime.Now;
-                            this.doProcessFFMPEG(strUrl);
-                            return;
-
-                        case StreamTypeEnum.Unknown:
-                        default:
-                            //Unknown type; try determine the type from the response
-
-                            buffer = new byte[TS_BLOCK_SIZE];
-
-                            try
-                            {
-                                Pbk.Net.Http.HttpUserWebRequest rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl, this.HttpArguments);
-                                remoteStream = rq.GetResponseStream();
-                                if (rq.HttpResponseCode == HttpStatusCode.OK)
-                                {
-                                    iDataSize = remoteStream.Read(buffer, 0, buffer.Length);
-                                    if (iDataSize >= 7)
+                                    //DRM licence server
+                                    if (!string.IsNullOrWhiteSpace(this.DRMLicenceServer))
                                     {
-                                        if (buffer[0] == TS_BLOCK_MARKER)
-                                        {
-                                            //TransportStream
-                                            _Logger.Debug("[{0}][DoProcess] StreamType: TS", this._HandlerId);
-                                            this.StreamType = StreamTypeEnum.TransportStrem;
-                                            goto case StreamTypeEnum.TransportStrem;
-                                        }
+                                        sb.Append('&');
+                                        sb.Append(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER);
+                                        sb.Append('=');
+                                        sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMLicenceServer));
+                                    }
 
-                                        if (buffer[0] == '#' && buffer[1] == 'E' && buffer[2] == 'X' && buffer[3] == 'T' && buffer[4] == 'M' && buffer[5] == '3' && buffer[6] == 'U')
-                                        {
-                                            //HLS
-                                            _Logger.Debug("[{0}][DoProcess] StreamType: HLS", this._HandlerId);
-                                            this.StreamType = StreamTypeEnum.HLS;
-                                            rq.Close();
-                                            goto case StreamTypeEnum.HLS;
-                                        }
+                                    //DRM HttpArguments
+                                    if (this.DRMHttpArguments != null)
+                                    {
+                                        sb.Append('&');
+                                        sb.Append(Plugin.URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS);
+                                        sb.Append('=');
+                                        sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMHttpArguments.Serialize()));
+                                    }
 
-                                        if (buffer[0] == '<' && (buffer[1] == '?' && buffer[2] == 'x' && buffer[3] == 'm' && buffer[4] == 'l')
-                                            || (buffer[1] == 'M' && buffer[2] == 'P' && buffer[3] == 'D'))
-                                        {
-                                            //MPEG DASH
-                                            _Logger.Debug("[{0}][DoProcess] StreamType: DASH", this._HandlerId);
-                                            this.StreamType = StreamTypeEnum.Dash;
-                                            rq.Close();
-                                            goto case StreamTypeEnum.Dash;
-                                        }
+                                    //Http user arguments
+                                    if (this.HttpArguments != null)
+                                    {
+                                        sb.Append('&');
+                                        sb.Append(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS);
+                                        sb.Append('=');
+                                        sb.Append(System.Web.HttpUtility.UrlEncode(this.HttpArguments.Serialize()));
+                                    }
 
-                                        _Logger.Error("[{0}][DoProcess] Unknown stream type.", this._HandlerId);
-                                        return;
+                                    strUrl = sb.ToString();
+                                }
+
+                                //Call FFMPEG
+                                this._StartProcesTimeStamp = DateTime.Now;
+                                this.doProcessFFMPEG(strUrl);
+                                return;
+
+                            case StreamTypeEnum.Unknown:
+                            default:
+                                //Unknown type; try determine the type from the response
+
+                                buffer = new byte[TS_BLOCK_SIZE];
+
+                                try
+                                {
+                                    Pbk.Net.Http.HttpUserWebRequest rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl, this.HttpArguments);
+                                    remoteStream = rq.GetResponseStream();
+                                    if (rq.HttpResponseCode == HttpStatusCode.OK)
+                                    {
+                                        iDataSize = remoteStream.Read(buffer, 0, buffer.Length);
+                                        if (iDataSize >= 7)
+                                        {
+                                            if (buffer[0] == TS_BLOCK_MARKER)
+                                            {
+                                                //TransportStream
+                                                _Logger.Debug("[{0}][DoProcess] StreamType: TS", this._HandlerId);
+                                                this.StreamType = StreamTypeEnum.TransportStrem;
+                                                goto case StreamTypeEnum.TransportStrem;
+                                            }
+
+                                            if (buffer[0] == '#' && buffer[1] == 'E' && buffer[2] == 'X' && buffer[3] == 'T' && buffer[4] == 'M' && buffer[5] == '3' && buffer[6] == 'U')
+                                            {
+                                                //HLS
+                                                _Logger.Debug("[{0}][DoProcess] StreamType: HLS", this._HandlerId);
+                                                this.StreamType = StreamTypeEnum.HLS;
+                                                rq.Close();
+                                                goto case StreamTypeEnum.HLS;
+                                            }
+
+                                            if (buffer[0] == '<' && (buffer[1] == '?' && buffer[2] == 'x' && buffer[3] == 'm' && buffer[4] == 'l')
+                                                || (buffer[1] == 'M' && buffer[2] == 'P' && buffer[3] == 'D'))
+                                            {
+                                                //MPEG DASH
+                                                _Logger.Debug("[{0}][DoProcess] StreamType: DASH", this._HandlerId);
+                                                this.StreamType = StreamTypeEnum.Dash;
+                                                rq.Close();
+                                                goto case StreamTypeEnum.Dash;
+                                            }
+
+                                            _Logger.Error("[{0}][DoProcess] Unknown stream type.", this._HandlerId);
+                                            return;
+                                        }
                                     }
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                _Logger.Error("[{3}][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
-                            }
+                                catch (Exception ex)
+                                {
+                                    _Logger.Error("[{3}][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
+                                }
 
-                            break;
+                                break;
+                        }
                     }
 
                     Thread.Sleep(500);
@@ -657,7 +668,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 }
 
                 Thread.Sleep(REFRESH_PERIOD);
-                
+
                 iSocketCnt = this._ClientList.Count;
 
                 if (iSocketCnt < 1)
@@ -694,7 +705,7 @@ namespace MediaPortal.IptvChannels.Proxy
                     uint wBitRate = (uint)((float)(lReadDiff * 8) / REFRESH_PERIOD); //in kbit
                     ulong dwTimeDiff = (ulong)(DateTime.Now - client.DataSentFirstTS).TotalSeconds;
                     ulong dwBitRateAvg = dwTimeDiff > 0 && client.DataSent > 0 ? (client.DataSent * 8 / 1000 / dwTimeDiff) : 0;
-                    
+
                     sbInfo.Clear();
                     sbInfo.Append("Data received:  ");
                     sbInfo.Append(getSizeStringShort(client.DataSent));
@@ -745,7 +756,7 @@ namespace MediaPortal.IptvChannels.Proxy
                     sbInfo.Append((DateTime.Now - this._OpenTimeStamp).ToString("hh\\:mm\\:ss"));
                     this.Info = sbInfo.ToString();
                     #endregion
-                }    
+                }
 
                 lDownloadedBytes = client.DataSent;
             }
@@ -767,7 +778,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[" + this._HandlerId + "][removeClient] Remote socket: " + client.RemotePoint);
 
                 if (_EventTargets.Count > 0)
-                    invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.ClientRemoved, Tag = client }); 
+                    invokeEvent(this, new ConnectionEventArgs() { EventType = ConnectionEventTypeEnum.ClientRemoved, Tag = client });
             }
         }
 
@@ -817,7 +828,7 @@ namespace MediaPortal.IptvChannels.Proxy
                     {
                         if (buffer[iIdxNext] == TS_BLOCK_MARKER)
                             return iIdx; //Next block has TS marker; OK
-                        else 
+                        else
                             continue; //Invalid TS marker in next block; try next byte
                     }
                     else

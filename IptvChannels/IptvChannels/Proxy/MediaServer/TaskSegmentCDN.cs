@@ -593,7 +593,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         strKID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
 
                                     strKey = Widevine.GetKey(strPSSH, strKID.Length > 32 ? strKID.Substring(strKID.Length - 32, 32) : strKID,
-                                        this.ContentProtection.LicenceServer);
+                                        this.ContentProtection.LicenceServer, this.ContentProtection.HttpArguments);
                                     if (strKey == null)
                                     {
                                         _Logger.Error("[doPostProcess][decrypt][{0}] Failed to get decryption Widevine key.", this.FullPath);

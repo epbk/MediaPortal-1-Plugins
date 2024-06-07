@@ -16,6 +16,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
         #endregion
 
         #region Variables
+        protected Plugin _ParentPlugin = null;
+        protected bool _Initialized = true;
         protected bool _Enabled = true;
         protected string _Version = "1.0.0";
         protected string _Author = "Unknown";
@@ -25,6 +27,7 @@ namespace MediaPortal.IptvChannels.SiteUtils
         protected DateTime _EpgLastRefresh = DateTime.MinValue;
         protected int _EpgRefreshPeriod = 1440 * 60000; //[minutes]
         protected VideoQualityTypes _VideoQuality = VideoQualityTypes.Highest;
+        protected bool _UpdateTvServerChannelLink = true;
         #endregion
 
         #region Properties
@@ -114,6 +117,23 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
+        [Category("Channels"), Description("Automatically update TV Server channel link.")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        [DisplayName("Update TvServer Channel Link")]
+        [DBField()]
+        [DefaultValue(true)]
+        public bool UpdateTvServerChannelLink
+        {
+            get
+            {
+                return this._UpdateTvServerChannelLink;
+            }
+            set
+            {
+                this._UpdateTvServerChannelLink = value;
+            }
+        }
+
         [Browsable(false)]
         public string Name
         {
@@ -160,11 +180,14 @@ namespace MediaPortal.IptvChannels.SiteUtils
         /// <summary>
         /// Initialize site util
         /// </summary>
-        public virtual void Initialize()
+        /// <param name="plugin">IptvChannels plugin reference</param>
+        public virtual void Initialize(Plugin plugin)
         {
             //System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             //this.Logger.Info(string.Format("Plugin has starded. Version " + assembly.GetName().Version.ToString() + " ."));
             this._Logger.Info(string.Format("Plugin has started. Version " + this._Version));
+            this._ParentPlugin = plugin;
+            this._Initialized = true;
         }
 
         /// <summary>
@@ -187,18 +210,6 @@ namespace MediaPortal.IptvChannels.SiteUtils
             return false; 
         }
 
-        /// <summary>
-        /// Get channel url
-        /// </summary>
-        /// <param name="channel">Channel for which to get the channel url</param>
-        /// <returns>Channel url</returns>
-        public virtual string GetChannelUrl(IptvChannel channel)
-        {
-            return Plugin.URL_FILTER_BASE + HttpUtility.UrlEncode("http://127.0.0.1:" + Database.dbSettings.Instance.HttpServerPort 
-                + Plugin.HTTP_PATH_STREAM + "?site=" + HttpUtility.UrlEncode(this.Name) + "&channel=" + channel.Id)
-                + (channel.PmtID >= 32 && channel.PmtID <= 8191 ? "&Mpeg2TsTransportStreamID=" + channel.TransportStreamID +
-                    "&Mpeg2TsProgramNumber=" + channel.ServiceID + "&Mpeg2TsProgramMapPID=" + channel.PmtID + "&HttpOpenConnectionTimeout=30000" : Plugin.URL_FILTER_PARAM);
-        }
         #endregion
 
         #region Overrides

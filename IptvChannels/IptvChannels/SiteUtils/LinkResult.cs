@@ -18,6 +18,11 @@ namespace MediaPortal.IptvChannels.SiteUtils
         public string DRMLicenceServer;
 
         /// <summary>
+        /// Optional DRM Http headers; e.g. "X-AxDRM-Message"
+        /// </summary>
+        public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments;
+
+        /// <summary>
         /// Optional Stream type. Leave as Unknown to determine automatically later by connection handler.
         /// </summary>
         public Proxy.StreamTypeEnum StreamType = Proxy.StreamTypeEnum.Unknown;
