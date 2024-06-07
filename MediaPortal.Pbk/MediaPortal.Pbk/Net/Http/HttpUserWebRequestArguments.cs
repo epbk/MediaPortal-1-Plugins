@@ -36,6 +36,10 @@ namespace MediaPortal.Pbk.Net.Http
                 else if (fi.FieldType == typeof(NameValueCollection))
                 {
                     NameValueCollection col = (NameValueCollection)fi.GetValue(this);
+
+                    if (col == null || col.Count == 0)
+                        continue;
+
                     if (sbValue == null)
                         sbValue = new StringBuilder(256);
                     else
