@@ -43,8 +43,18 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #region Overrides
         public override void Initialize(Plugin plugin)
         {
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_family/live_hd",  "p111013" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd",  "p111015" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_max/live_hd",  "p111017" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cool/live_hd",  "p111014" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_love/live_hd", "p111016" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_krimi/live_hd",  "p432829" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cnn/live_hd",  "p650443" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_star/live_hd",  "p846043" } };
+            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_show/live_hd",  "p899572" } };
+
             //this._ChannelList.Add(new IptvChannel(this, "PRIMA", "p111013", "Prima Web") { Tag = "iPrima" });
-            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "p111015", "Prima ZOOM Web") { Tag = "iPrima" });
+            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd", "Prima ZOOM Web") { Tag = "p111015" });
             //this._ChannelList.Add(new IptvChannel(this, "MAX", "p111017", "Prima MAX Web") { Tag = "iPrima" });
             //this._ChannelList.Add(new IptvChannel(this, "COOL", "p111014", "Prima COOL Web") { Tag = "iPrima" });
             //this._ChannelList.Add(new IptvChannel(this, "LOVE", "p111016", "Prima LOVE Web") { Tag = "iPrima" });
@@ -63,15 +73,24 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             {
                 this._Logger.Debug("[GetStreamUrl] Query:" + channel.Name + "  ID:" + channel.Id);
 
-                return getStreamUrl(channel.Url);
+                return getStreamUrl(channel.Url, (string)channel.Tag);
             }
         }
 
         #endregion
 
         #region Private methods
-        private LinkResult getStreamUrl(string strId)
+        private LinkResult getStreamUrl(string strUrlPrimary, string strId)
         {
+            if (!string.IsNullOrWhiteSpace(strUrlPrimary))
+            {
+                Pbk.Net.Http.HttpUserWebRequest.Download<byte[]>(strUrlPrimary, out string strRedirect, out System.Net.HttpStatusCode httpStatus,
+                    method: Pbk.Net.Http.HttpMethodEnum.HEAD);
+
+                if (httpStatus == System.Net.HttpStatusCode.OK)
+                    return new LinkResult() { Url = strUrlPrimary };
+            }
+
             if (string.IsNullOrEmpty(strId))
             {
                 this._Logger.Error("[getStreamUrl] Invalid channel ID.");
