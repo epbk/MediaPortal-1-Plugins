@@ -61,9 +61,9 @@ namespace MediaPortal.IptvChannels.SiteUtils
                     sb.Append(Database.dbSettings.Instance.HttpServerPort);
                     sb.Append(Plugin.HTTP_PATH_STREAM);
                     sb.Append("?site=");
-                    sb.Append(this.Name);
+                    sb.Append(System.Web.HttpUtility.UrlEncode(this._SiteUtil.Name));
                     sb.Append("&channel=");
-                    sb.Append(this.Id);
+                    sb.Append(System.Web.HttpUtility.UrlEncode(this.Id));
 
                     string strUrl = System.Web.HttpUtility.UrlEncode(sb.ToString());
                     sb.Clear();
