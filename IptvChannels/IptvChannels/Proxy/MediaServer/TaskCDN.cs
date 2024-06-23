@@ -74,6 +74,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private static CultureInfo _CiEn = CultureInfo.GetCultureInfo("en-US");
 
         private string _UrlFinal;
+        private string _UrlMedia = null;
 
         private List<ContentProtection> _ContentProtection = null;
         
@@ -348,7 +349,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 segment = new TaskSegmentCDN(this)
                                 {
                                     Index = this._FileIdCounter,
-                                    Url = this.getFullUrl(strUrlPath),
+                                    Url = this._UrlMedia != null ? getFullUrl(strUrlPath, this._UrlMedia)  : this.getFullUrl(strUrlPath),
                                     HttpArguments = this.HttpArguments,
                                     Filename = Path.GetFileName(strFile),
                                     FullPath = strFile,
@@ -646,7 +647,12 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             else
                             {
                                 //Modify existing
-                                string strFullUrl = this.getFullUrl(nodeBaseURL.InnerText);
+                                string strFullUrl;
+                                if (Uri.IsWellFormedUriString(nodeBaseURL.InnerText, UriKind.Absolute))
+                                    strFullUrl = this._UrlMedia = nodeBaseURL.InnerText;
+                                else
+                                    strFullUrl = this.getFullUrl(nodeBaseURL.InnerText);
+
                                 nodeBaseURL.InnerText = "/cdn/stream/" + this._Identifier + "/files" + strFullUrl.Substring(strFullUrl.IndexOf('/', 8));
                                 //to do: in case of abs url the domain can be different!!
                             }
