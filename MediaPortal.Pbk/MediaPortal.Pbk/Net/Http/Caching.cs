@@ -650,7 +650,7 @@ namespace MediaPortal.Pbk.Net.Http
                     if (fi.Length > 0)
                     {
                         int iAge = (int)(DateTime.Now - fi.LastWriteTime).TotalMinutes;
-                        if (iAge < (iLifeTime > 0 ? iLifeTime : _CACHE_FILES_REFRESH))
+                        if (fi.CreationTime > DateTime.Now || iAge < (iLifeTime > 0 ? iLifeTime : _CACHE_FILES_REFRESH))
                         {
                             int iAttempts = 3;
                             while (iAttempts-- > 0)
@@ -677,12 +677,22 @@ namespace MediaPortal.Pbk.Net.Http
                 {
                     if (wr.DownloadFile(strCacheFullPath, true))
                     {
-                        DateTime dtNow = DateTime.Now;
+                        
                         switch (wr.HttpResponseCode)
                         {
-                            case System.Net.HttpStatusCode.OK:
-                                if (postDownload != null)
+                            case HttpStatusCode.OK:
+                            case HttpStatusCode.NotModified:
+
+                                if (wr.HttpResponseCode == HttpStatusCode.OK && postDownload != null)
                                     postDownload(this, strCacheFullPath, postDownloadTag);
+
+                                DateTime dtNow = DateTime.Now;
+                                DateTime dtLastModified = dtNow;
+                                if (wr.HttpResponseFields.TryGetValue("Last-Modified", out string strValue) && DateTime.TryParse(strValue, out DateTime dt) && dt > dtLastModified)
+                                    dtLastModified = dt;
+
+                                if (wr.HttpResponseFields.TryGetValue("Expires", out strValue) && DateTime.TryParse(strValue, out dt) && dt > dtNow)
+                                    dtLastModified = dtNow.AddMinutes(Math.Min(_CACHE_FILES_LIFETIME, (dt - dtNow).TotalMinutes));
 
                                 int iAttempts = 3;
                                 while (iAttempts-- > 0)
@@ -691,29 +701,9 @@ namespace MediaPortal.Pbk.Net.Http
                                     {
                                         fi = new FileInfo(strCacheFullPath);
 
-                                        string strValue;
-                                        if (wr.HttpResponseFields.TryGetValue("Last-Modified", out strValue))
-                                            fi.CreationTime = DateTime.Parse(strValue);
-                                        else
-                                            fi.CreationTime = dtNow;
+                                        if (dtLastModified > fi.CreationTime)
+                                            fi.CreationTime = dtLastModified;
 
-                                        fi.LastWriteTime = dtNow;
-                                        fi.LastAccessTime = dtNow;
-                                        return strCacheFullPath;
-                                    }
-                                    catch { }
-                                    Thread.Sleep(200);
-                                }
-                                _Logger.Error("[{0}][DownloadFile] File Access: '{1}'", this._Id, strCacheFullPath);
-                                return strCacheFullPath;
-
-                            case HttpStatusCode.NotModified:
-                                iAttempts = 3;
-                                while (iAttempts-- > 0)
-                                {
-                                    try
-                                    {
-                                        fi = new FileInfo(strCacheFullPath);
                                         fi.LastWriteTime = dtNow;
                                         fi.LastAccessTime = dtNow;
                                         return strCacheFullPath;
