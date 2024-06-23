@@ -102,7 +102,11 @@ namespace MediaPortal.IptvChannels.Proxy
         public Client(Stream remoteStream, SendHandler clientDataCallback)
         {
             if (remoteStream != null)
+            {
                 this._RemoteStream = remoteStream;
+                this._ClientDataCallback = clientDataCallback;
+                this._ReceiveCallback = new AsyncCallback(this.receive);
+            }
         }
 
         public Client(string strUrl, SendHandler clientDataCallback)
