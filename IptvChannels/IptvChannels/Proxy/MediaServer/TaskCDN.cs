@@ -371,118 +371,126 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                             if (segment != null)
                             {
-                                segment.LastAccess = DateTime.Now;
-
-                                string strContentType = segment.Filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ? "video/mp4" : Pbk.Net.Http.HttpHeaderField.HTTP_CONTENT_TYPE_APPLICATION_OCTET_STREAM;
-
-                                //got it
-                                if (segment.Status == TaskStatusEnum.Available || segment.Status == TaskStatusEnum.Done)
+                                try
                                 {
-                                    //File already cached
-                                    args.ResponseCode = System.Net.HttpStatusCode.OK;
-                                    args.ResponseHeaderFields = new Dictionary<string, string>();
-                                    args.ResponseHeaderFields.Add(Pbk.Net.Http.HttpHeaderField.HTTP_FIELD_CONTENT_TYPE, strContentType);
-                                    args.ResponseStream = segment.GetStream();
-                                    args.Handled = true;
-                                    this.Logger.Debug("[{0}][HandleHttpRequest] File is ready. Delivered: {1}", this._Identifier, segment.FullPath);
-                                }
-                                else //possible running; make request & wait for data
-                                {
-                                    this.Logger.Debug("[{0}][HandleHttpRequest] Requesting file: {1}", this._Identifier, segment.FullPath);
+                                    segment.LastAccess = DateTime.Now;
+                                    Interlocked.Increment(ref segment.InUse);
 
-                                    //Request
-                                    this.segmentRequest(segment);
+                                    string strContentType = segment.Filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ? "video/mp4" : Pbk.Net.Http.HttpHeaderField.HTTP_CONTENT_TYPE_APPLICATION_OCTET_STREAM;
 
-                                    //We have to release segments lock now
-                                    Monitor.Exit(this._Segments);
-                                    bLocked = false;
-
-                                    //In case of DRM, we need to wait until file is downloaded & decrypted
-                                    if (segment.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit || segment.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedMedia)
+                                    //got it
+                                    if (segment.Status == TaskStatusEnum.Available || segment.Status == TaskStatusEnum.Done)
                                     {
-                                        segment.JobFlagDone.WaitOne();
-                                        if (segment.JobStatus != JobStatus.Complete)
-                                            return false;
+                                        //File already cached
+                                        args.ResponseCode = System.Net.HttpStatusCode.OK;
+                                        args.ResponseHeaderFields = new Dictionary<string, string>();
+                                        args.ResponseHeaderFields.Add(Pbk.Net.Http.HttpHeaderField.HTTP_FIELD_CONTENT_TYPE, strContentType);
+                                        args.ResponseStream = segment.GetStream();
+                                        args.Handled = true;
+                                        this.Logger.Debug("[{0}][HandleHttpRequest] File is ready. Delivered: {1}", this._Identifier, segment.FullPath);
                                     }
-                                    
-
-                                    #region Currently processing the download
-                                    if (segment.FlagProcessing.WaitOne(10000)) //wait up to 10s for the requested file
+                                    else //possible running; make request & wait for data
                                     {
-                                        //File available
+                                        this.Logger.Debug("[{0}][HandleHttpRequest] Requesting file: {1}", this._Identifier, segment.FullPath);
 
-                                        byte[] chunk = null;
-                                        if (!segment.IsContentLengthKnown)
-                                            chunk = new byte[16]; //prepare buffer for chunk size
+                                        //Request
+                                        this.segmentRequest(segment);
 
-                                        //Set send timeout to 20s
-                                        args.RemoteSocket.SendTimeout = 20000;
+                                        //We have to release segments lock now
+                                        Monitor.Exit(this._Segments);
+                                        bLocked = false;
 
-                                        //Send http response to the client
-                                        args.RemoteSocket.Send(createHttpResponse(chunk == null ? segment.Length : -1, args.KeepAlive, strContentType));
-
-                                        //Open the file with shared access
-                                        using (Stream fs = segment.GetStream())
+                                        //In case of DRM, we need to wait until file is downloaded & decrypted
+                                        if (segment.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit || segment.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedMedia)
                                         {
-                                            byte[] buffer = new byte[8192];
+                                            segment.JobFlagDone.WaitOne();
+                                            if (segment.JobStatus != JobStatus.Complete)
+                                                return false;
+                                        }
 
-                                            while (segment.Length <= 0 || fs.Position < segment.Length)
+
+                                        #region Currently processing the download
+                                        if (segment.FlagProcessing.WaitOne(10000)) //wait up to 10s for the requested file
+                                        {
+                                            //File available
+
+                                            byte[] chunk = null;
+                                            if (!segment.IsContentLengthKnown)
+                                                chunk = new byte[16]; //prepare buffer for chunk size
+
+                                            //Set send timeout to 20s
+                                            args.RemoteSocket.SendTimeout = 20000;
+
+                                            //Send http response to the client
+                                            args.RemoteSocket.Send(createHttpResponse(chunk == null ? segment.Length : -1, args.KeepAlive, strContentType));
+
+                                            //Open the file with shared access
+                                            using (Stream fs = segment.GetStream())
                                             {
-                                                int iMax;
-                                                lock (segment.LockDataAvailable)
+                                                byte[] buffer = new byte[8192];
+
+                                                while (segment.Length <= 0 || fs.Position < segment.Length)
                                                 {
-                                                    //Get size of available data
-                                                    while ((iMax = (int)Math.Min(buffer.Length - 2, segment.BytesProcessed - fs.Position)) <= 0)
+                                                    int iMax;
+                                                    lock (segment.LockDataAvailable)
                                                     {
-                                                        if (segment.Length > 0 && fs.Position >= segment.Length)
-                                                            goto done;
-
-                                                        //No more data so far; wait
-
-                                                        if (!Monitor.Wait(segment.LockDataAvailable, 5000))
+                                                        //Get size of available data
+                                                        while ((iMax = (int)Math.Min(buffer.Length - 2, segment.BytesProcessed - fs.Position)) <= 0)
                                                         {
-                                                            this.Logger.Error("[{0}][HandleHttpRequest] No response to request file within 5s: {1}", this._Identifier, segment.FullPath);
-                                                            return false;
+                                                            if (segment.Length > 0 && fs.Position >= segment.Length)
+                                                                goto done;
+
+                                                            //No more data so far; wait
+
+                                                            if (!Monitor.Wait(segment.LockDataAvailable, 5000))
+                                                            {
+                                                                this.Logger.Error("[{0}][HandleHttpRequest] No response to request file within 5s: {1}", this._Identifier, segment.FullPath);
+                                                                return false;
+                                                            }
                                                         }
                                                     }
-                                                }
 
-                                                //Read file
-                                                int iRd = fs.Read(buffer, 0, iMax);
-                                                if (iRd > 0)
-                                                {
-                                                    //Send to client the data currently available
-
-                                                    if (chunk != null)
+                                                    //Read file
+                                                    int iRd = fs.Read(buffer, 0, iMax);
+                                                    if (iRd > 0)
                                                     {
-                                                        //Send chunk size
-                                                        args.RemoteSocket.Send(chunk, 0, printChunkSize((uint)iRd, chunk), System.Net.Sockets.SocketFlags.None);
+                                                        //Send to client the data currently available
 
-                                                        //Append termination to the data
-                                                        buffer[iRd++] = (byte)'\r';
-                                                        buffer[iRd++] = (byte)'\n';
+                                                        if (chunk != null)
+                                                        {
+                                                            //Send chunk size
+                                                            args.RemoteSocket.Send(chunk, 0, printChunkSize((uint)iRd, chunk), System.Net.Sockets.SocketFlags.None);
+
+                                                            //Append termination to the data
+                                                            buffer[iRd++] = (byte)'\r';
+                                                            buffer[iRd++] = (byte)'\n';
+                                                        }
+
+                                                        // send data
+                                                        args.RemoteSocket.Send(buffer, 0, iRd, System.Net.Sockets.SocketFlags.None);
                                                     }
-                                                    
-                                                    // send data
-                                                    args.RemoteSocket.Send(buffer, 0, iRd, System.Net.Sockets.SocketFlags.None);
+                                                    else
+                                                        Thread.Sleep(50);
                                                 }
-                                                else
-                                                    Thread.Sleep(50);
+
+                                            done:
+                                                if (chunk != null)
+                                                    args.RemoteSocket.Send(chunk, 0, printChunkSize(0, chunk), System.Net.Sockets.SocketFlags.None); //null termination chunk
+
+                                                args.ResponseSent = true; //inform http server that we have already handled entire response including content
+                                                args.Handled = true;
+                                                this.Logger.Debug("[{0}][HandleHttpRequest] Delivered: {1} Length: {2}", this._Identifier, segment.FullPath, fs.Position);
+                                                return true;
                                             }
-
-                                        done:
-                                            if (chunk != null)
-                                                args.RemoteSocket.Send(chunk, 0, printChunkSize(0, chunk), System.Net.Sockets.SocketFlags.None); //null termination chunk
-
-                                            args.ResponseSent = true; //inform http server that we have already handled entire response including content
-                                            args.Handled = true;
-                                            this.Logger.Debug("[{0}][HandleHttpRequest] Delivered: {1} Length: {2}", this._Identifier, segment.FullPath, fs.Position);
-                                            return true;
                                         }
+                                        else
+                                            this.Logger.Error("[{0}][HandleHttpRequest] No response to request file within 10s: {1}", this._Identifier, segment.FullPath);
+                                        #endregion
                                     }
-                                    else
-                                        this.Logger.Error("[{0}][HandleHttpRequest] No response to request file within 10s: {1}", this._Identifier, segment.FullPath);
-                                    #endregion
+                                }
+                                finally
+                                {
+                                    Interlocked.Decrement(ref segment.InUse);
                                 }
 
                             }
@@ -613,6 +621,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                         MediaStream media = null;
 
                         const string MPD_NS = "urn:mpeg:dash:schema:mpd:2011";
+                        const string MPD_NS2 = "urn:mpeg:DASH:schema:MPD:2011";
 
                         if (strResult.Contains(MPD_NS))
                         {
@@ -623,6 +632,11 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             XmlNamespaceManager mgr = new XmlNamespaceManager(xml.NameTable);
                             mgr.AddNamespace("ns", MPD_NS);
                             XmlNode nodeMPD = xml.SelectSingleNode("ns:MPD", mgr);
+                            if (nodeMPD == null)
+                            {
+                                mgr.AddNamespace("ns", MPD_NS2);
+                                nodeMPD = xml.SelectSingleNode("ns:MPD", mgr);
+                            }
                             XmlNode nodeBaseURL = nodeMPD.SelectSingleNode("./ns:BaseURL", mgr);
                             XmlNode nodeLocation = nodeMPD.SelectSingleNode("./ns:Location", mgr);
                             XmlAttribute atrMinimumUpdatePeriod = nodeMPD.Attributes["minimumUpdatePeriod"];
@@ -1068,7 +1082,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                             this._SbMasterList.Append(strLine, 0, iIdx);
                                             int iIdxEnd = strLine.IndexOf("\"", iIdx);
 
-                                            this._SbMasterList.Append("/get?url=");
+                                            this._SbMasterList.Append("/GetMediaHandler?url=");
                                             this._SbMasterList.Append(System.Web.HttpUtility.UrlEncode(this.getFullUrl(strLine.Substring(iIdx, iIdxEnd - iIdx))));
                                             this._SbMasterList.Append(strLine, iIdxEnd, strLine.Length - iIdxEnd);
                                             this._SbMasterList.Append("\r\n");
@@ -1238,22 +1252,54 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = seg });
                 }
 
-                if (!seg.IsInCurrentHlsList && (DateTime.Now - seg.LastAccess).TotalSeconds >= 60)
+                if (seg.InUse <= 0)
                 {
-                    try
+                    if (!seg.IsInCurrentHlsList)
                     {
-                        File.Delete(seg.FullPath);
-                        //bChange = true;
-                        this._Segments.RemoveAt(i);
+                        if ((DateTime.Now - seg.LastAccess).TotalSeconds >= 60)
+                        {
+                            try
+                            {
+                                //this.Logger.Debug("[segmentCleaning] File: {0}", seg.FullPath);
 
-                        //Event
-                        this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentDeleted, Tag = seg });
+                                File.Delete(seg.FullPath);
+                                //bChange = true;
+                                this._Segments.RemoveAt(i);
 
-                        this.Logger.Debug("[segmentCleaning] File removed: " + seg.FullPath);
+                                //Event
+                                this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentDeleted, Tag = seg });
 
-                        continue;
+                                this.Logger.Debug("[segmentCleaning] File removed: {0}", seg.FullPath);
+
+                                continue;
+                            }
+                            catch
+                            {
+                                this.Logger.Error("[segmentCleaning] Error while removing segment: {0}", seg.FullPath);
+                            }//probably still using by http
+                        }
                     }
-                    catch { }//probably still using by http
+                    else if (seg.Status == TaskStatusEnum.Available && seg.LastAccess > DateTime.MinValue
+                        && (DateTime.Now - seg.LastAccess).TotalSeconds >= 120)
+                    {
+                        try
+                        {
+                            //this.Logger.Debug("[segmentCleaning] File: {0}", seg.FullPath);
+
+                            File.Delete(seg.FullPath);
+
+                            seg.Status = TaskStatusEnum.Iddle;
+
+                            //Event
+                            this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = seg });
+
+                            this.Logger.Debug("[segmentCleaning] Segment reset. File removed: {0}", seg.FullPath);
+                        }
+                        catch
+                        {
+                            this.Logger.Error("[segmentCleaning] Error while removing segment: {0}", seg.FullPath);
+                        }//probably still using by http
+                    }
                 }
 
                 i++;
@@ -1501,7 +1547,15 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     {
                         this._AutoTerminateCountDown -= 1000;
                         if (this._AutoTerminateCountDown <= 0)
-                            this.Stop();
+                        {
+                            if (this._HttpRequestCounter > 0)
+                            {
+                                this.Logger.Warn("[cbRefreshTmerElapsed] Stop: ongoing http requests. Try agin later. {0}", this.Title);
+                                this._AutoTerminateCountDown = Database.dbSettings.Instance.MediaServerAutoterminatePeriod;
+                            }
+                            else
+                                this.Stop();
+                        }
                     }
                 }
             }

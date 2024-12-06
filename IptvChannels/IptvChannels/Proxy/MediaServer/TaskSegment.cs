@@ -38,6 +38,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         public DateTime LastAccess = DateTime.MinValue;
 
+        public int InUse = 0;
+
         public object Tag;
 
         protected Task _Task;
