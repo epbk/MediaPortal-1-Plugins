@@ -76,7 +76,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public CeskaTelevize()
         {
             //Basics
-            this._Version = "1.1.4";
+            this._Version = "1.1.5";
             this._Author = "Pbk";
             this._Description = "Česká Televize";
             this._EpgRefreshPeriod = 15 * 60000;
@@ -277,9 +277,11 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
 
             List<Program> result = new List<Program>();
 
+            Regex regexT = new Regex(@"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z");
+
             foreach (JToken j in this._CacheOnline2)
             {
-                if (((string)j["encoder"]).Equals(iptvChannel.Id, StringComparison.CurrentCultureIgnoreCase))
+                if (((string)j["encoder"]).Equals(iptvChannel.Url, StringComparison.CurrentCultureIgnoreCase))
                 {
                     TimeSpan tsStart = TimeSpan.ParseExact((string)j["time_str"], "hh\\:mm", null);
                     TimeSpan tsEnd = TimeSpan.ParseExact((string)j["time_end_str"], "hh\\:mm", null);
@@ -287,7 +289,26 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                     if (tsDur.Ticks < 0)
                         tsDur = tsDur.Add(new TimeSpan(24, 0, 0));
 
-                    dtStart = new DateTime(1970, 1, 1).AddSeconds((int)j["time"]).AddHours(utcOffset.Hours);
+                    JToken jT = j["time"];
+                    if (jT != null)
+                        dtStart = new DateTime(1970, 1, 1).AddSeconds((int)j["time"]).AddHours(utcOffset.Hours);
+                    else
+                    {
+                        jT = j["id"];
+                        if (jT != null)
+                        {
+                            Match m = regexT.Match((string)jT);
+                            if (m.Success)
+                            {
+                                dtStart = DateTime.Parse(m.Value);
+                                goto nxt;
+                            }
+                        }
+
+                        dtStart = DateTime.Today + tsStart;
+                    }
+
+                nxt:
                     dtStop = dtStart.Add(tsDur);
 
                     if (dtStart.Date.Equals(dt.Date))
