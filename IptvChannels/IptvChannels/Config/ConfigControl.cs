@@ -468,7 +468,9 @@ namespace SetupTv.Sections
             if (row != null)
             {
                 row.Cells[_COLUMN_CDN_INDEX_STATUS].Value = (string)j["status"];
+                row.Cells[_COLUMN_CDN_INDEX_DRM].Value = (string)j["drm"];
                 this.dataGridViewCDN.InvalidateCell(this.dataGridViewCDN.MainColumnIndex, row.Index);
+                this.dataGridViewCDN.InvalidateCell(_COLUMN_CDN_INDEX_DRM, row.Index);
             }
         }
 

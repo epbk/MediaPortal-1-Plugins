@@ -60,7 +60,9 @@ namespace MediaPortal.IptvChannels
         public const string URL_PARAMETER_NAME_STREAM_TYPE = "streamType";
         public const string URL_PARAMETER_NAME_DRM_LICENCE_SERVER = "drmLicenceServer";
         public const string URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS = "drmHttpArguments";
+        public const string URL_PARAMETER_NAME_DRM_KEY = "drmKey";
         public const string URL_PARAMETER_NAME_HTTP_ARGUMENTS = "httpArguments";
+        public const string URL_PARAMETER_NAME_STREAMING_ENGINE = "streamingEngine";
 
         #endregion
 
@@ -214,6 +216,13 @@ namespace MediaPortal.IptvChannels
                     sb.Append(strUrl);
                     if (args.UseMPUrlSourceSplitterArguents)
                         sb.Append(URL_FILTER_PARAM);
+                }
+
+                if (args.StreamingEngine != Proxy.StreamingEngineEnum.Default)
+                {
+                    sb.Append('&');
+                    sb.Append(URL_PARAMETER_NAME_STREAMING_ENGINE);
+                    sb.Append(args.StreamingEngine);
                 }
 
                 return sb.ToString();
@@ -1071,6 +1080,7 @@ namespace MediaPortal.IptvChannels
                                         Title = strUrl,
                                         Autoterminate = true,
                                         DRMLicenceServer = prm.TryGetValue(URL_PARAMETER_NAME_DRM_LICENCE_SERVER, out strValue) ? strValue : null,
+                                        DRMKey = prm.TryGetValue(URL_PARAMETER_NAME_DRM_KEY, out strValue) ? strValue : null,
                                         DRMHttpArguments = prm.TryGetValue(URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS, out strValue)
                                             ? Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue) : null,
                                         HttpArguments = prm.TryGetValue(URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue)

@@ -87,6 +87,8 @@ namespace MediaPortal.IptvChannels.Proxy
         public string DRMLicenceServer { get; private set; } = null;
         public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments { get; private set; } = null;
         public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments { get; private set; } = null;
+        public string DRMKey { get; private set; } = null;
+        public StreamingEngineEnum StreamingEngine { get; private set; } = StreamingEngineEnum.Default;
 
         public StreamTypeEnum StreamType { get; private set; } = StreamTypeEnum.Unknown;
 
@@ -181,7 +183,7 @@ namespace MediaPortal.IptvChannels.Proxy
                         getLinkHandler = getLinkHandler,
                         SiteUtil = strSite,
                         ChannelId = strChannel,
-                        Args = prm.TryGetValue(Plugin.URL_PARAMETER_NAME_ARGUMENTS, out string strValue) ? strValue : null
+                        Args = prm.TryGetValue(Plugin.URL_PARAMETER_NAME_ARGUMENTS, out string strValue) ? strValue : null,
                     };
 
                     //MediaServer prm
@@ -200,9 +202,18 @@ namespace MediaPortal.IptvChannels.Proxy
                     if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS, out strValue) && !string.IsNullOrWhiteSpace(strValue))
                         handler.DRMHttpArguments = Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue);
 
+                    //DRM Key
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_DRM_KEY, out strValue) && !string.IsNullOrWhiteSpace(strValue))
+                        handler.DRMKey = strValue;
+
                     //Http Arguments
                     if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue) && !string.IsNullOrWhiteSpace(strValue))
                         handler.HttpArguments = Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue);
+
+                    //StreamingEngine
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_STREAMING_ENGINE, out strValue) && Enum.TryParse(strValue, true, out StreamingEngineEnum eng))
+                        handler.StreamingEngine = eng;
+
 
                     _HandlerList.Add(handler);
 
@@ -447,6 +458,15 @@ namespace MediaPortal.IptvChannels.Proxy
                                         sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMHttpArguments.Serialize()));
                                     }
 
+                                    //DRM Key
+                                    if (!string.IsNullOrWhiteSpace(this.DRMKey))
+                                    {
+                                        sb.Append('&');
+                                        sb.Append(Plugin.URL_PARAMETER_NAME_DRM_KEY);
+                                        sb.Append('=');
+                                        sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMKey));
+                                    }
+
                                     //Http user arguments
                                     if (this.HttpArguments != null)
                                     {
@@ -536,6 +556,14 @@ namespace MediaPortal.IptvChannels.Proxy
 
         private void doProcessFFMPEG(string strUrl)
         {
+            if ((this.StreamingEngine == StreamingEngineEnum.VLC 
+                || (this.StreamingEngine == StreamingEngineEnum.Default && Database.dbSettings.Instance.StreamingEngine == StreamingEngineEnum.VLC))
+                && File.Exists(Database.dbSettings.Instance.VlcPath))
+            {
+                this.doProcessVLC(strUrl);
+                return;
+            }
+
             if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Start...", this._HandlerId);
 
             this.Info = "Connecting to UDP...";
@@ -607,6 +635,55 @@ namespace MediaPortal.IptvChannels.Proxy
             }
 
             if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Closed.", this._HandlerId);
+        }
+
+        private void doProcessVLC(string strUrl)
+        {
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][vlc][DoProcess] Start...", this._HandlerId);
+
+            this.Info = "Connecting to UDP...";
+
+            //Start VLC
+            try
+            {
+                //Init UDP
+                Client udp = new Client(null, this.sendToAllClients, 0); //port = 0 : pick free port
+                if (!udp.Connect())
+                    return;
+
+                this.Info = "Connecting to VLC ...";
+
+                // Send http OK
+                this.sendToAllClients(null, 0, 0, -1, true, false);
+
+                //Start VLC streaming
+                int iId = VlcControlManager.Instance.StreamingStart(strUrl, udp.Port);
+                if (iId < 0)
+                {
+                    _Logger.Error("[{0}][vlc][DoProcess] Failed to start VLC sreaming.", this._HandlerId);
+                    return;
+                }
+
+                //Start UDP process
+                this.processMonitor(udp, null);
+
+                //Stop VLC streaming
+                VlcControlManager.Instance.StreamingDelete(iId);
+
+                //Close UDP
+                udp.Close();
+                udp = null;
+            }
+            catch (Exception ex)
+            {
+                _Logger.Error("[{3}][vlc][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
+            }
+            finally
+            {
+                this.close();
+            }
+
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][vlc][DoProcess] Closed.", this._HandlerId);
         }
 
         private void outputHandler(object sender, DataReceivedEventArgs e)

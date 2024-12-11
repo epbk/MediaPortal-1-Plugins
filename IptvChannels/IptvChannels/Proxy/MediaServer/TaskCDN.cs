@@ -41,6 +41,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             public int Bandwidth = -1;
             public int Width = -1;
             public int Height = -1;
+            public string Language;
         }
 
         #region Database Fields
@@ -86,6 +87,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         private List<MediaStream> _StreamList = new List<MediaStream>();
         private StreamQualityEnum _StreamQualitySelection = Database.dbSettings.Instance.StreamQualitySelection;
+        private List<string> _StreamLanguageSelection = Database.dbSettings.Instance.StreamLanguageSelectionList;
 
         #endregion
 
@@ -239,6 +241,9 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         }
 
         public string DRMLicenceServer
+        { get; set; }
+
+        public string DRMKey
         { get; set; }
 
         public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments
@@ -695,31 +700,75 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             if (this._ContentProtection == null) //??? to do
                             {
                                 List<ContentProtection> prot = new List<ContentProtection>();
-                                XmlNodeList nodesDRM = nodeMPD.SelectNodes(".//ns:Representation|.//ns:AdaptationSet", mgr);
-                                nodesDRM.ForEach(n =>
-                                    {
-                                        XmlNode nodeProt = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:mpeg:dash:mp4protection:2011']", mgr);
-                                        XmlNode nodeWv = n.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed']", mgr);
-                                        XmlNode nodeID = n.Name == "Representation" ? n.SelectSingleNode("./@id", mgr) : null;
-                                        XmlNode nodeTemplate = n.SelectSingleNode("./ns:SegmentTemplate", mgr);
-                                        XmlNode node;
-                                        if (nodeTemplate == null && n.Name == "Representation")
-                                            nodeTemplate = n.ParentNode.SelectSingleNode("./ns:SegmentTemplate", mgr);
+                                XmlNodeList nodesAS = nodeMPD.SelectNodes(".//ns:AdaptationSet", mgr);
 
-                                        if (nodeProt != null && nodeWv != null)
-                                            //Widevine detected
-                                            prot.Add(new ContentProtection()
+                                //XmlNodeList nodesDRM = nodeMPD.SelectNodes(".//ns:Representation|.//ns:AdaptationSet", mgr);
+                                nodesAS.ForEach(nAS =>
+                                    {
+                                        XmlNode node;
+                                        XmlNode nodeTemplate = nAS.SelectSingleNode("./ns:SegmentTemplate", mgr);
+                                        XmlNode nodeProt = nodeProt = nAS.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:mpeg:dash:mp4protection:2011']", mgr);
+                                        XmlNode nodeWv = nAS.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed']", mgr);
+                                        XmlNode nodeID = nAS.SelectSingleNode("./@id", mgr);
+
+                                        if (nodeTemplate != null)
+                                        {
+                                            if (nodeProt != null && nodeWv != null)
                                             {
-                                                RepresentationID = nodeID?.Value,
-                                                KID = (node = nodeProt.SelectSingleNode("./@*[name()='cenc:default_KID']")) != null ? node.Value.Replace("-", "") : null,
-                                                PSSH = nodeWv.SelectSingleNode("./*[name()='cenc:pssh']/text()")?.Value,
-                                                SegmentTemplateInit = nodeTemplate.Attributes["initialization"]?.Value,
-                                                SegmentTemplateMedia = nodeTemplate.Attributes["media"]?.Value,
-                                                InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString(),
-                                                LicenceServer = this.DRMLicenceServer,
-                                                HttpArguments = this.DRMHttpArguments,
-                                                Type = ContentProtectionTypeEnum.Widevine
+                                                //Widevine detected
+                                                prot.Add(new ContentProtection()
+                                                {
+                                                    RepresentationID = nodeID?.Value,
+                                                    KID = (node = nodeProt.SelectSingleNode("./@*[name()='cenc:default_KID']")) != null ? node.Value.Replace("-", "") : null,
+                                                    PSSH = nodeWv.SelectSingleNode("./*[name()='cenc:pssh']/text()")?.Value,
+                                                    SegmentTemplateInit = nodeTemplate.Attributes["initialization"]?.Value,
+                                                    SegmentTemplateMedia = nodeTemplate.Attributes["media"]?.Value,
+                                                    InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString(),
+                                                    LicenceServer = this.DRMLicenceServer,
+                                                    HttpArguments = this.DRMHttpArguments,
+                                                    Type = ContentProtectionTypeEnum.Widevine
+                                                });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            XmlNodeList nodesRep = nAS.SelectNodes(".//ns:Representation", mgr);
+                                            nodesRep.ForEach(nRep =>
+                                            {
+                                                nodeTemplate = nRep.SelectSingleNode("./ns:SegmentTemplate", mgr);
+                                                if (nodeTemplate != null)
+                                                {
+                                                    XmlNode nodeProtRep = nodeProt;
+                                                    XmlNode nodeWvRep = nodeWv;
+
+                                                    if (nodeProtRep == null)
+                                                    {
+                                                        nodeProtRep = nRep.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:mpeg:dash:mp4protection:2011']", mgr);
+                                                        nodeWvRep = nRep.SelectSingleNode("./ns:ContentProtection[@schemeIdUri='urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed']", mgr);
+                                                    }
+
+                                                    if (nodeProtRep != null && nodeWvRep != null)
+                                                    {
+                                                        if (nodeID == null)
+                                                            nodeID = nRep.SelectSingleNode("./@id", mgr);
+
+                                                        //Widevine detected
+                                                        prot.Add(new ContentProtection()
+                                                        {
+                                                            RepresentationID = nodeID?.Value,
+                                                            KID = (node = nodeProtRep.SelectSingleNode("./@*[name()='cenc:default_KID']")) != null ? node.Value.Replace("-", "") : null,
+                                                            PSSH = nodeWvRep.SelectSingleNode("./*[name()='cenc:pssh']/text()")?.Value,
+                                                            SegmentTemplateInit = nodeTemplate.Attributes["initialization"]?.Value,
+                                                            SegmentTemplateMedia = nodeTemplate.Attributes["media"]?.Value,
+                                                            InitFileFullPath = this.WorkFolder + Guid.NewGuid().ToString(),
+                                                            LicenceServer = this.DRMLicenceServer,
+                                                            HttpArguments = this.DRMHttpArguments,
+                                                            Type = ContentProtectionTypeEnum.Widevine
+                                                        });
+                                                    }
+                                                }
                                             });
+                                        }
                                     });
 
                                 if (prot.Count > 0)
@@ -729,11 +778,27 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         ContentProtection p = prot[i];
                                         if (p.PSSH != null && p.KID != null)
                                         {
-                                            p.DecryptionKey = Widevine.GetKey(p.PSSH, p.KID, p.LicenceServer, p.HttpArguments);
+                                            if (this.DRMKey != null && this.DRMKey.Length == 65)
+                                            {
+                                                string[] parts = this.DRMKey.Split(':');
+                                                if (parts.Length == 2 && parts[0].Equals(p.KID, StringComparison.OrdinalIgnoreCase) 
+                                                    && parts[1].All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+                                                {
+                                                    //Directly specified key
+                                                    p.DecryptionKey = parts[1];
+
+                                                    this.Logger.Debug("[{0}][refreshMasterList] Explicit Widevine DRM key: {0}:{1}", parts[0], parts[1]);
+                                                }
+                                            }
+
                                             if (p.DecryptionKey == null)
                                             {
-                                                this.Logger.Error("[{0}][refreshMasterList] ContentProtection: Failed to get the Key: {1}", this._Identifier, p.KID);
-                                                return;
+                                                p.DecryptionKey = Widevine.GetKey(p.PSSH, p.KID, p.LicenceServer, p.HttpArguments, bPermanent: true);
+                                                if (p.DecryptionKey == null)
+                                                {
+                                                    this.Logger.Error("[{0}][refreshMasterList] ContentProtection: Failed to get the Key: {1}", this._Identifier, p.KID);
+                                                    return;
+                                                }
                                             }
                                         }
                                     };
@@ -745,6 +810,9 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                                         //Set protection list
                                         this._ContentProtection = prot;
+
+                                        //Report change
+                                        this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.TaskStateChanged });
                                     }
                                 }
                             }
@@ -816,6 +884,29 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     }
                                 }
                                 );
+                            }
+
+                            if (this._StreamLanguageSelection.Count > 0)
+                            {
+                                XmlNodeList nodesAdpt = nodeMPD.SelectNodes(".//ns:AdaptationSet[@contentType='audio'][@lang]", mgr);
+                                this._StreamList.Clear();
+                                nodesAdpt.ForEach(nodeAdpt =>
+                                {
+                                    string strLng = nodeAdpt.Attributes["lang"].Value;
+                                    if (!string.IsNullOrWhiteSpace(strLng) && !this._StreamLanguageSelection.Exists(s => s.Equals(strLng, StringComparison.OrdinalIgnoreCase)))
+                                        this._StreamList.Add(new MediaStream()
+                                        {
+                                            Language = strLng,
+                                            Tag = nodeAdpt
+                                        }); //add to remove list
+                                }
+                                );
+
+                                if (this._StreamList.Count < nodesAdpt.Count)
+                                {
+                                    //Remove the adaptation sets
+                                    this._StreamList.ForEach(a => ((XmlNode)a.Tag).ParentNode.RemoveChild((XmlNode)a.Tag));
+                                }
                             }
                             #endregion
 

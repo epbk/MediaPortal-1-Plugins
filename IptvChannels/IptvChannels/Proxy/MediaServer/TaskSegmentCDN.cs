@@ -538,7 +538,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     #region MP4 decryption
                     string strFileSrc = this.FullPath + ".tmp";
                     string strFileDst = this.FullPath;
-                    string strArgs;
+                    string strArgs = null;
                     string strInitPath = this.ContentProtection.InitFileFullPath;
                     string strKID = this.ContentProtection.KID;
                     string strPSSH = this.ContentProtection.PSSH;
@@ -546,29 +546,32 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                     if (this.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit)
                     {
-                        if (strKey == null) //do not decrypt
-                        {
-                            if (!File.Exists(strInitPath))
-                                File.Copy(this.FullPath, strInitPath);
-
-                            if (strKID == null)
-                            {
-                                byte[] kid = mp4GetDefaultKID(File.ReadAllBytes(this.FullPath));
-                                if (kid != null)
-                                {
-                                    this.ContentProtection.KID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
-                                    _Logger.Debug("[doPostProcess][{0}] MP4 Init - default KID: {0}", this.FullPath, this.ContentProtection.KID);
-                                }
-                            }
-
-                            break;
-                        }
-
                         //We need to backup init file for decrypting individual m4s fragments
                         if (!File.Exists(strInitPath))
                             File.Copy(this.FullPath, strInitPath);
 
-                        strArgs = string.Format(" --key {0}:{1} \"{2}\" \"{3}\"", strKID, strKey, strFileSrc, strFileDst);
+                        if (strKID == null)
+                        {
+                            byte[] kid = mp4GetDefaultKID(File.ReadAllBytes(this.FullPath));
+                            if (kid != null)
+                            {
+                                strKID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
+                                if (!kid.All(b => b == 0))
+                                {
+                                    //Non zero KID
+                                    this.ContentProtection.KID = strKID;
+                                    _Logger.Debug("[doPostProcess][{0}] MP4 Init - default KID: {1}", this.FullPath, this.ContentProtection.KID);
+                                }
+                            }
+                            else
+                            {
+                                _Logger.Error("[doPostProcess][decrypt][{0}] MP4 Init - KID not found.", this.FullPath);
+                                return JobStatus.Failed;
+                            }
+                        }
+
+                        //Remove encryption from init file
+                        strArgs = string.Format(" --key {0}:00000000000000000000000000000000 \"{1}\" \"{2}\"", strKID, strFileSrc, strFileDst);
                     }
                     else
                     {
@@ -600,7 +603,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         return JobStatus.Failed;
                                     }
 
-                                    _Logger.Debug("[doPostProcess][decrypt][{0}] Mp4Decrypt Key: {1}", this.FullPath, strKey);
+                                    _Logger.Debug("[doPostProcess][decrypt][{0}] Mp4Decrypt Key: {1}:{2}", this.FullPath, strKID, strKey);
                                 }
                                 else
                                 {
@@ -698,7 +701,6 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             if (!string.IsNullOrWhiteSpace(e.Data))
                 _Logger.Debug("[mp4decrypt][error] " + e.Data);
         }
-
 
         private static bool mp4TryGetEncryptionData(Stream stream, bool bPssh, bool bKID, out byte[] pssh, out byte[] kid)
         {
@@ -803,8 +805,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 Buffer.BlockCopy(mp4InitData, iIdx, kid, 0, 16);
 
                 //Check for non empty KID
-                if (!kid.All(b => b == 0))
-                    return kid;
+                //if (!kid.All(b => b == 0))
+                return kid;
             }
 
             return null;

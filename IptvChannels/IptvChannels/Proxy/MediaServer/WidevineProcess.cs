@@ -5,19 +5,20 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using NLog;
+using MediaPortal.IptvChannels.Database;
 
 namespace MediaPortal.IptvChannels.Proxy.MediaServer
 {
     public class WidevineProcess
     {
         private static readonly Logger _Logger = LogManager.GetCurrentClassLogger();
-        private readonly List<ContentProtectionKey> _Keys = new List<ContentProtectionKey>();
+        private readonly List<dbContentProtectionKey> _Keys = new List<dbContentProtectionKey>();
         private string _Result = string.Empty;
         private string _Error = string.Empty;
 
         public string Error => _Error;
 
-        public List<ContentProtectionKey> GetKeys(string strPSSH, string strLicenceServer, Pbk.Net.Http.HttpUserWebRequestArguments httpArgs)
+        public List<dbContentProtectionKey> GetKeys(string strPSSH, string strLicenceServer, Pbk.Net.Http.HttpUserWebRequestArguments httpArgs)
         {
             try
             {
@@ -101,7 +102,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 {
                     string[] parts = e.Data.Substring(5).Split(':');
                     if (parts.Length == 2)
-                        this._Keys.Add(new ContentProtectionKey(parts[0], parts[1]));
+                        this._Keys.Add(new dbContentProtectionKey(parts[0], parts[1]));
                 }
                 else if (e.Data.StartsWith("Result: "))
                     this._Result = e.Data.Substring(8);

@@ -33,9 +33,16 @@ namespace MediaPortal.IptvChannels
         { get; set; }
 
         [Category("Stream")]
-        [Description("Additional arguments (for FFMPEG).")]
+        [Description("Additional arguments (for streaming engine).")]
         public string Arguments
         { get; set; }
+
+        [Category("Stream")]
+        [Description("Strreaming engine for conversion to MPEG-TS format.")]
+        [DisplayName("Streaming Engine")]
+        [DefaultValue(Proxy.StreamingEngineEnum.Default)]
+        public Proxy.StreamingEngineEnum StreamingEngine
+        { get; set; } = Proxy.StreamingEngineEnum.Default;
 
         [Category("Stream")]
         [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]

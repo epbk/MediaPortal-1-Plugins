@@ -72,7 +72,8 @@ namespace MediaPortal.IptvChannels.Database
         {
             get { return this._UseOpenSsl; }
             set { this._UseOpenSsl = value; Pbk.Net.Http.HttpUserWebRequest.UseOpenSSLDefault = value; }
-        } private bool _UseOpenSsl = false;
+        }
+        private bool _UseOpenSsl = false;
 
         [DBFieldAttribute(FieldName = "allowSystemProxy", Default = "True")]
         [DisplayName("Allow system proxy")]
@@ -83,7 +84,8 @@ namespace MediaPortal.IptvChannels.Database
         {
             get { return this._AllowSystemProxy; }
             set { this._AllowSystemProxy = value; Pbk.Net.Http.HttpUserWebRequest.AllowSystemProxyDefault = value; }
-        } private bool _AllowSystemProxy = true;
+        }
+        private bool _AllowSystemProxy = true;
 
         [DBFieldAttribute(FieldName = "httpServerPort", Default = "8100")]
         [DisplayName("Http server port")]
@@ -134,7 +136,8 @@ namespace MediaPortal.IptvChannels.Database
 
                 this._WorkPath = this._TempPath + "MediaPortalIptvChannels\\";
             }
-        } private string _TempPath = TEMP_PATH_DEFAULT;
+        }
+        private string _TempPath = TEMP_PATH_DEFAULT;
 
         [Browsable(false)]
         public string WorkPath
@@ -153,7 +156,8 @@ namespace MediaPortal.IptvChannels.Database
 
                 return this._WorkPath;
             }
-        } private string _WorkPath = TEMP_PATH_DEFAULT + "MediaPortalIptvChannels\\";
+        }
+        private string _WorkPath = TEMP_PATH_DEFAULT + "MediaPortalIptvChannels\\";
 
         [DBFieldAttribute(FieldName = "proxyTimeoutNoClients", Default = "15000")]
         [Description("Timeout - no clients.")]
@@ -176,7 +180,8 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._TimeoutNoClients = value;
             }
-        } private int _TimeoutNoClients = TIMEOUT_PERIOD_NO_CLIENTS;  //[ms]
+        }
+        private int _TimeoutNoClients = TIMEOUT_PERIOD_NO_CLIENTS;  //[ms]
 
         [DBFieldAttribute(FieldName = "proxyTimeoutNoData", Default = "20000")]
         [Description("Timeout - no data.")]
@@ -199,7 +204,8 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._TimeoutNoData = value;
             }
-        } private int _TimeoutNoData = TIMEOUT_PERIOD_NO_DATA;  //[ms]
+        }
+        private int _TimeoutNoData = TIMEOUT_PERIOD_NO_DATA;  //[ms]
 
         [DBFieldAttribute(FieldName = "proxyClientMemoryBufferSize", Default = "2097152")]
         [Description("Client memory buffer size.")]
@@ -222,9 +228,26 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._ClientMemoryBufferSize = value / (256 * 1024) * (256 * 1024);
             }
-        } private int _ClientMemoryBufferSize = Proxy.RemoteClient.DEFAULT_BUFFER_SIZE;
+        }
+        private int _ClientMemoryBufferSize = Proxy.RemoteClient.DEFAULT_BUFFER_SIZE;
 
+        [DBFieldAttribute(FieldName = "proxyVlcPath", Default = "")]
+        [Description("VLC path for conversion to MPEG-TS format. If not specified then FFMPEG will be used instead.")]
+        [DisplayName("Streaming: VLC path")]
+        [Category("Streaming")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public string VlcPath
         #endregion
+        { get; set; }
+
+        [DBFieldAttribute(FieldName = "proxyStreamingEngine", Default = "VLC")]
+        [Description("Strreaming engine for conversion to MPEG-TS format.")]
+        [DisplayName("Streaming: Engine")]
+        [Category("Streaming")]
+        [DefaultValue(Proxy.StreamingEngineEnum.VLC)]
+        [TypeConverter(typeof(Controls.UIEditor.StreamingEngineConverter))]
+        public Proxy.StreamingEngineEnum StreamingEngine
+        { get; set; } = Proxy.StreamingEngineEnum.VLC;
 
         #region MediaServer
         [DBFieldAttribute(FieldName = "mediaServerUse", Default = "True")]
@@ -251,7 +274,8 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerMaxSimultaneousDownloads = value;
             }
-        } private int _MediaServerMaxSimultaneousDownloads = 2;
+        }
+        private int _MediaServerMaxSimultaneousDownloads = 2;
 
         [DBFieldAttribute(FieldName = "mediaServerMaxSimultaneousDownloadsPerTask", Default = "2")]
         [DefaultValue(2)]
@@ -270,7 +294,8 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerMaxSimultaneousDownloadsPerTask = value;
             }
-        } private int _MediaServerMaxSimultaneousDownloadsPerTask = 2;
+        }
+        private int _MediaServerMaxSimultaneousDownloadsPerTask = 2;
 
         [DBFieldAttribute(FieldName = "mediaServerDownloadOnRequest", Default = "True")]
         [DefaultValue(true)]
@@ -297,7 +322,8 @@ namespace MediaPortal.IptvChannels.Database
                 else
                     this._MediaServerAutoterminatePeriod = value;
             }
-        } private int _MediaServerAutoterminatePeriod = 60000;
+        }
+        private int _MediaServerAutoterminatePeriod = 60000;
 
         [DBFieldAttribute(FieldName = "mediaServerStreamSelection", Default = "Default")]
         [DefaultValue(Proxy.MediaServer.StreamQualityEnum.Default)]
@@ -307,6 +333,49 @@ namespace MediaPortal.IptvChannels.Database
         [EditorAttribute(typeof(Pbk.Controls.UIEditor.EnumUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public Proxy.MediaServer.StreamQualityEnum StreamQualitySelection
         { get; set; }
+
+        [DBFieldAttribute(FieldName = "mediaServerStreamSelectionLang", Default = "")]
+        [DefaultValue("")]
+        [Description("Stream language selection. Example: cs,en,de")]
+        [Category("Media Server")]
+        [DisplayName("Language Selection")]
+        public string StreamLanguageSelection
+        {
+            get
+            {
+                if (this.StreamLanguageSelectionList != null)
+                {
+                    StringBuilder sb = new StringBuilder(64);
+                    foreach (string str in this.StreamLanguageSelectionList)
+                    {
+                        if (sb.Length > 0)
+                            sb.Append(", ");
+                        sb.Append(str);
+                    }
+
+                    return sb.ToString();
+                }
+                return string.Empty;
+            }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    this.StreamLanguageSelectionList.Clear();
+
+                    string[] items = value.Split(new char[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string strItem in items)
+                    {
+                        string str = strItem.Trim().ToLowerInvariant();
+
+                        if (!this.StreamLanguageSelectionList.Exists(s => s == str))
+                            this.StreamLanguageSelectionList.Add(str);
+                    }
+                }
+
+            }
+        }
+        public List<string> StreamLanguageSelectionList = new List<string>();
         #endregion
 
 
@@ -331,7 +400,8 @@ namespace MediaPortal.IptvChannels.Database
                 return _Instance;
 
             }
-        }private static dbSettings _Instance = null;
+        }
+        private static dbSettings _Instance = null;
 
 
 

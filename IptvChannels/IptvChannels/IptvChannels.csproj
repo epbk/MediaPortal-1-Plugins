@@ -134,6 +134,9 @@
     <Compile Include="Controls\DataGridViewDropEventArgs.cs" />
     <Compile Include="Controls\DataGridViewDropEventHandler.cs" />
     <Compile Include="Controls\DataGridViewRowTypeEnum.cs" />
+    <Compile Include="Controls\UIEditor\StreamingEngineConverter.cs" />
+    <Compile Include="Database\dbContentProtectionBox.cs" />
+    <Compile Include="Database\dbContentProtectionKey.cs" />
     <Compile Include="GenerateLinkConfiguration.cs" />
     <Compile Include="Controls\UIEditor\HttpCookiesUIEditor.cs" />
     <Compile Include="Controls\UIEditor\HttpFieldsUIEditor.cs" />
@@ -142,12 +145,12 @@
     <Compile Include="Proxy\MediaServer\StreamQualityEnum.cs" />
     <Compile Include="Proxy\MediaServer\Widevine.cs" />
     <Compile Include="Proxy\MediaServer\WidevineProcess.cs" />
+    <Compile Include="Proxy\StreamingEngineEnum.cs" />
     <Compile Include="Proxy\StreamTypeEnum.cs" />
+    <Compile Include="Proxy\VlcControlManager.cs" />
     <Compile Include="SendEventTypeEnum.cs" />
     <Compile Include="Controls\UIEditor\FileSizeConverter.cs" />
     <Compile Include="Controls\UIEditor\TimePeriodConverter.cs" />
-    <Compile Include="Proxy\MediaServer\ContentProtectionBox.cs" />
-    <Compile Include="Proxy\MediaServer\ContentProtectionKey.cs" />
     <Compile Include="Database\dbSettings.cs" />
     <Compile Include="Database\dbTable.cs" />
     <Compile Include="PluginLoader.cs" />
