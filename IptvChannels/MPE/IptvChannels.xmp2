@@ -766,14 +766,14 @@ public class Script
     <Version>
       <Major>0</Major>
       <Minor>9</Minor>
-      <Build>1</Build>
+      <Build>2</Build>
       <Revision>0</Revision>
     </Version>
     <ExtensionDescription>IPTV channels</ExtensionDescription>
     <VersionDescription />
     <DevelopmentStatus>Stable</DevelopmentStatus>
     <OnlineLocation />
-    <ReleaseDate>2024-04-30T18:27:26</ReleaseDate>
+    <ReleaseDate>2024-12-18T18:27:26</ReleaseDate>
     <Tags>iptv,tv server plugins</Tags>
     <PlatformCompatibility>AnyCPU</PlatformCompatibility>
     <Location>.\IptvChannels.v[Version].mpe1</Location>
