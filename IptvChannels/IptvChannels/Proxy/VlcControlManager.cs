@@ -21,6 +21,7 @@ namespace MediaPortal.IptvChannels.Proxy
         #endregion
 
         #region Fields
+        private readonly string _VlcOptions = null;
         private readonly string _VlcExePath = null;
         private readonly int _VlcPort = -1;
 
@@ -42,7 +43,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 {
                     if (_Instance == null)
                     {
-                        _Instance = new VlcControlManager(Database.dbSettings.Instance.VlcPath, getAvailablePort(9000));
+                        _Instance = new VlcControlManager(Database.dbSettings.Instance.VlcPath, getAvailablePort(9000), Database.dbSettings.Instance.VlcOptions);
                         _Instance.Start();
                     }
 
@@ -58,11 +59,12 @@ namespace MediaPortal.IptvChannels.Proxy
         #endregion
 
         #region ctor
-        public VlcControlManager(string strVlcExePath, int iPort)
+        public VlcControlManager(string strVlcExePath, int iPort, string strOptions)
         {
             this._VlcExePath = strVlcExePath;
             this._VlcPort = iPort;
-        }
+            this._VlcOptions = strOptions;
+    }
         #endregion
 
         #region dtor
@@ -99,7 +101,7 @@ namespace MediaPortal.IptvChannels.Proxy
                     ErrorDialog = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
-                    Arguments = " --intf=\"http\" --http-host 0.0.0.0 --http-port " + this._VlcPort + " --http-password 1234"
+                    Arguments = " --intf=\"http\" --http-host 0.0.0.0 --http-port " + this._VlcPort + " --http-password 1234 " + this._VlcOptions
                 };
 
                 Process pr = new Process { StartInfo = psi };

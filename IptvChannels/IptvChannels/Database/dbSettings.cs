@@ -237,7 +237,14 @@ namespace MediaPortal.IptvChannels.Database
         [Category("Streaming")]
         [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public string VlcPath
-        #endregion
+        { get; set; }
+
+        [DBFieldAttribute(FieldName = "proxyVlcOptions", Default = "")]
+        [Description("Additional VLC options used for start.")]
+        [DisplayName("Streaming: VLC options")]
+        [Category("Streaming")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public string VlcOptions
         { get; set; }
 
         [DBFieldAttribute(FieldName = "proxyStreamingEngine", Default = "VLC")]
@@ -248,6 +255,8 @@ namespace MediaPortal.IptvChannels.Database
         [TypeConverter(typeof(Controls.UIEditor.StreamingEngineConverter))]
         public Proxy.StreamingEngineEnum StreamingEngine
         { get; set; } = Proxy.StreamingEngineEnum.VLC;
+
+        #endregion
 
         #region MediaServer
         [DBFieldAttribute(FieldName = "mediaServerUse", Default = "True")]
