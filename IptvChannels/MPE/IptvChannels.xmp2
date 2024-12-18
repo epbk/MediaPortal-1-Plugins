@@ -148,6 +148,20 @@
               <ZipFileName>Installer{CopyFile}\{21750904-90f2-434e-8159-27661165f335}-Newtonsoft.Json.dll</ZipFileName>
               <DestinationFilename>%TvServerBase%\Newtonsoft.Json.dll</DestinationFilename>
             </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x86">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x86\Mp4Lib.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{9042e2f0-e8b8-4819-b614-0df8e14fd308}-Mp4Lib.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Mp4Lib.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="PlatformTarget_x64">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>..\IptvChannels\External\Lib_x64\Mp4Lib.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{a29fd745-81ce-47e7-b52a-cc91fb77dffb}-Mp4Lib.dll</ZipFileName>
+              <DestinationFilename>%TvServerBase%\Mp4Lib.dll</DestinationFilename>
+            </FileItem>
           </Items>
         </Files>
       </GroupItem>
@@ -915,6 +929,20 @@ public class Script
         <LocalFileName>..\IptvChannels\External\Newtonsoft.Json.dll</LocalFileName>
         <ZipFileName>Installer{CopyFile}\{21750904-90f2-434e-8159-27661165f335}-Newtonsoft.Json.dll</ZipFileName>
         <DestinationFilename>%TvServerBase%\Newtonsoft.Json.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x86\Mp4Lib.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{9042e2f0-e8b8-4819-b614-0df8e14fd308}-Mp4Lib.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Mp4Lib.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true" Condition="None">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>..\IptvChannels\External\Lib_x64\Mp4Lib.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{a29fd745-81ce-47e7-b52a-cc91fb77dffb}-Mp4Lib.dll</ZipFileName>
+        <DestinationFilename>%TvServerBase%\Mp4Lib.dll</DestinationFilename>
       </FileItem>
       <FileItem InstallType="CopyFile" SystemFile="false" Modified="false" Condition="None">
         <Param1 />

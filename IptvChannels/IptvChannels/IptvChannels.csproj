@@ -142,6 +142,7 @@
     <Compile Include="Controls\UIEditor\HttpFieldsUIEditor.cs" />
     <Compile Include="HttpUserWebRequestArgumentsWrapper.cs" />
     <Compile Include="Proxy\MediaServer\ContentProtectionTypeEnum.cs" />
+    <Compile Include="Proxy\MediaServer\MP4LibNative.cs" />
     <Compile Include="Proxy\MediaServer\StreamQualityEnum.cs" />
     <Compile Include="Proxy\MediaServer\Widevine.cs" />
     <Compile Include="Proxy\MediaServer\WidevineProcess.cs" />

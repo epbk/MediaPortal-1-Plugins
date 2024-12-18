@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define USE_MP4LIB
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -544,6 +546,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     string strPSSH = this.ContentProtection.PSSH;
                     string strKey = this.ContentProtection.DecryptionKey;
 
+                    byte[] kid, key;
+
                     if (this.TaskSegmentType == TaskSegmentTypeEnum.MP4EncryptedInit)
                     {
                         //We need to backup init file for decrypting individual m4s fragments
@@ -552,7 +556,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                         if (strKID == null)
                         {
-                            byte[] kid = mp4GetDefaultKID(File.ReadAllBytes(this.FullPath));
+                            kid = mp4GetDefaultKID(File.ReadAllBytes(this.FullPath));
                             if (kid != null)
                             {
                                 strKID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
@@ -569,9 +573,15 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 return JobStatus.Failed;
                             }
                         }
+#if USE_MP4LIB
+                        else
+                            kid = Pbk.Utils.Tools.ParseByteArrayFromHex(strKID);
 
+                        key = new byte[16];
+#else
                         //Remove encryption from init file
-                        strArgs = string.Format(" --key {0}:00000000000000000000000000000000 \"{1}\" \"{2}\"", strKID, strFileSrc, strFileDst);
+                        strArgs = string.Format(" --key 1:00000000000000000000000000000000 \"{1}\" \"{2}\"", strKID, strFileSrc, strFileDst);
+#endif
                     }
                     else
                     {
@@ -587,7 +597,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             //Key not specified; get PSSH & KID from m4s segment file
                             using (FileStream fs = new FileStream(this.FullPath, FileMode.Open))
                             {
-                                if (mp4TryGetEncryptionData(fs, strPSSH == null, strKID == null, out byte[] pssh, out byte[] kid))
+                                if (mp4TryGetEncryptionData(fs, strPSSH == null, strKID == null, out byte[] pssh, out kid))
                                 {
                                     if (strPSSH == null)
                                         strPSSH = Convert.ToBase64String(pssh);
@@ -595,7 +605,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     if (strKID == null)
                                         strKID = Pbk.Utils.Tools.PrintDataToHex(kid, false, "x2");
 
-                                    strKey = Widevine.GetKey(strPSSH, strKID.Length > 32 ? strKID.Substring(strKID.Length - 32, 32) : strKID,
+                                    strKey = Widevine.GetKey(strPSSH, strKID,
                                         this.ContentProtection.LicenceServer, this.ContentProtection.HttpArguments);
                                     if (strKey == null)
                                     {
@@ -612,14 +622,29 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 }
                             }
                         }
-
-                        strArgs = string.Format(" --key {0}:{1} --fragments-info \"{2}\" \"{3}\" \"{4}\"", strKID, strKey, strInitPath, strFileSrc, strFileDst);
+#if USE_MP4LIB
+                        kid = Pbk.Utils.Tools.ParseByteArrayFromHex(strKID);
+                        key = Pbk.Utils.Tools.ParseByteArrayFromHex(strKey);
+#else
+                        strArgs = string.Format(" --key 1:{1} --fragments-info \"{2}\" \"{3}\" \"{4}\"", strKID, strKey, strInitPath, strFileSrc, strFileDst);
+#endif
                     }
 
                     //Rename encrypted file to tmp
                     File.Move(this.FullPath, strFileSrc);
 
                     #region Mp4Decrypt process
+
+#if USE_MP4LIB
+                    MP4LibNative.MP4_API_RESULT res = MP4LibNative.Decrypt(getNullTerminatedUtf8(strFileSrc), getNullTerminatedUtf8(strFileDst),
+                        this.TaskSegmentType != TaskSegmentTypeEnum.MP4EncryptedInit ? getNullTerminatedUtf8(strInitPath) : null, kid, key, 1);
+
+                    if (res != MP4LibNative.MP4_API_RESULT.AP4_SUCCESS)
+                    {
+                        _Logger.Error("[doPostProcess][decrypt][{0}] Failed to decrypt file: {1}", this.FullPath, res);
+                        return JobStatus.Failed;
+                    }
+#else
                     ProcessStartInfo psi = new ProcessStartInfo()
                     {
                         Arguments = strArgs,
@@ -648,7 +673,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                     pr.CancelOutputRead();
                     pr.CancelErrorRead();
-                    #endregion
+#endif
+#endregion
 
                     if (!File.Exists(this.FullPath))
                     {
@@ -679,7 +705,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                     //Delete encrypted file
                     File.Delete(strFileSrc);
-                    #endregion
+#endregion
 
                     break;
             }
@@ -754,9 +780,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                         {
                                             int iLength = mp4ReadInt32(stream); //length
                                             stream.Position += 4; //count
-                                            //stream.Position += 4; //0,0,flag,iv_size
-                                            //we have to include preceeding 4 bytes because of bug in mp4decrypt
-                                            kid = new byte[iLength];
+                                            stream.Position += 4; //0,0,flag,iv_size
+                                            kid = new byte[16];
                                             stream.Read(kid, 0, kid.Length);
                                             if (!bPssh || pssh != null)
                                                 return true;
@@ -818,6 +843,14 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             while(i < code.Length)
              code[i++] = (char)stream.ReadByte();
             return new String(code);
+        }
+
+        private static byte[] getNullTerminatedUtf8(string strText)
+        {
+            byte[] t = Encoding.UTF8.GetBytes(strText);
+            byte[] utf8 = new byte[t.Length + 1];
+            Buffer.BlockCopy(t, 0, utf8, 0, t.Length);
+            return utf8;
         }
 
         private static int mp4ReadInt32(Stream stream)
