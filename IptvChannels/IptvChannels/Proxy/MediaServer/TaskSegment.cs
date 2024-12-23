@@ -12,6 +12,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 {
     public abstract class TaskSegment
     {
+        public string GroupID = null;
         public string Filename;
         public string FullPath;
         public string Url;
@@ -26,13 +27,13 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         public int Attempts = 3;
         public DateTime DateTime;
-        public int Index;
+        public int Index = -1;
         public double Duration;
 
         public string ErrorDescription = string.Empty;
 
-        public bool IsInCurrentHlsList = false;
-        public bool IsInCurrentHlsListTmp = false;
+        public bool IsInCurrentList = false;
+        public bool IsInCurrentListTmp = false;
 
         public bool Discontinuity = false;
 

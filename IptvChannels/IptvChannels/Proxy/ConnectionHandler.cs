@@ -59,6 +59,8 @@ namespace MediaPortal.IptvChannels.Proxy
         private static List<ConnectionEventHandler> _EventTargets = new List<ConnectionEventHandler>();
 
         private Plugin.GetSiteLinkHandler getLinkHandler;
+
+        private Dictionary<string, string> _HttpArguments;
         #endregion
 
         #region Public Fields
@@ -89,6 +91,7 @@ namespace MediaPortal.IptvChannels.Proxy
         public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments { get; private set; } = null;
         public string DRMKey { get; private set; } = null;
         public StreamingEngineEnum StreamingEngine { get; private set; } = StreamingEngineEnum.Default;
+        public bool SegmentListBuild { get; set; } = true;
 
         public StreamTypeEnum StreamType { get; private set; } = StreamTypeEnum.Unknown;
 
@@ -184,6 +187,7 @@ namespace MediaPortal.IptvChannels.Proxy
                         SiteUtil = strSite,
                         ChannelId = strChannel,
                         Args = prm.TryGetValue(Plugin.URL_PARAMETER_NAME_ARGUMENTS, out string strValue) ? strValue : null,
+                        _HttpArguments = prm
                     };
 
                     //MediaServer prm
@@ -213,6 +217,10 @@ namespace MediaPortal.IptvChannels.Proxy
                     //StreamingEngine
                     if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_STREAMING_ENGINE, out strValue) && Enum.TryParse(strValue, true, out StreamingEngineEnum eng))
                         handler.StreamingEngine = eng;
+
+                    //SegmentListBuild
+                    if (prm.TryGetValue(Plugin.URL_PARAMETER_NAME_SEGMENT_LIST_BUILD, out strValue))
+                        handler.SegmentListBuild = strValue == "1";
 
 
                     _HandlerList.Add(handler);
@@ -356,8 +364,11 @@ namespace MediaPortal.IptvChannels.Proxy
                             strUrl = result.Url;
                             this.DRMLicenceServer = result.DRMLicenceServer;
                             this.DRMHttpArguments = result.DRMHttpArguments;
+                            this.DRMKey = result.DRMKey;
                             this.HttpArguments = result.HttpArguments;
                             this.StreamType = result.StreamType;
+                            this.StreamingEngine = result.StreamingEngine;
+                            this.SegmentListBuild = result.SegmentListBuild;
                         }
                         else
                             strUrl = null;
@@ -440,6 +451,17 @@ namespace MediaPortal.IptvChannels.Proxy
                                     sb.Append('=');
                                     sb.Append(System.Web.HttpUtility.UrlEncode(strUrl));
 
+                                    if (this._HttpArguments != null)
+                                    {
+                                        foreach (KeyValuePair<string, string> prm in this._HttpArguments)
+                                        {
+                                            sb.Append('&');
+                                            sb.Append(prm.Key);
+                                            sb.Append('=');
+                                            sb.Append(System.Web.HttpUtility.UrlEncode(prm.Value));
+                                        }
+                                    }
+
                                     //DRM licence server
                                     if (!string.IsNullOrWhiteSpace(this.DRMLicenceServer))
                                     {
@@ -466,6 +488,13 @@ namespace MediaPortal.IptvChannels.Proxy
                                         sb.Append('=');
                                         sb.Append(System.Web.HttpUtility.UrlEncode(this.DRMKey));
                                     }
+
+                                    //SegmentListBuild
+                                    sb.Append('&');
+                                    sb.Append(Plugin.URL_PARAMETER_NAME_SEGMENT_LIST_BUILD);
+                                    sb.Append('=');
+                                    sb.Append(this.SegmentListBuild ? "1" : "0");
+
 
                                     //Http user arguments
                                     if (this.HttpArguments != null)
@@ -596,7 +625,14 @@ namespace MediaPortal.IptvChannels.Proxy
                 //test.Exited += new EventHandler(restream_Exited);
                 pr.OutputDataReceived += this.outputHandler;
                 pr.ErrorDataReceived += this.errorHandler;
-                startInfo.Arguments = " -re -i " + strUrl + ' ' + this.Args + " -c copy -f mpegts udp://127.0.0.1:" + udp.Port;
+
+                //-map 0 From input index #0 (the 1st input) select all streams. 
+                //- map 1:a From input index #1 (the 2nd input) select all audio streams. 
+                //-map 3:s: 4 From input index #3 (the 4th input) select subtitle stream index #4 (the fifth subtitle stream). 
+                //- map 0 - map - 0:s Will select all streams from input index #0 (the 1st input) except subtitles. The - indicates negative mapping.
+                //If you do not use the -map option then the default stream selection behavior will automatically choose streams.
+
+                startInfo.Arguments = " -re -i " + strUrl + ' ' + (this.Args ?? Database.dbSettings.Instance.FfmpegStreamArguments) + " -f mpegts udp://127.0.0.1:" + udp.Port;
 
                 // Send http OK
                 this.sendToAllClients(null, 0, 0, -1, true, false);

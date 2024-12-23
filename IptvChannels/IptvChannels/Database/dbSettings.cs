@@ -240,7 +240,7 @@ namespace MediaPortal.IptvChannels.Database
         { get; set; }
 
         [DBFieldAttribute(FieldName = "proxyVlcOptions", Default = "")]
-        [Description("Additional VLC options used for start.")]
+        [Description("Additional options used for start of the VLC server.")]
         [DisplayName("Streaming: VLC options")]
         [Category("Streaming")]
         [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
@@ -255,6 +255,24 @@ namespace MediaPortal.IptvChannels.Database
         [TypeConverter(typeof(Controls.UIEditor.StreamingEngineConverter))]
         public Proxy.StreamingEngineEnum StreamingEngine
         { get; set; } = Proxy.StreamingEngineEnum.VLC;
+
+
+        [DBFieldAttribute(FieldName = "proxyVlcStreamArgs", Default = "")]
+        [Description("Additional VLC arguments used to initiate each streaming. Can be overrided by url argument.")]
+        [DisplayName("Streaming: VLC stream arguments")]
+        [Category("Streaming")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public string VlcStreamArguments
+        { get; set; }
+
+        [DBFieldAttribute(FieldName = "proxyFfmpegStreamArgs", Default = "-c copy -map 0")]
+        [Description("Additional FFMPEG arguments used to initiate each streaming. Can be overrided by url argument.")]
+        [DisplayName("Streaming: FFMPEG stream arguments")]
+        [Category("Streaming")]
+        [DefaultValue("-c copy -map 0")]
+        [EditorAttribute(typeof(Pbk.Controls.UIEditor.SelectFileUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public string FfmpegStreamArguments
+        { get; set; } = "-c copy -map 0";
 
         #endregion
 

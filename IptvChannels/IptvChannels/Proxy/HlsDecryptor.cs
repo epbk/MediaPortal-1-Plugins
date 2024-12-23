@@ -12,9 +12,13 @@ namespace MediaPortal.IptvChannels.Proxy
         public int SqId { get; private set; }
         public RijndaelManaged Rijndael { get; private set; }
         public byte[] IV { get; private set; }
+        public long UID { get; }
+
+        private static long _UIDcnt = 0;
 
         public HlsDecryptor(string strID, int iSqID, RijndaelManaged rjnd, byte[] iv)
         {
+            this.UID = System.Threading.Interlocked.Increment(ref _UIDcnt);
             this.ID = strID;
             this.SqId = iSqID;
             this.Rijndael = rjnd;

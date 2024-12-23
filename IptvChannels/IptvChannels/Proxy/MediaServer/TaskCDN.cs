@@ -44,6 +44,14 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             public string Language;
         }
 
+        class Segment
+        {
+            public int Index;
+            public long Ts;
+            public long Duration;
+            public XmlNode Parent;
+        }
+
         #region Database Fields
         #endregion
 
@@ -63,7 +71,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
         private bool _QueueStarted = false;
 
-        private static System.Globalization.CultureInfo _Culture_EN = new System.Globalization.CultureInfo("en-US");
+        private static CultureInfo _Culture_EN = new CultureInfo("en-US");
 
         private int _HttpRequestCounter = 0;
 
@@ -88,6 +96,13 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         private List<MediaStream> _StreamList = new List<MediaStream>();
         private StreamQualityEnum _StreamQualitySelection = Database.dbSettings.Instance.StreamQualitySelection;
         private List<string> _StreamLanguageSelection = Database.dbSettings.Instance.StreamLanguageSelectionList;
+        
+        private bool _FirstMasterRefresh = true;
+
+        private StringBuilder _SbDashTemplate = new StringBuilder(128);
+
+        private Pbk.Net.Http.HttpUserWebRequestArguments _HttpArguments = null;
+        private string _HttpArgumentsSerialized = null;
 
         #endregion
 
@@ -246,11 +261,25 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
         public string DRMKey
         { get; set; }
 
+        public bool SegmentListBuild
+        { get; set; } = true;
+
         public Pbk.Net.Http.HttpUserWebRequestArguments DRMHttpArguments
         { get; set; }
 
         public Pbk.Net.Http.HttpUserWebRequestArguments HttpArguments
-        { get; set; }
+        {
+            get { return this._HttpArguments; }
+
+            set
+            {
+                if (value != null)
+                {
+                    this._HttpArgumentsSerialized = value.Serialize();
+                    this._HttpArguments = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Handle http request
@@ -315,6 +344,28 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             bool bIsInit = false;
                             ContentProtection cp = null;
 
+                            if (segment == null && strUrlPath == null)
+                            {
+                                segment = new TaskSegmentCDN(this)
+                                {
+                                    HttpArguments = this._HttpArguments,
+                                    Filename = Path.GetFileName(strFile),
+                                    FullPath = this.WorkFolder + strFile,
+                                    LastAccess = DateTime.Now
+                                };
+
+                                //Try parse additional arguments
+                                this.taskSegmentExtractParamsFromUri(uri, segment);
+
+                                if (segment.Url == null || segment.Index < 0)
+                                    segment = null;
+                                else
+                                {
+                                    this.addNewSegment(segment);
+                                    this.Logger.Debug("[{0}][HandleHttpRequest] New segment created: {1}", this._Identifier, segment.FullPath);
+                                }
+                            }
+
                             if (segment == null && strUrlPath != null)
                             {
                                 //Dynamic files
@@ -355,7 +406,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                 {
                                     Index = this._FileIdCounter,
                                     Url = this._UrlMedia != null ? getFullUrl(strUrlPath, this._UrlMedia)  : this.getFullUrl(strUrlPath),
-                                    HttpArguments = this.HttpArguments,
+                                    HttpArguments = this._HttpArguments,
                                     Filename = Path.GetFileName(strFile),
                                     FullPath = strFile,
                                     LastAccess = DateTime.Now
@@ -368,6 +419,8 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     segment.ContentProtection = cp;
                                 }
 
+                                //Try parse additional arguments
+                                this.taskSegmentExtractParamsFromUri(uri, segment);
 
                                 this.addNewSegment(segment);
 
@@ -388,8 +441,10 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     {
                                         //File already cached
                                         args.ResponseCode = System.Net.HttpStatusCode.OK;
-                                        args.ResponseHeaderFields = new Dictionary<string, string>();
-                                        args.ResponseHeaderFields.Add(Pbk.Net.Http.HttpHeaderField.HTTP_FIELD_CONTENT_TYPE, strContentType);
+                                        args.ResponseHeaderFields = new Dictionary<string, string>
+                                        {
+                                            { Pbk.Net.Http.HttpHeaderField.HTTP_FIELD_CONTENT_TYPE, strContentType }
+                                        };
                                         args.ResponseStream = segment.GetStream();
                                         args.Handled = true;
                                         this.Logger.Debug("[{0}][HandleHttpRequest] File is ready. Delivered: {1}", this._Identifier, segment.FullPath);
@@ -485,7 +540,6 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                                 args.ResponseSent = true; //inform http server that we have already handled entire response including content
                                                 args.Handled = true;
                                                 this.Logger.Debug("[{0}][HandleHttpRequest] Delivered: {1} Length: {2}", this._Identifier, segment.FullPath, fs.Position);
-                                                return true;
                                             }
                                         }
                                         else
@@ -498,6 +552,21 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     Interlocked.Decrement(ref segment.InUse);
                                 }
 
+                                //Try to download next segment ahead
+                                if (segment.ID > 0)
+                                {
+                                    if (!bLocked)
+                                    {
+                                        Monitor.Enter(this._Segments);
+                                        bLocked = true;
+                                    }
+
+                                    TaskSegmentCDN segmentNext = (TaskSegmentCDN)this._Segments.Find(p => p.ID == segment.ID + 1
+                                        && (segment.GroupID == null || segment.GroupID == p.GroupID));
+
+                                    if (segmentNext != null && segmentNext.Status == TaskStatusEnum.Iddle)
+                                        this.segmentRequest(segmentNext);
+                                }
                             }
                             else
                                 this.Logger.Error("[{0}][HandleHttpRequest] File not found: {1}", this._Identifier, strFile);
@@ -589,7 +658,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                 if (this._Request == null)
                 {
-                    this._Request = new Pbk.Net.Http.HttpUserWebRequest(this.Url, this.HttpArguments)
+                    this._Request = new Pbk.Net.Http.HttpUserWebRequest(this.Url, this._HttpArguments)
                     {
                         AllowSystemProxy = Database.dbSettings.Instance.AllowSystemProxy ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No,
                         UseOpenSSL = Database.dbSettings.Instance.UseOpenSsl ? Pbk.Utils.OptionEnum.Yes : Pbk.Utils.OptionEnum.No
@@ -645,6 +714,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             XmlNode nodeBaseURL = nodeMPD.SelectSingleNode("./ns:BaseURL", mgr);
                             XmlNode nodeLocation = nodeMPD.SelectSingleNode("./ns:Location", mgr);
                             XmlAttribute atrMinimumUpdatePeriod = nodeMPD.Attributes["minimumUpdatePeriod"];
+                            XmlNodeList nodesTemplate = null;
 
                             //MPD location url
                             if (nodeLocation != null)
@@ -816,6 +886,9 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                                     }
                                 }
                             }
+                            else
+                                nodeMPD.SelectNodes(".//ns:ContentProtection", mgr).ForEach(n => n.ParentNode.RemoveChild(n));
+
                             #endregion
 
                             #region Manual stream filtering
@@ -910,6 +983,106 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                             }
                             #endregion
 
+                            #region SegmentTimeline rework
+                            if (this._FirstMasterRefresh)
+                            {
+                                List<Segment> segs = new List<Segment>();
+
+                                nodesTemplate = nodeMPD.SelectNodes(".//ns:SegmentTemplate", mgr);
+                                nodesTemplate.ForEach(n =>
+                                {
+                                    int iStart = int.Parse(n.Attributes["startNumber"].Value);
+
+                                    XmlNodeList segments = n.SelectNodes("./ns:SegmentTimeline/ns:S", mgr);
+                                    {
+                                        for (int i = 0; i < segments.Count; i++)
+                                        {
+                                            XmlNode nodeS = segments[i];
+
+                                            Segment seg = new Segment()
+                                            {
+                                                Index = iStart++,
+                                                Ts = long.Parse(nodeS.Attributes["t"].Value),
+                                                Duration = long.Parse(nodeS.Attributes["d"].Value),
+                                                Parent = nodeS.ParentNode
+                                            };
+
+                                            segs.Add(seg);
+
+                                            XmlAttribute aRepeat = nodeS.Attributes["r"];
+
+                                            if (aRepeat != null)
+                                            {
+                                                int iR = int.Parse(nodeS.Attributes["r"].Value);
+                                                long iTS = seg.Ts;
+                                                while (iR-- > 0)
+                                                {
+                                                    iTS += seg.Duration;
+
+                                                    segs.Add(new Segment()
+                                                    {
+                                                        Duration = seg.Duration,
+                                                        Ts = iTS,
+                                                        Index = iStart++,
+                                                        Parent = seg.Parent
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+
+                                //Sort by TS
+                                segs.Sort((s1, s2) => s1.Ts.CompareTo(s2.Ts));
+
+                                //Insert new segments
+                                nodesTemplate.ForEach(n =>
+                                {
+                                    XmlAttribute aStart = n.Attributes["startNumber"];
+
+                                    n.SelectNodes("./ns:SegmentTimeline", mgr).ForEach(timeline =>
+                                    {
+                                        timeline.RemoveAll();
+
+                                        int iCnt = 0;
+                                        int iMax = segs.Count(s => s.Parent == timeline);
+                                        foreach (Segment seg in segs.Where((s) => s.Parent == timeline))
+                                        {
+                                            if (timeline.ChildNodes.Count == 0)
+                                                aStart.Value = seg.Index.ToString();
+
+                                            XmlNode nodeSnew = xml.CreateElement("S", mgr.LookupNamespace("ns"));
+
+                                            XmlAttribute a = xml.CreateAttribute("t");
+                                            a.Value = seg.Ts.ToString();
+                                            nodeSnew.Attributes.Append(a);
+
+                                            a = xml.CreateAttribute("d");
+                                            a.Value = seg.Duration.ToString();
+                                            nodeSnew.Attributes.Append(a);
+
+                                            timeline.AppendChild(nodeSnew);
+
+                                            //Remove last two segments (if possible)
+                                            if (++iCnt >= 4 && (iMax - iCnt) == 2)
+                                                break;
+                                        }
+                                    });
+                                });
+
+                                this._FirstMasterRefresh = false;
+                            }
+                            #endregion
+
+                            //Build segment list(if posssible)
+                            this._Segments.ForEach(t => t.IsInCurrentListTmp = false);
+                            if (this.SegmentListBuild)
+                            {
+                                if (nodesTemplate == null)
+                                    nodesTemplate = nodeMPD.SelectNodes(".//ns:SegmentTemplate", mgr);
+                                nodesTemplate.ForEach(n => this.dashAddSegments(n, mgr));
+                            }
+
                             //Generate a new MPD
                             this._SbMasterList.Append(xml.OuterXml);
 
@@ -929,7 +1102,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                         {
                             #region M3U
 
-                            this._Segments.ForEach(t => t.IsInCurrentHlsListTmp = false);
+                            this._Segments.ForEach(t => t.IsInCurrentListTmp = false);
                             string[] lines = strResult.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                             #region Parsing
@@ -1208,32 +1381,54 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                                         if (task == null)
                                         {
-                                            string strFilename = "file_" + this._FileIdCounter + ".bin";
-                                            this.addNewSegment(new TaskSegmentCDN(this)
+                                            if (this.SegmentListBuild)
                                             {
-                                                Index = this._FileIdCounter,
-                                                Url = strFullUrl,
-                                                HttpArguments = this.HttpArguments,
-                                                Filename = strFilename,
-                                                FullPath = strPath + strFilename,
-                                                IsInCurrentHlsList = true,
-                                                IsInCurrentHlsListTmp = true,
-                                                HLS_Decryptor = dec,
-                                                ID = iMediaSequenceCounter
-                                            });
+                                                string strFilename = "file_" + this._FileIdCounter + ".bin";
+                                                this.addNewSegment(new TaskSegmentCDN(this)
+                                                {
+                                                    Index = this._FileIdCounter,
+                                                    Url = strFullUrl,
+                                                    HttpArguments = this._HttpArguments,
+                                                    Filename = strFilename,
+                                                    FullPath = strPath + strFilename,
+                                                    IsInCurrentList = true,
+                                                    IsInCurrentListTmp = true,
+                                                    HLS_Decryptor = dec,
+                                                    ID = iMediaSequenceCounter
+                                                });
 
-                                            this.appendFile(this._FileIdCounter);
+                                                this.appendFile(this._FileIdCounter);
+
+                                                iSegmentsAdded++;
+
+                                                this.Logger.Debug("[{0}][refreshMasterList] New segment: {1} {2} {3}", this._Identifier, iMediaSequenceCounter, strFilename, strFullUrl);
+                                            }
+                                            else
+                                            {
+                                                this.appendFile(this._FileIdCounter);
+
+                                                //Additional params
+                                                this._SbMasterList.Append("?url=");
+                                                this._SbMasterList.Append(System.Web.HttpUtility.UrlEncode(strFullUrl));
+
+                                                this._SbMasterList.Append("&id=");
+                                                this._SbMasterList.Append(this._FileIdCounter);
+
+                                                if (dec != null)
+                                                {
+                                                    this._SbMasterList.Append("&hlsDecryptorId=");
+                                                    this._SbMasterList.Append(dec.UID);
+                                                }
+                                            }
+                                            
                                             this._FileIdCounter++;
-
-                                            iSegmentsAdded++;
-
-                                            this.Logger.Debug("[{0}][refreshMasterList] New segment: {1} {2} {3}", this._Identifier, iMediaSequenceCounter, strFilename, strFullUrl);
                                         }
                                         else
                                         {
-                                            task.IsInCurrentHlsListTmp = true;
+                                            task.IsInCurrentListTmp = true;
                                             this.appendFile(task.Index);
                                         }
+ 
 
                                         this._SbMasterList.Append("\r\n");
 
@@ -1335,9 +1530,9 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             {
                 TaskSegment seg = this._Segments[i];
 
-                if (seg.IsInCurrentHlsList != seg.IsInCurrentHlsListTmp)
+                if (seg.IsInCurrentList != seg.IsInCurrentListTmp)
                 {
-                    seg.IsInCurrentHlsList = seg.IsInCurrentHlsListTmp;
+                    seg.IsInCurrentList = seg.IsInCurrentListTmp;
 
                     //Event
                     this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = seg });
@@ -1345,7 +1540,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                 if (seg.InUse <= 0)
                 {
-                    if (!seg.IsInCurrentHlsList)
+                    if (!seg.IsInCurrentList)
                     {
                         if ((DateTime.Now - seg.LastAccess).TotalSeconds >= 60)
                         {
@@ -1379,10 +1574,20 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
 
                             File.Delete(seg.FullPath);
 
-                            seg.Status = TaskStatusEnum.Iddle;
+                            if (!this.SegmentListBuild)
+                            {
+                                this._Segments.RemoveAt(i);
 
-                            //Event
-                            this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = seg });
+                                //Event
+                                this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentDeleted, Tag = seg });
+                            }
+                            else
+                            {
+                                seg.Status = TaskStatusEnum.Iddle;
+
+                                //Event
+                                this.OnEvent(new TaskEventArgs() { Type = TaskEventTypeEnum.SegmentStateChanged, Tag = seg });
+                            }
 
                             this.Logger.Debug("[segmentCleaning] Segment reset. File removed: {0}", seg.FullPath);
                         }
@@ -1612,6 +1817,244 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                 return 5;
             }
         }
+        
+        /// <summary>
+        /// Formats template.
+        /// </summary>
+        /// <param name="strTemplate">Template.</param>
+        /// <param name="strRepresentation">This identifier is substituted with the value of the attribute Representation@id of the containing Representation.</param>
+        /// <param name="strNumber">This identifier is substituted with the number of the corresponding Segment, if $SubNumber$ is not present in the same string.</param>
+        /// <param name="strBandwidth">This identifier is substituted with the value of Representation@bandwidth attribute value.</param>
+        /// <param name="strTime">This identifier is substituted with the value of the MPD start time of the Segment being accessed. For the Segment Timeline, this means that this identifier is substituted with the value of the SegmentTimeline@t attribute for the Segment being accessed.</param>
+        /// <param name="strSubNumber">This identifier is substituted with the number of the corresponding Segment in a Seqment Sequence.</param>
+        /// <returns>Formated template.</returns>
+        private string dashTemplateFormat(string strTemplate, string strRepresentation, string strNumber, string strBandwidth, string strTime, string strSubNumber)
+        {
+            this._SbDashTemplate.Clear();
+
+            int i = 0;
+            int iTag = -1;
+            string strTagName = null;
+            int iTagValueMinLength = 0;
+            while (i < strTemplate.Length)
+            {
+                char c = strTemplate[i++];
+                if (c == '$')
+                {
+                    // $$ escape
+                    if (i < strTemplate.Length && strTemplate[i] == '$')
+                        i++;
+                    else if (iTag < 0)
+                    {
+                        //Beginning of the tag
+                        iTag = i;
+                        continue;
+                    }
+                    else
+                    {
+                        //End of the tag
+                        if (strTagName == null)
+                            strTagName = strTemplate.Substring(iTag, i - iTag - 1);
+
+                        string strTagValue;
+                        switch (strTagName)
+                        {
+                            case "RepresentationID":
+                                strTagValue = strRepresentation;
+                                break;
+
+                            case "Number":
+                                strTagValue = strNumber;
+                                break;
+
+                            case "Bandwidth":
+                                strTagValue = strBandwidth;
+                                break;
+
+                            case "Time":
+                                strTagValue = strTime;
+                                break;
+
+                            case "SubNumber":
+                                strTagValue = strSubNumber;
+                                break;
+
+                            default:
+                                throw new Exception("Invalid tag name.");
+                        }
+
+                        //Padding
+                        while (iTagValueMinLength-- > strTagValue.Length)
+                            this._SbDashTemplate.Append('0');
+
+                        //Insert tag value
+                        this._SbDashTemplate.Append(strTagValue);
+
+                        //New tag init
+                        strTagName = null;
+                        iTag = -1;
+                        iTagValueMinLength = 0;
+                        continue;
+                    }
+                }
+                else if (iTag >= 0)
+                {
+                    if (c == '%')
+                    {
+                        //format: %0[width]d
+                        if (i + 4 <= strTemplate.Length)
+                        {
+                            strTagName = strTemplate.Substring(iTag, i - iTag - 1);
+
+                            if (strTemplate[i++] != '0')
+                                throw new Exception("Invalid format.");
+
+                            int iStart = i;
+                            while (i < strTemplate.Length)
+                            {
+                                c = strTemplate[i++];
+                                if (c == 'd')
+                                {
+                                    if (i - iStart < 2 || !int.TryParse(strTemplate.Substring(iStart, i - iStart - 1), out iTagValueMinLength) || strTemplate[i] != '$')
+                                        throw new Exception("Invalid format.");
+
+                                    break;
+                                }
+                                else if (c < '0' || c > '9')
+                                    throw new Exception("Invalid int in format.");
+                            }
+                        }
+                        else
+                            throw new Exception("Invalid format.");
+
+                        continue;
+                    }
+                    else
+                        continue;
+                }
+
+                //Nontag char
+                this._SbDashTemplate.Append(c);
+            }
+
+            return this._SbDashTemplate.ToString();
+        }
+
+        private void dashAddSegments(XmlNode nodeTemplate, XmlNamespaceManager mgr)
+        {
+            XmlNodeList nodesSegments = nodeTemplate.SelectNodes("./ns:SegmentTimeline/ns:S", mgr);
+
+            XmlAttribute aStart = nodeTemplate.Attributes["startNumber"];
+            if (aStart != null)
+            {
+                int iStart = int.Parse(aStart.Value);
+                string strTemplate = nodeTemplate.Attributes["media"].Value;
+
+                if (nodeTemplate.ParentNode.Name == "Representation")
+                    this.dashAddSegments(nodesSegments, nodeTemplate.ParentNode, iStart, strTemplate);
+                else
+                {
+                    nodeTemplate.ParentNode.SelectNodes("./ns:Representation", mgr).ForEach(nodeRep =>
+                        this.dashAddSegments(nodesSegments, nodeRep, iStart, strTemplate));
+                }
+            }
+        }
+        private void dashAddSegments(XmlNodeList nodesSegments, XmlNode nodeRepresentation, int iStart, string strTemplate)
+        {
+            ContentProtection cp = null;
+            string strRep = nodeRepresentation.Attributes["id"].Value;
+            string strBandwidth = nodeRepresentation.Attributes["bandwidth"]?.Value;
+
+            for (int i = 0; i < nodesSegments.Count; i++)
+            {
+                XmlNode nodeS = nodesSegments[i];
+
+                try
+                {
+                    XmlAttribute aRep = nodeS.Attributes["r"];
+                    int iRepeat = aRep != null ? int.Parse(aRep.Value) : 0;
+
+                    do
+                    {
+                        string strPath = this.dashTemplateFormat(strTemplate, strRep, iStart.ToString(), strBandwidth, nodeS.Attributes["t"].Value, nodeS.Attributes["k"]?.Value);
+                        string strUrlPath = strPath.Substring(this.LeadingUriPath.Length + 5);
+                        string strFile = this.WorkFolder + strPath.Substring(this.LeadingUriPath.Length).Replace('/', '\\');
+
+                        TaskSegmentCDN segment = (TaskSegmentCDN)this._Segments.Find(p => p.Filename == strFile || p.FullPath == strFile);
+                        if (segment == null)
+                        {
+                            segment = new TaskSegmentCDN(this)
+                            {
+                                Index = this._FileIdCounter,
+                                Url = this._UrlMedia != null ? getFullUrl(strUrlPath, this._UrlMedia) : this.getFullUrl(strUrlPath),
+                                HttpArguments = this._HttpArguments,
+                                Filename = Path.GetFileName(strFile),
+                                FullPath = strFile,
+                                GroupID = strRep,
+                                ID = iStart,
+                                IsInCurrentList = true,
+                                IsInCurrentListTmp = true,
+                            };
+
+                            if (this._ContentProtection != null)
+                            {
+                                if (cp == null)
+                                {
+                                    for (int iCp = 0; iCp < this._ContentProtection.Count; iCp++)
+                                    {
+                                        if (this._ContentProtection[iCp].IsMatch(strPath, out _))
+                                        {
+                                            cp = this._ContentProtection[iCp];
+                                            break;
+                                        }
+                                    }
+
+                                    if (cp == null)
+                                    {
+                                        this.Logger.Error("[{0}][dashAddSegments] ContentProtection not found.", this._Identifier);
+                                        return;
+                                    }
+                                }
+
+                                //DRM data
+                                segment.TaskSegmentType = TaskSegmentTypeEnum.MP4EncryptedMedia;
+                                segment.ContentProtection = cp;
+                            }
+
+                            this.addNewSegment(segment);
+                            this.Logger.Debug("[{0}][dashAddSegments] Segment added: {1}", this._Identifier, segment.FullPath);
+                        }
+                        else
+                            segment.IsInCurrentListTmp = true;
+
+                        iStart++;
+                    }
+                    while (iRepeat-- > 0);
+                }
+                catch (Exception ex)
+                {
+                    this.Logger.Error("[dashAddSegments] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                    return;
+                }
+            }
+        }
+
+        private void taskSegmentExtractParamsFromUri(Uri uri, TaskSegmentCDN segment)
+        {
+            if (uri.Query.Length > 0)
+            {
+                Dictionary<string, string> prms = Pbk.Utils.Tools.GetUrlParams(uri.Query);
+
+                if (prms.TryGetValue("hlsDecryptorId", out string strValue))
+                    segment.HLS_Decryptor = this.getDecryptor(long.Parse(strValue));
+
+                if (prms.TryGetValue("url", out strValue))
+                    segment.Url = strValue;
+
+                if (prms.TryGetValue("id", out strValue))
+                    segment.Index = int.Parse(strValue);
+            }
+        }
 
         #region Callbacks
         private void cbRefreshTmerElapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -1709,6 +2152,22 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
                     HlsDecryptor dec = this._DecryptorBuffer[i];
 
                     if (iSqId >= dec.SqId)
+                        return dec;
+                }
+
+                return null;
+            }
+        }
+
+        private HlsDecryptor getDecryptor(long lUID)
+        {
+            lock (this._DecryptorBuffer)
+            {
+                for (int i = this._DecryptorBuffer.Count - 1; i >= 0; i--)
+                {
+                    HlsDecryptor dec = this._DecryptorBuffer[i];
+
+                    if (lUID >= dec.UID)
                         return dec;
                 }
 

@@ -63,6 +63,7 @@ namespace MediaPortal.IptvChannels
         public const string URL_PARAMETER_NAME_DRM_KEY = "drmKey";
         public const string URL_PARAMETER_NAME_HTTP_ARGUMENTS = "httpArguments";
         public const string URL_PARAMETER_NAME_STREAMING_ENGINE = "streamingEngine";
+        public const string URL_PARAMETER_NAME_SEGMENT_LIST_BUILD = "segmenListBuild";
 
         #endregion
 
@@ -1085,7 +1086,9 @@ namespace MediaPortal.IptvChannels
                                             ? Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue) : null,
                                         HttpArguments = prm.TryGetValue(URL_PARAMETER_NAME_HTTP_ARGUMENTS, out strValue)
                                             ? Pbk.Net.Http.HttpUserWebRequestArguments.Deserialize(strValue) : null,
+                                        SegmentListBuild = !prm.TryGetValue(URL_PARAMETER_NAME_SEGMENT_LIST_BUILD, out strValue) || strValue == "1"
                                     };
+
                                     this.cdnTaskAdd(cdnTask);
                                     cdnTask.Event += this.cbTaskEvent;
                                     cdnTask.Start();

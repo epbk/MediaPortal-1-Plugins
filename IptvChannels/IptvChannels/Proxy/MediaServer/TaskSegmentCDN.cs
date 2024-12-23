@@ -874,7 +874,7 @@ namespace MediaPortal.IptvChannels.Proxy.MediaServer
             sb.Append("\",\"url\":\"");
             sb.Append(this.Url);
             sb.Append("\",\"isInHls\":\"");
-            sb.Append(this.IsInCurrentHlsList);
+            sb.Append(this.IsInCurrentList);
             sb.Append("\"}");
 
             return sb;
