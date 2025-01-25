@@ -23,7 +23,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         private const string _URL_HBBTV_LIVE = _URL_HBBTV_BASE + "/ivysilani/services/data/live.json";
         //private const string _URL_HBBTV_ONLINE = _URL_HBBTV_BASE + "/ivysilani/services/data/online.json";
         private const string _URL_HBBTV_ONLINE = _URL_HBBTV_BASE + "/online/services/data/online.json";
-        private const string _URL_HBBTV_VIDEOPLAYER = _URL_HBBTV_BASE + "/modules/videoplayer-v3/services/videodetail.php?id={0}&getQualities=1&qualities=%7B%22VOD%22%3A%22max1080p%22%2C%22LIVE%22%3A%22max1080p%22%7D&{1}";
+        private const string _URL_HBBTV_VIDEOPLAYER = _URL_HBBTV_BASE + "/modules/videoplayer-v3/services/videodetail.php?id={0}&getQualities=1&qualities=%7B%22VOD%22%3A%22max1080p%22%2C%22LIVE%22%3A%22max1080p%22%7D&newodpl=1&{1}";
 
         private const int _CACHE_LIVETIME_ONLINE = 120; //[s]
 
@@ -76,7 +76,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public CeskaTelevize()
         {
             //Basics
-            this._Version = "1.1.5";
+            this._Version = "1.1.6";
             this._Author = "Pbk";
             this._Description = "Česká Televize";
             this._EpgRefreshPeriod = 15 * 60000;
