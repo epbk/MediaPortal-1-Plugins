@@ -205,6 +205,11 @@
     <Compile Include="Controls\UIEditor\StringDictionaryEditorForm.Designer.cs">
       <DependentUpon>StringDictionaryEditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SSDP\SsdpClient.cs" />
+    <Compile Include="SSDP\SsdpServer.cs" />
+    <Compile Include="SSDP\SsdpServerInfo.cs" />
+    <Compile Include="SSDP\SsdpServerInfoIcon.cs" />
+    <Compile Include="SSDP\UpnpDevice.cs" />
     <Compile Include="Tools\Json.cs" />
     <Compile Include="Tools\RegularExpressions.cs" />
     <Compile Include="Tools\Utils.cs">

@@ -3,7 +3,7 @@ using System.Net;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
+using System.Linq;
 using System.Threading;
 using System.IO;
 using System.Web;
@@ -51,6 +51,7 @@ namespace MediaPortal.IptvChannels
         public const string HTTP_PATH_CDN_SEGMENTS = "/GetCDNSegments";
         public const string HTTP_PATH_EVENTS = "/GetEvents";
         public const string HTTP_PATH_APPLY_SETTINGS = "/ApplySettings";
+        public const string HTTP_PATH_DESCRIPTION = "/description.xml";
 
         public const string URL_PARAMETER_NAME_URL = "url";
         public const string URL_PARAMETER_NAME_SITE = "site";
@@ -65,6 +66,8 @@ namespace MediaPortal.IptvChannels
         public const string URL_PARAMETER_NAME_STREAMING_ENGINE = "streamingEngine";
         public const string URL_PARAMETER_NAME_SEGMENT_LIST_BUILD = "segmenListBuild";
 
+        public const string UPNP_DEVICE_TYPE = "urn:team-mediaportal.com:device:IptvChannels:1";
+        
         #endregion
 
         #region Types
@@ -104,6 +107,10 @@ namespace MediaPortal.IptvChannels
         private ManualResetEvent[] _EventClientFlags = null;
         private readonly List<ManualResetEvent> _EventClientFlagsList = new List<ManualResetEvent>();
 
+        private SSDP.SsdpServer _SsdpServer;
+        private SSDP.UpnpDevice _RootDevice;
+        private IPEndPoint _HttpServerEndpoint;
+
         private static NLog.Logger _Logger;
 
         #endregion
@@ -122,10 +129,27 @@ namespace MediaPortal.IptvChannels
         {
             _Logger = LogManager.GetCurrentClassLogger();
 
-            _Logger.Info("IptvChannels (" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + ")");
+            string strVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            _Logger.Info(this.Name +  " (" + strVersion + ")");
 
             this._PluginLoader = new PluginLoader();
             this._Sites = new List<SiteUtils.SiteUtilBase>();
+
+            //SSDP
+            this._RootDevice = new SSDP.UpnpDevice()
+            {
+                DeviceType = UPNP_DEVICE_TYPE,
+                Udn = Guid.NewGuid(),
+                FriendlyName = this.Name,
+                ModelName = this.Name,
+                Manufacturer = this.Author,
+                ModelNumber = strVersion,
+                ServerPort = Database.dbSettings.Instance.HttpServerPort
+            };
+            this._RootDevice.InitDescription();
+            this._SsdpServer = new SSDP.SsdpServer(new SSDP.UpnpDevice[] { this._RootDevice });
+            this._HttpServerEndpoint = new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName()).First(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork),
+                Database.dbSettings.Instance.HttpServerPort);
 
             //Load external plugins
             this.createSiteList();
@@ -919,6 +943,9 @@ namespace MediaPortal.IptvChannels
                 Enabled = true
             };
             this._ScheduleTimer.Elapsed += new System.Timers.ElapsedEventHandler(this.cbScheduleTimer);
+
+            //SSDP
+            this._SsdpServer.Start();
         }
 
         /// <summary>
@@ -929,6 +956,9 @@ namespace MediaPortal.IptvChannels
             _Logger.Debug("[Stop] Stopping...");
 
             this.unregisterWakeupHandler();
+
+            //SSDP
+            this._SsdpServer.Stop();
 
             //Terminate timer
             if (this._ScheduleTimer != null)
@@ -1299,6 +1329,19 @@ namespace MediaPortal.IptvChannels
 
                             break;
                             #endregion
+
+                        #region /description.xml
+                        case HTTP_PATH_DESCRIPTION:
+                            e.ResponseContentType = "text/xml; charset=\"utf-8\"";
+                            e.ResponseHeaderFields = new Dictionary<string, string>
+                            {
+                                { "X-IPTV_CHANNELS-HTTP-Port", Database.dbSettings.Instance.HttpServerPort.ToString() }
+                            };
+                            e.ResponseData = this._RootDevice.Description;
+                            e.ResponseCode = HttpStatusCode.OK;
+                            e.Handled = true;
+                            break;
+                        #endregion
                     }
                 }
             }
