@@ -991,6 +991,8 @@ namespace MediaPortal.IptvChannels
             _Logger.Debug("[Stop] CDN tasks closed.");
 
 
+            Proxy.VlcControlManager.Terminate();
+
             _Logger.Debug("[Stop] Stopped.");
         }
 

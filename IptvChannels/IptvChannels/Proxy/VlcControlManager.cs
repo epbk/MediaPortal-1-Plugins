@@ -185,6 +185,9 @@ namespace MediaPortal.IptvChannels.Proxy
             //if (!this.vlmExecuteCommand("setup ID_" + iId + " option audio-language=cze,eng"))
             //    return -1;
 
+            if (!this.vlmExecuteCommand("setup ID_" + iId + " option network-caching=0"))
+                return -1;
+
             return this.vlmExecuteCommand("control ID_" + iId + " play") ? iId : -1;
         }
 
@@ -199,6 +202,11 @@ namespace MediaPortal.IptvChannels.Proxy
         public void StreamingDeleteAll()
         {
             this.vlmExecuteCommand("del all");
+        }
+
+        public static bool Terminate()
+        {
+            return _Instance?.Stop() ?? false;
         }
 
         #endregion
