@@ -46,5 +46,46 @@ namespace MediaPortal.IptvChannels.SiteUtils
         /// True to keep/update internal HLS/DASH segment list. It has abilty to predownload subsequent segment ahead.
         /// </summary>
         public bool SegmentListBuild = true;
+
+        /// <summary>
+        /// Serialize all properties to url argument format
+        /// </summary>
+        /// <returns></returns>
+        public string Serialize()
+        {
+            return this.Serialize(new StringBuilder(256)).ToString();
+        }
+
+        /// <summary>
+        /// Serialize all properties to url argument format to StringBuilder
+        /// </summary>
+        /// <param name="sb">StringBuilder for seialization.</param>
+        /// <returns></returns>
+        public StringBuilder Serialize(StringBuilder sb)
+        {
+            sb.Append(Plugin.URL_PARAMETER_NAME_URL).Append('=').Append(System.Web.HttpUtility.UrlEncode(this.Url));
+
+            if (!string.IsNullOrWhiteSpace(this.DRMLicenceServer))
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_DRM_LICENCE_SERVER).Append('=').Append(System.Web.HttpUtility.UrlEncode(this.DRMLicenceServer));
+
+            if (!string.IsNullOrWhiteSpace(this.DRMKey))
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_DRM_KEY).Append('=').Append(System.Web.HttpUtility.UrlEncode(this.DRMKey));
+
+            if (this.DRMHttpArguments != null)
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_DRM_HTTP_ARGUMENTS).Append('=').Append(System.Web.HttpUtility.UrlEncode(this.DRMHttpArguments.Serialize()));
+
+            if (this.StreamType != Proxy.StreamTypeEnum.Unknown)
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_STREAM_TYPE).Append('=').Append(this.StreamType);
+
+            if (this.HttpArguments != null)
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_HTTP_ARGUMENTS).Append('=').Append(System.Web.HttpUtility.UrlEncode(this.HttpArguments.Serialize()));
+
+            if (this.StreamingEngine != Proxy.StreamingEngineEnum.Default)
+                sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_STREAMING_ENGINE).Append('=').Append(this.StreamingEngine);
+
+            sb.Append('&').Append(Plugin.URL_PARAMETER_NAME_SEGMENT_LIST_BUILD).Append('=').Append(this.SegmentListBuild ? '1' : '0');
+
+            return sb;
+        }
     }
 }

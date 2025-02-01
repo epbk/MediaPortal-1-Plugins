@@ -42,7 +42,7 @@ namespace MediaPortal.IptvChannels
             "&Mpeg2TsProgramNumber=" + _PROGRAM_ID_DEFAULT +
             "&Mpeg2TsProgramMapPID=" + _PMT_PID_DEFAULT + "&HttpOpenConnectionTimeout=30000";
 
-        public const string HTTP_PATH_LINK = "/GetUrl";
+        public const string HTTP_PATH_CHANNEL_LINK = "/GetChannelUrl";
         public const string HTTP_PATH_STREAM = "/GetStream";
         public const string HTTP_PATH_MEDIA_HANDLER = "/GetMediaHandler";
         public const string HTTP_PATH_STREAM_CONNECTIONS = "/GetStreamConnections";
@@ -639,18 +639,18 @@ namespace MediaPortal.IptvChannels
         private void removeUnknownChannels(SiteUtils.SiteUtilBase site)
         {
             //Remove all unknown channels
-            Regex regexLink = new Regex("http://127\\.0\\.0\\.1:" + Database.dbSettings.Instance.HttpServerPort + HTTP_PATH_LINK + "\\?site=(?<site>[^&]+)&channel=(?<channel>[^&]+)&.+");
+            Regex regexLink = new Regex(_PROVIDER_PREFIX + "(?<site>.+?)\\|(?<channel>.+)");
 
             List<Channel> delList = new List<Channel>();
             foreach (Channel ch in this._TvLayer.Channels)
             {
                 IList<TuningDetail> tun = ch.ReferringTuningDetail();
-                if (tun[0].Provider.StartsWith(_PROVIDER_PREFIX) && tun[0].Url.StartsWith(URL_FILTER_BASE))
+                if (tun[0].Provider.StartsWith(_PROVIDER_PREFIX))
                 {
-                    Match m = regexLink.Match(HttpUtility.UrlDecode(tun[0].Url.Substring(URL_FILTER_BASE.Length)));
+                    Match m = regexLink.Match(tun[0].Provider);
                     if (m.Success)
                     {
-                        string strSiteName = HttpUtility.UrlDecode(m.Groups["site"].Value);
+                        string strSiteName = m.Groups["site"].Value;
                         SiteUtils.SiteUtilBase siteCheck = null;
 
                         if (site == null)
@@ -1130,8 +1130,8 @@ namespace MediaPortal.IptvChannels
                             break;
                         #endregion
 
-                        #region /GetUrl
-                        case HTTP_PATH_LINK:
+                        #region /GetChannelUrl
+                        case HTTP_PATH_CHANNEL_LINK:
                             this.httpHandleChannelRequest(prm, e);
                             break;
                         #endregion
@@ -1363,18 +1363,26 @@ namespace MediaPortal.IptvChannels
         private void httpHandleChannelRequest(Dictionary<string, string> prm, Pbk.Net.Http.HttpUserServerEventArgs e)
         {
             //Get final url from site
-            SiteUtils.LinkResult response = null;
+            SiteUtils.LinkResult link = null;
             if (prm.TryGetValue("site", out string strSite) && prm.TryGetValue("channel", out string strChannel))
-                response = GetLinkFromSite(strSite, strChannel);
+                link = GetLinkFromSite(strSite, strChannel);
 
             #region Response
-            if (response != null && response.Url != null)
+            if (link?.Url != null)
             {
                 e.ResponseCode = HttpStatusCode.Moved;
-                e.ResponseHeaderFields = new Dictionary<string, string>
+                e.ResponseHeaderFields = new Dictionary<string, string>();
+                string strLink;
+                if (!prm.TryGetValue("toMediaHandler", out string str) || str == "1")
                 {
-                    { "Location", response.Url }
-                };
+                    StringBuilder sb = new StringBuilder(256);
+                    sb.Append("http://").Append(this._HttpServerEndpoint).Append(HTTP_PATH_MEDIA_HANDLER).Append('?');
+                    strLink = link.Serialize(sb).ToString();
+                }
+                else
+                    strLink = link.Url;
+
+                e.ResponseHeaderFields.Add("Location", strLink);
             }
             else
             {
@@ -1385,7 +1393,7 @@ namespace MediaPortal.IptvChannels
             e.Handled = true;
 
             if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[httpHandleChannelRequest][{0}] Response:\r\n{1}",
-                e.RemoteSocket.RemoteEndPoint.ToString(), response?.Url);
+                e.RemoteSocket.RemoteEndPoint.ToString(), link?.Url);
             #endregion
         }
 
