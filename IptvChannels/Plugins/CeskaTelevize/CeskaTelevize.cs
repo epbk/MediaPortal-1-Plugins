@@ -76,7 +76,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public CeskaTelevize()
         {
             //Basics
-            this._Version = "1.1.6";
+            this._Version = "1.1.7";
             this._Author = "Pbk";
             this._Description = "Česká Televize";
             this._EpgRefreshPeriod = 15 * 60000;
@@ -114,7 +114,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             this._ChannelList.Add(new IptvChannel(this, "CTMOBILE05", "CH_MP_05", "CTMOBILE05") { Tag = "ČT sport Plus" });
 
             //Test MEPG-DASH with Widevine
-            this._ChannelList.Add(new IptvChannel(this, "CT2_DASH", "2", "CT2 - DASH") { Tag = "DASH" });
+            this._ChannelList.Add(new IptvChannel(this, "CT2_DASH", "CH_2", "CT2 - DASH") { Tag = "DASH" });
 
             this.updateChannelList();
 
@@ -363,19 +363,12 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
                 return null;
             }
 
-            byte[] post = Encoding.UTF8.GetBytes(string.Format("playlist%5B0%5D%5Btype%5D=channel&playlist%5B0%5D%5Bid%5D={0}&requestUrl=%2Fivysilani%2Fembed%2FiFramePlayer.php&requestSource=iVysilani&type=html&canPlayDRM=true&streamingProtocol=dash", strId));
+            JToken j = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>("https://api.ceskatelevize.cz/video/v1/playlist-live/v1/stream-data/channel/" 
+                + strId + "?canPlayDrm=true&streamType=dash&quality=web&maxQualityCount=5");
 
-            JToken j = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>("https://www.ceskatelevize.cz/ivysilani/ajax/get-client-playlist/", post: post);
             if (j == null)
             {
-                this._Logger.Error("[getStreamUrlDash] Failed to get player data: " + strId);
-                return null;
-            }
-
-            j = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>((string)j["url"]);
-            if (j == null)
-            {
-                this._Logger.Error("[getStreamUrlDash] Failed to get player data: " + strId);
+                this._Logger.Error("[getStreamUrlDash] Failed to get player data: {0}", strId);
                 return null;
             }
 
@@ -383,7 +376,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             {
                 return new LinkResult()
                 {
-                    Url = (string)j.SelectToken("playlist[0].streamUrls.main"),
+                    Url = (string)j.SelectToken("streamUrls.main"),
                     DRMLicenceServer = "https://ivys-wvproxy.o2tv.cz/license?access_token=c3RlcGFuLWEtb25kcmEtanNvdS1wcm9zdGUtbmVqbGVwc2k="
                 };
             }
