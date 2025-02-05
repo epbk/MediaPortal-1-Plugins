@@ -33,7 +33,7 @@ namespace MediaPortal.IptvChannels.SSDP
         private Timer _DelayedNetworkChangeTimer;
 
         private IPAddress[] _HostAddresses = new IPAddress[0];
-
+        private IPEndPoint _EpSsdp = new IPEndPoint(IPAddress.Parse("239.255.255.250"), 1900);
         private readonly Random _Rnd = new Random();
         private readonly int _MaxAge = 1800;
         #endregion
@@ -86,7 +86,10 @@ namespace MediaPortal.IptvChannels.SSDP
                     timer.Dispose();
 
                 foreach (SsdpSocket socket in this._Sockets)
+                {
+                    this.sendNotify(socket.NotifySocket, socket.Address.ToString(), false);
                     socket.ListenerSocket.Close();
+                }
 
                 this._Sockets = null;
                 this._NnotifyTimers = null;
@@ -138,42 +141,78 @@ namespace MediaPortal.IptvChannels.SSDP
             {
                 iLength = socket.ListenerSocket.EndReceiveFrom(ar, ref socket.RemoteEp);
 
-                string[] lines = Encoding.ASCII.GetString(socket.Buffer, 0, iLength).Split(new string[] { "\r\n" },
+                if (iLength > 6 && socket.Buffer[0] == 'M' && socket.Buffer[1] == '-' && socket.Buffer[2] == 'S')
+                {
+                    string[] lines = Encoding.ASCII.GetString(socket.Buffer, 0, iLength).Split(new string[] { "\r\n" },
                     StringSplitOptions.RemoveEmptyEntries);
 
-                if (lines.Length > 0 && lines[0] == "M-SEARCH * HTTP/1.1")
-                {
-                    if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[cbReceive] Received:\r\n{0}", lines[0]);
-
-                    Dictionary<string, string> httpFields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                    for (int i = 1; i < lines.Length; i++)
+                    if (lines.Length > 0 && lines[0] == "M-SEARCH * HTTP/1.1")
                     {
-                        string[] keyValues = lines[i].Split(new char[] { ':' }, 2);
-                        if (keyValues.Length == 2)
-                            httpFields[keyValues[0].Trim()] = keyValues[1].Trim();
-                    }
+                        if (Log.LogLevel <= LogLevel.Trace) _Logger.Trace("[cbReceive] Received:\r\n{0}", lines[0]);
 
-                    //it defines the scope (namespace) of the extension. MUST be "ssdp:discover".
-                    if (!httpFields.TryGetValue("MAN", out string str) || !str.Equals("\"ssdp:discover\"", StringComparison.OrdinalIgnoreCase))
-                        return;
+                        Dictionary<string, string> httpFields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    //seconds to delay response
-                    //Field value contains maximum wait time in seconds. MUST be greater than or equal to 1 and SHOULD be less than 5 inclusive.
-                    if (!httpFields.TryGetValue("MX", out str) || !int.TryParse(str, out int iMx) || iMx < 0)
-                        return;
-
-                    //Search Target
-                    if (!httpFields.TryGetValue("ST", out string strSt))
-                        return;
-
-                    for (int i = 0; i < this._UpnpDevices.Length; i++)
-                    {
-                        UpnpDevice dev = this._UpnpDevices[i];
-                        if (StringComparer.OrdinalIgnoreCase.Compare(strSt, dev.DeviceType) == 0)
+                        for (int i = 1; i < lines.Length; i++)
                         {
-                            Thread.Sleep(this._Rnd.Next(iMx * 500));
-                            this.sendResponseMessage(dev, socket.ListenerSocket, socket.RemoteEp, socket.Address.ToString(), strSt, dev.Udn.ToString());
+                            string[] keyValues = lines[i].Split(new char[] { ':' }, 2);
+                            if (keyValues.Length == 2)
+                                httpFields[keyValues[0].Trim()] = keyValues[1].Trim();
+                        }
+
+                        //it defines the scope (namespace) of the extension. MUST be "ssdp:discover".
+                        if (!httpFields.TryGetValue("MAN", out string str) || !str.Equals("\"ssdp:discover\"", StringComparison.OrdinalIgnoreCase))
+                            return;
+
+                        //seconds to delay response
+                        //Field value contains maximum wait time in seconds. MUST be greater than or equal to 1 and SHOULD be less than 5 inclusive.
+                        if (!httpFields.TryGetValue("MX", out str) || !int.TryParse(str, out int iMx) || iMx < 0)
+                            return;
+
+                        //Search Target
+                        if (!httpFields.TryGetValue("ST", out string strSt))
+                            return;
+
+                        string strUsn = null;
+                        string strLocalEndPoint = socket.Address.ToString();
+                        EndPoint remoteEp = socket.RemoteEp;
+                        for (int i = 0; i < this._UpnpDevices.Length; i++)
+                        {
+                            UpnpDevice dev = this._UpnpDevices[i];
+
+                            strUsn = "uuid:" + dev.Udn.ToString();
+                            if (StringComparer.OrdinalIgnoreCase.Compare(strSt, "upnp:rootdevice") == 0 ||
+                                StringComparer.OrdinalIgnoreCase.Compare(strSt, dev.DeviceType) == 0)
+                            {
+                                Thread.Sleep(this._Rnd.Next(iMx * 850));
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, strSt, strUsn);
+                            }
+                            else if (StringComparer.OrdinalIgnoreCase.Compare(strSt, strUsn) == 0)
+                            {
+                                strSt = strUsn;
+                                Thread.Sleep(this._Rnd.Next(iMx * 850));
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, strSt, strUsn);
+                                break; //message handled
+                            }
+                            else if (StringComparer.OrdinalIgnoreCase.Compare(strSt, "ssdp:all") == 0)
+                            {
+                                Thread.Sleep(this._Rnd.Next(iMx * 850));
+
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, "upnp:rootdevice", strUsn);
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, strUsn, strUsn);
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, dev.DeviceType, strUsn);
+
+                                foreach (UpnpService service in dev.Services)
+                                    this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, service.ServiceType, strUsn);
+
+                            }
+                            else if (dev.Services.FirstOrDefault(a =>
+                                StringComparer.OrdinalIgnoreCase.Compare(strSt, a.ServiceType) == 0) != null)
+                            {
+                                //Service
+                                Thread.Sleep(this._Rnd.Next(iMx * 850));
+                                this.sendResponseMessage(dev, socket.ListenerSocket, remoteEp, strLocalEndPoint, strSt, strUsn);
+                                break; //message handled
+                            }
                         }
                     }
                 }
@@ -187,11 +226,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 if (iLength > 0)
                     socket.ListenerSocket.BeginReceiveFrom(socket.Buffer, 0, socket.Buffer.Length, SocketFlags.None, ref socket.RemoteEp, this.cbReceive, socket);
                 else
-                {
-                    this.sendNotify(socket.NotifySocket, socket.Address.ToString(), false);
-                    socket.NotifySocket.Close();
                     if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[cbReceive] SSDP server stopped on {0}", socket.Address);
-                }
             }
         }
         #endregion
@@ -215,6 +250,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 listenerSocket.Bind(new IPEndPoint(address, 1900));
                 listenerSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(IPAddress.Parse("239.255.255.250"), address));
                 Socket notifySocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                notifySocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, address.GetAddressBytes());
                 notifySocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 notifySocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
                 notifySocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 2);
@@ -229,7 +265,14 @@ namespace MediaPortal.IptvChannels.SSDP
             for (int i = 0; i < this._UpnpDevices.Length; i++)
             {
                 UpnpDevice dev = this._UpnpDevices[i];
-                this.sendNotifyMessage(dev, socket, strHost, dev.DeviceType, dev.Udn.ToString(), bIsAlive);
+                string strUsn = dev.Udn.ToString();
+
+                this.sendNotifyMessage(dev, socket, strHost, "upnp:rootdevice", strUsn, bIsAlive);
+                this.sendNotifyMessage(dev, socket, strHost, strUsn, strUsn, bIsAlive);
+                this.sendNotifyMessage(dev, socket, strHost, dev.DeviceType, strUsn, bIsAlive);
+
+                foreach (UpnpService service in dev.Services)
+                    this.sendNotifyMessage(dev, socket, strHost, service.ServiceType, strUsn, bIsAlive);
             }
         }
 
@@ -250,8 +293,8 @@ namespace MediaPortal.IptvChannels.SSDP
             sb.Append("LOCATION: http://");
             sb.Append(strHost);
             sb.Append(':');
-            sb.Append(dev.ServerPort);
-            sb.AppendLine("/description.xml");
+            sb.Append(dev.HttpServerPort);
+            sb.AppendLine(dev.HttpDescriptionPath);
 
             //REQUIRED. Field value contains Notification Type.
             sb.Append("NT: ");
@@ -283,13 +326,12 @@ namespace MediaPortal.IptvChannels.SSDP
             }
             sb.AppendLine();
 
-            //REQUIRED.The BOOTID.UPNP.ORG header field represents the boot instance of the device expressed according to a monotonically increasing value.
+            //REQUIRED. Number increased each time device sends an initial announce or an update message
             sb.Append("BOOTID.UPNP.ORG: ");
             sb.Append(dev.BootID);
             sb.AppendLine();
 
-            //REQUIRED. The CONFIGID.UPNP.ORG field value MUST be a non-negative, 31-bit integer, ASCII encoded, decimal, without leading zeros (leading zeroes,
-            //if present, MUST be ignored by the recipient) that MUST represent the configuration number of a root device.
+            //REQUIRED. Number used for caching description information.
             sb.Append("CONFIGID.UPNP.ORG: ");
             sb.Append(dev.ConfigID);
             sb.AppendLine();
@@ -299,7 +341,7 @@ namespace MediaPortal.IptvChannels.SSDP
 
             sb.AppendLine();
 
-            try { socket.SendTo(Encoding.ASCII.GetBytes(sb.ToString()), new IPEndPoint(IPAddress.Broadcast, 1900)); }
+            try { socket.SendTo(Encoding.ASCII.GetBytes(sb.ToString()), this._EpSsdp); }
             catch { }
 
             Thread.Sleep(100);
@@ -326,8 +368,8 @@ namespace MediaPortal.IptvChannels.SSDP
             sb.Append("LOCATION: http://");
             sb.Append(strHost);
             sb.Append(':');
-            sb.Append(dev.ServerPort);
-            sb.AppendLine("/description.xml");
+            sb.Append(dev.HttpServerPort);
+            sb.AppendLine(dev.HttpDescriptionPath);
 
             //REQUIRED. Specified by UPnP vendor.
             sb.Append("SERVER: WindowsNT/");
@@ -344,7 +386,7 @@ namespace MediaPortal.IptvChannels.SSDP
             sb.AppendLine(strSt);
 
             //REQUIRED. Field value contains Unique Service Name.
-            sb.Append("USN: uuid:");
+            sb.Append("USN: ");
             sb.Append(strUsn);
             if (strSt != strUsn)
             {
@@ -353,13 +395,12 @@ namespace MediaPortal.IptvChannels.SSDP
             }
             sb.AppendLine();
 
-            //REQUIRED.
+            //REQUIRED. Number increased each time device sends an initial announce or an update message
             sb.Append("BOOTID.UPNP.ORG: ");
             sb.Append(dev.BootID);
             sb.AppendLine();
 
-            //OPTIONAL. The CONFIGID.UPNP.ORG field value MUST be a non-negative, 31-bit integer, ASCII encoded, decimal, without leading zeros (leading zeroes,
-            //if present, MUST be ignored by the recipient) that MUST represent the configuration number of a root device.
+            //OPTIONAL. Number used for caching description information
             sb.Append("CONFIGID.UPNP.ORG: ");
             sb.Append(dev.ConfigID);
             sb.AppendLine();

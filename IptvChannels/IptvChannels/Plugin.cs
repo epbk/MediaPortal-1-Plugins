@@ -136,17 +136,16 @@ namespace MediaPortal.IptvChannels
             this._Sites = new List<SiteUtils.SiteUtilBase>();
 
             //SSDP
-            this._RootDevice = new SSDP.UpnpDevice()
-            {
-                DeviceType = UPNP_DEVICE_TYPE,
-                Udn = Guid.NewGuid(),
-                FriendlyName = this.Name,
-                ModelName = this.Name,
-                Manufacturer = this.Author,
-                ModelNumber = strVersion,
-                ServerPort = Database.dbSettings.Instance.HttpServerPort
-            };
-            this._RootDevice.InitDescription();
+            this._RootDevice = new SSDP.UpnpDevice(
+                Guid.NewGuid(),
+                UPNP_DEVICE_TYPE,
+                Database.dbSettings.Instance.HttpServerPort,
+                HTTP_PATH_DESCRIPTION,
+                this.Name,
+                this.Author,
+                this.Name,
+                strModelNumber: strVersion
+                );
             this._SsdpServer = new SSDP.SsdpServer(new SSDP.UpnpDevice[] { this._RootDevice });
             this._HttpServerEndpoint = new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName()).First(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork),
                 Database.dbSettings.Instance.HttpServerPort);
