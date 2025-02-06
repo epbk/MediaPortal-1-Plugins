@@ -515,38 +515,37 @@ namespace MediaPortal.IptvChannels.SSDP
                 //Wait for all jobs to be done
                 flagDone.WaitOne();
 
-                //Log description for each server
-                StringBuilder sb = new StringBuilder(1024);
-                result.ForEach(srv =>
+                if (bLoadDescription)
                 {
-                    try
+                    //Log description for each server
+                    StringBuilder sb = new StringBuilder(1024);
+                    result.ForEach(srv =>
                     {
-                        if (srv.Parsed)
+                        try
                         {
-                            sb.Clear();
-                            sb.AppendLine("[Discover] Device discovered:");
-                            srv.PrintReport(sb);
-                            sb.AppendLine();
-                            _Logger.Debug(sb.ToString());
+                            if (srv.Parsed)
+                            {
+                                sb.Clear();
+                                sb.AppendLine("[discover] Device discovered:");
+                                srv.PrintReport(sb);
+                                sb.AppendLine();
+                                _Logger.Debug(sb.ToString());
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        _Logger.Error("[Discover] Error getting description: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
-                    }
-                });
+                        catch (Exception ex)
+                        {
+                            _Logger.Error("[discover] Error printing description: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                        }
+                    });
+                }
 
                 return result;
 
             }
             catch (Exception ex)
             {
-                _Logger.Error("[Discover] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                _Logger.Error("[discover] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
                 return null;
-            }
-            finally
-            {
-
             }
         }
         private static List<SsdpServerInfo> discover(IPAddress ip, byte[] searchMessage, string strSearchTarget, bool bLoadDescription)
@@ -599,7 +598,7 @@ namespace MediaPortal.IptvChannels.SSDP
                             {
                                 _Logger.Debug("[discover] Response received from: {0}\r\n{1}", epRemote, Encoding.ASCII.GetString(buffer, 0, iResponseLength));
                                 SsdpServerInfo res = parseResponse("HTTP/1.1 200 OK", fields);
-                                if (res != null && (!bLoadDescription || res.LoadDescription()) && res.DeviceType == strSearchTarget && !result.Exists(si => si.IsMatch(res)))
+                                if (res != null && (!bLoadDescription || res.LoadDescription()) && res.SearchTarget == strSearchTarget && !result.Exists(si => si.IsMatch(res)))
                                     result.Add(res);
 
                                 iReceived = 0;
@@ -650,16 +649,17 @@ namespace MediaPortal.IptvChannels.SSDP
         {
             SsdpServerInfo result = null;
             SsdpServerInfoStatusEnum status;
+            string strSt;
             if (strHeader.StartsWith("HTTP/1") && strHeader.EndsWith(" 200 OK")) //HTTP/1.1 200 OK
             {
-                if (!fields.TryGetValue("ST", out _))
+                if (!fields.TryGetValue("ST", out strSt))
                     return null;
 
                 status = SsdpServerInfoStatusEnum.Alive;
             }
             else if (strHeader.StartsWith("NOTIFY * HTTP/1.")) //NOTIFY * HTTP/1.1
             {
-                if (fields.TryGetValue("NT", out _) && fields.TryGetValue("NTS", out string strNts))
+                if (fields.TryGetValue("NT", out strSt) && fields.TryGetValue("NTS", out string strNts))
                 {
                     switch (strNts)
                     {
@@ -719,7 +719,7 @@ namespace MediaPortal.IptvChannels.SSDP
                             if (!string.IsNullOrWhiteSpace(strDevType))
                             {
                                 //New device detected
-                                result = new SsdpServerInfo(strDevType, strLocation, strUSN, strUUID,
+                                result = new SsdpServerInfo(strSt, strLocation, strUSN, strUUID,
                                     strServer, iCfgId, iBootId, iMaxAge, fields);
                             }
                         }
@@ -766,6 +766,19 @@ namespace MediaPortal.IptvChannels.SSDP
 
                 _Logger.Debug("[servereInfoAddOrUpdate] ServerInfo created: USN: '{0}'  Expires in: {1}s",
                     serverInfo.USN, (long)serverInfo.ExpiresIn.TotalSeconds);
+
+                try
+                {
+                    StringBuilder sb = new StringBuilder(1024);
+                    sb.AppendLine("[servereInfoAddOrUpdate] Device discovered:");
+                    serverInfo.PrintReport(sb);
+                    sb.AppendLine();
+                    _Logger.Debug(sb.ToString());
+                }
+                catch (Exception ex)
+                {
+                    _Logger.Error("[servereInfoAddOrUpdate] Error printing description: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                }
             }
             else
                 return null;

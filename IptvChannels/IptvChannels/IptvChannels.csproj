@@ -211,9 +211,11 @@
     <Compile Include="SSDP\SsdpEventTypeEnum.cs" />
     <Compile Include="SSDP\SsdpServer.cs" />
     <Compile Include="SSDP\SsdpServerInfo.cs" />
+    <Compile Include="SSDP\SsdpServerInfoDevice.cs" />
     <Compile Include="SSDP\SsdpServerInfoIcon.cs" />
     <Compile Include="SSDP\SsdpServerInfoStatusEnum.cs" />
     <Compile Include="SSDP\UpnpDevice.cs" />
+    <Compile Include="SSDP\SsdpServerInfoService.cs" />
     <Compile Include="SSDP\UpnpService.cs" />
     <Compile Include="Tools\Json.cs" />
     <Compile Include="Tools\RegularExpressions.cs" />

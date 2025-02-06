@@ -13,9 +13,14 @@ namespace MediaPortal.IptvChannels.SSDP
         private static Logger _Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
-        /// UPnP device type. Single URI.
+        /// Root device.
         /// </summary>
-        public string DeviceType { get; private set; }
+        public SsdpServerInfoDevice RootDevice { get; private set; }
+
+        /// <summary>
+        /// Search target.
+        /// </summary>
+        public string SearchTarget { get; private set; }
 
         /// <summary>
         /// URL to the UPnP description of the root device.
@@ -36,7 +41,7 @@ namespace MediaPortal.IptvChannels.SSDP
         /// Specified by UPnP vendor.
         /// </summary>
         public string Server { get; private set; }
-        
+
         /// <summary>
         /// Boot instance of the device.
         /// </summary>
@@ -48,56 +53,6 @@ namespace MediaPortal.IptvChannels.SSDP
         public int ConfigID { get; private set; } = -1;
 
         /// <summary>
-        /// URL to presentation for device
-        /// </summary>
-        public string PresentationUrl { get; private set; }
-
-        /// <summary>
-        /// Model name.
-        /// </summary>
-        public string ModelName { get; private set; }
-
-        /// <summary>
-        /// Long description for end user.
-        /// </summary>
-        public string ModelDescription { get; private set; }
-
-        /// <summary>
-        /// Short description for end user.
-        /// </summary>
-        public string FriendlyName { get; private set; }
-
-        /// <summary>
-        /// Manufacturer's name.
-        /// </summary>
-        public string Manufacturer { get; private set; }
-
-        /// <summary>
-        /// Web site for Manufacturer.
-        /// </summary>
-        public string ManufacturerUrl { get; private set; }
-
-        /// <summary>
-        /// Model number.
-        /// </summary>
-        public string ModelNumber { get; private set; }
-
-        /// <summary>
-        /// Web site for model.
-        /// </summary>
-        public string ModelUrl { get; private set; }
-
-        /// <summary>
-        /// Serial number.
-        /// </summary>
-        public string SerialNumber { get; private set; }
-
-        /// <summary>
-        /// Unique Device Name.
-        /// </summary>
-        public string UDN { get; private set; }
-                
-        /// <summary>
         /// In device templates, defines the lowest version of the architecture on which the device can be implemented.
         /// </summary>
         public int SpecVersionMajor { get; private set; } = -1;
@@ -106,16 +61,6 @@ namespace MediaPortal.IptvChannels.SSDP
         /// In device templates, defines the lowest version of the architecture on which the device can be implemented.
         /// </summary>
         public int SpecVersionMinor { get; private set; } = -1;
-
-        /// <summary>
-        /// Universal Product Code.
-        /// </summary>
-        public string UPC { get; private set; }
-        
-        /// <summary>
-        /// Icon list.
-        /// </summary>
-        public List<SsdpServerInfoIcon> Icons { get; private set; } = null;
 
         /// <summary>
         /// Specifies the number of seconds the advertisement is valid.
@@ -164,10 +109,10 @@ namespace MediaPortal.IptvChannels.SSDP
             }
         }
 
-        public SsdpServerInfo(string strDevType, string strLocation, string strUSN, string strUUID, string strServer,
+        public SsdpServerInfo(string strSearchTarget, string strLocation, string strUSN, string strUUID, string strServer,
             int iCfgId, int iBootId, int iMaxAge, Dictionary<string, string> httpFields)
         {
-            this.DeviceType = strDevType;
+            this.SearchTarget = strSearchTarget;
             this.Location = strLocation;
             this.USN = strUSN;
             this.UUID = strUUID;
@@ -186,27 +131,19 @@ namespace MediaPortal.IptvChannels.SSDP
                     this.SatIpDeviceID = -1;
             }
         }
-        
+
         public StringBuilder PrintReport(StringBuilder sb)
         {
             sb.Append("Server: ").AppendLine(this.Server);
             sb.Append("Location: ").AppendLine(this.Location);
             sb.Append("MaxAge: ").Append(this.MaxAge).AppendLine();
-            sb.Append("FriendlyName: ").AppendLine(this.FriendlyName);
-            sb.Append("DeviceType: ").AppendLine(this.DeviceType);
-            sb.Append("UDN: ").AppendLine(this.UDN);
             sb.Append("USN: ").AppendLine(this.USN);
             sb.Append("UUID: ").AppendLine(this.UUID);
             sb.Append("Version: ").Append(this.SpecVersionMajor).Append('.').Append(this.SpecVersionMinor).AppendLine();
-            sb.Append("Manufacturer: ").AppendLine(this.Manufacturer);
-            sb.Append("ManufacturerURL: ").AppendLine(this.ManufacturerUrl);
-            sb.Append("ModelDescription: ").AppendLine(this.ModelDescription);
-            sb.Append("ModelName: ").AppendLine(this.ModelName);
-            sb.Append("ModelNumber: ").AppendLine(this.ModelNumber);
-            sb.Append("ModelURL: ").AppendLine(this.ModelUrl);
-            sb.Append("SerialNumber: ").AppendLine(this.SerialNumber);
-            sb.Append("PresentationURL: ").AppendLine(this.PresentationUrl);
-            sb.Append("UPC: ").AppendLine(this.UPC);
+            sb.Append("BootID: ").Append(this.BootID).AppendLine();
+            sb.Append("ConfigID: ").Append(this.ConfigID).AppendLine();
+            sb.AppendLine("Root:");
+            this.RootDevice.PrintReport(sb, " ");
 
             sb.Append("Sat>IP: Capabilities: ").AppendLine(this.SatIpCapabilities);
             sb.Append("Sat>IP: ChannelListURL: ").AppendLine(this.SatIpChannelListUrl);
@@ -220,13 +157,13 @@ namespace MediaPortal.IptvChannels.SSDP
         {
             return this.USN == si?.USN;
         }
-        
+
         public int UpdateFrom(SsdpServerInfo si)
         {
             this.RefreshTimeStamp = si.RefreshTimeStamp;
             this.MaxAge = si.MaxAge;
 
-            if (!this.Parsed || si.Status == SsdpServerInfoStatusEnum.Updated 
+            if (!this.Parsed || si.Status == SsdpServerInfoStatusEnum.Updated
                 || (this.BootID >= 0 && this.BootID != si.BootID))
             {
                 if (!si.Parsed || !si.LoadDescription())
@@ -236,18 +173,8 @@ namespace MediaPortal.IptvChannels.SSDP
                 this.Server = si.Server;
                 this.ConfigID = si.ConfigID;
                 this.BootID = si.BootID;
+                this.RootDevice = si.RootDevice;
 
-                this.PresentationUrl = si.PresentationUrl;
-                this.FriendlyName = si.FriendlyName;
-                this.Manufacturer = si.Manufacturer;
-                this.ManufacturerUrl = si.ManufacturerUrl;
-                this.ModelDescription = si.ModelDescription;
-                this.ModelName = si.ModelName;
-                this.ModelNumber = si.ModelNumber;
-                this.ModelUrl = si.ModelUrl;
-                this.SerialNumber = si.SerialNumber;
-                this.UPC = si.UPC;
-                this.Icons = si.Icons;
                 this.SpecVersionMajor = si.SpecVersionMajor;
                 this.SpecVersionMinor = si.SpecVersionMinor;
 
@@ -285,11 +212,11 @@ namespace MediaPortal.IptvChannels.SSDP
 
         private bool parseDescription(XmlDocument xml, Dictionary<string, string> httpFields)
         {
+            const string NS = "urn:schemas-upnp-org:device-1-0";
+            const string NS_SATIP = "urn:ses-com:satip";
+
             try
             {
-                const string NS = "urn:schemas-upnp-org:device-1-0";
-                const string NS_SATIP = "urn:ses-com:satip";
-
                 XmlNode nodeRoot = xml["root", NS];
                 if (nodeRoot == null)
                     return false;
@@ -301,39 +228,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 if (nodeRootDev == null)
                     return false;
 
-                this.PresentationUrl = nodeRootDev["presentationURL", NS]?.InnerText;
-                this.FriendlyName = nodeRootDev["friendlyName", NS]?.InnerText;
-                this.Manufacturer = nodeRootDev["manufacturer", NS]?.InnerText;
-                this.ManufacturerUrl = nodeRootDev["manufacturerURL", NS]?.InnerText;
-                this.ModelDescription = nodeRootDev["modelDescription", NS]?.InnerText;
-                this.ModelName = nodeRootDev["modelName", NS]?.InnerText;
-                this.ModelNumber = nodeRootDev["modelNumber", NS]?.InnerText;
-                this.ModelUrl = nodeRootDev["modelURL", NS]?.InnerText;
-                this.SerialNumber = nodeRootDev["serialNumber", NS]?.InnerText;
-                this.DeviceType = nodeRootDev["deviceType", NS]?.InnerText;
-                this.UDN = nodeRootDev["UDN", NS]?.InnerText;
-                this.UPC = nodeRootDev["UPC", NS]?.InnerText;
-
-                XmlNode nodesIcon = nodeRootDev["iconList", NS];
-                if (nodesIcon != null)
-                {
-                    this.Icons = new List<SsdpServerInfoIcon>();
-                    foreach (XmlNode nodeIcon in nodesIcon.ChildNodes)
-                    {
-                        if (nodeIcon.Name == "icon" && nodeIcon.NamespaceURI == NS)
-                        {
-                            this.Icons.Add(new SsdpServerInfoIcon()
-                            {
-                                MimeType = nodeIcon["mimetype", NS].InnerText,
-                                Url = nodeIcon["url", NS].InnerText,
-                                Width = int.Parse(nodeIcon["width", NS].InnerText),
-                                Height = int.Parse(nodeIcon["height", NS].InnerText),
-                                Depth = int.Parse(nodeIcon["depth", NS].InnerText)
-                            }
-                            );
-                        }
-                    }
-                }
+                this.RootDevice = new SsdpServerInfoDevice(nodeRootDev, NS);
 
                 XmlNode nodeVersion = nodeRoot["specVersion", NS];
                 if (nodeVersion != null)
@@ -353,10 +248,9 @@ namespace MediaPortal.IptvChannels.SSDP
                 #endregion
 
                 this.Parsed = true;
-
                 return true;
             }
-            catch( Exception ex)
+            catch (Exception ex)
             {
                 _Logger.Error("[parseDescription] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
             }
