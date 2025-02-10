@@ -51,10 +51,10 @@ namespace MediaPortal.IptvChannels.SSDP
                 this.SearchMessage = buildSearchMessage(strSearchTarget, strUserAgent);
             }
 
-            
+
             public bool CallbackRegister(SsdpEventHandler callback)
             {
-                lock(this._Callbacks)
+                lock (this._Callbacks)
                 {
                     if (!this._Callbacks.Exists(cb => cb == callback))
                     {
@@ -79,10 +79,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 {
                     for (int i = 0; i < this._Callbacks.Count; i++)
                     {
-                        try
-                        {
-                            this._Callbacks[i].Invoke(this, e);
-                        }
+                        try { this._Callbacks[i].Invoke(this, e); }
                         catch { }
                     }
                 }
@@ -207,7 +204,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 Monitor.Enter(this, ref bLocked);
 
                 this.init();
-
+                bool bNew = false;
                 if (!this._SsdpJobs.TryGetValue(strSearchTarget, out SsdpJob job))
                 {
                     job = new SsdpJob(strSearchTarget, this._UserAgent);
@@ -215,6 +212,7 @@ namespace MediaPortal.IptvChannels.SSDP
 
                     try { this.Event?.Invoke(this, new SsdpEventArgsAttribute(SsdpEventTypeEnum.TargetAdded, strSearchTarget)); }
                     catch { }
+                    bNew = true;
                 }
                                 
                 job.CallbackRegister(registerCallback);
@@ -222,7 +220,8 @@ namespace MediaPortal.IptvChannels.SSDP
                 Monitor.Exit(this);
                 bLocked = false;
 
-                this.search(job);
+                if (bNew)
+                    this.search(job);
 
                 _Logger.Debug("[Start] Complete. SearchTarget: '{0}' Result:{1}", strSearchTarget, job.ServerInfo.Count);
                 return job.ServerInfo.Count;
@@ -344,6 +343,44 @@ namespace MediaPortal.IptvChannels.SSDP
         }
 
         /// <summary>
+        /// Initiate search on existing target started by Start method.
+        /// </summary>
+        /// <param name="strSearchTarget">Device name to search.</param>
+        /// <returns>Number of found servers.</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public int Search(string strSearchTarget)
+        {
+            bool bLocked = false;
+            try
+            {
+                Monitor.Enter(this, ref bLocked);
+                if (this._Sockets == null)
+                    throw new NullReferenceException("[Search] Server is stopped.");
+
+                if (string.IsNullOrWhiteSpace(strSearchTarget))
+                    throw new NullReferenceException("[Search] strSearchTarget is null.");
+
+                _Logger.Debug("[Search] '{0}'", strSearchTarget);
+
+                if (!this._SsdpJobs.TryGetValue(strSearchTarget, out SsdpJob job))
+                    _Logger.Error("[Search] SearchTarget not found: '{0}'", strSearchTarget);
+                else
+                {
+                    bLocked = false;
+                    Monitor.Exit(this);
+                    return this.search(job);
+                }
+            }
+            finally
+            {
+                if (bLocked)
+                    Monitor.Exit(bLocked);
+            }
+
+            return -1;
+        }
+
+        /// <summary>
         /// Retuns all ServerInfos found for given SearchTarget started by Start method.
         /// </summary>
         /// <param name="strSearchTarget">>Device name for ServerInfos to return.</param>
@@ -370,9 +407,6 @@ namespace MediaPortal.IptvChannels.SSDP
                     Monitor.Exit(this);
                     lock (job)
                     {
-                        if (job.ServerInfo.Count == 0)
-                            this.search(job);
-
                         int i = 0;
                         while (i < job.ServerInfo.Count)
                         {
@@ -381,16 +415,6 @@ namespace MediaPortal.IptvChannels.SSDP
                             {
                                 yield return si;
                                 i++;
-                            }
-                            else
-                            {
-                                //Remove no longer valid info
-                                job.ServerInfo.RemoveAt(i);
-                                _Logger.Debug("[GetServerInfo] ServerInfo removed: '{0}'", si.USN);
-                                SsdpEventArgsAttribute e = new SsdpEventArgsAttribute(SsdpEventTypeEnum.ServerInfoRemoved, si);
-                                job.CallbackInvoke(e);
-                                try { this.Event?.Invoke(this, e); }
-                                catch { }
                             }
                         }
                     }
@@ -455,17 +479,36 @@ namespace MediaPortal.IptvChannels.SSDP
                     if ((DateTime.Now - job.LastSearch).TotalSeconds < 10)
                         return -1;
 
+                    int iResult = 0;
                     job.LastSearch = DateTime.Now;
                     List<SsdpServerInfo> list = discover(job.SearchTarget, job.SearchMessage, false);
                     if (list?.Count > 0)
                     {
                         list.ForEach(si => this.serverInfoAddOrUpdate(job, si));
-                        
-                        return list.Count(si => si.IsValid);
+                        iResult = list.Count(si => si.IsValid);
                     }
+                    else
+                        _Logger.Debug("[search] None device discovered: '{0}'", job.SearchTarget);
 
-                    _Logger.Debug("[search] None device discovered: '{0}'", job.SearchTarget);
-                    return 0;
+                    //Update existing list
+                    int i = job.ServerInfo.Count - 1;
+                    while (i >= 0)
+                    {
+                        SsdpServerInfo si = job.ServerInfo[i];
+                        if (iResult == 0 || !list.Exists(inf => inf.IsMatch(si)) || !si.IsValid)
+                        {
+                            //Remove no longer valid info
+                            job.ServerInfo.RemoveAt(i);
+                            _Logger.Debug("[search] ServerInfo removed: '{0}'", si.USN);
+                            SsdpEventArgsAttribute arg = new SsdpEventArgsAttribute(SsdpEventTypeEnum.ServerInfoRemoved, si);
+                            job.CallbackInvoke(arg);
+                            try { this.Event?.Invoke(this, arg); }
+                            catch { }
+                        }
+                        i--;
+                    }
+                    
+                    return iResult;
                 }
             }
             finally
@@ -481,12 +524,13 @@ namespace MediaPortal.IptvChannels.SSDP
                 //We need to send M-SEARCH message from all interfaces to make sure local apps receive the message.
 
                 List<SsdpServerInfo> result = new List<SsdpServerInfo>();
-                IEnumerable<IPAddress> addresses = Dns.GetHostAddresses(Dns.GetHostName()).Where(a => a.AddressFamily == AddressFamily.InterNetwork);
+                IPAddress[] addresses = Dns.GetHostAddresses(Dns.GetHostName()).Where(a => a.AddressFamily == AddressFamily.InterNetwork).ToArray();
                 ManualResetEvent flagDone = new ManualResetEvent(false);
-                int iThreadsCounter = addresses.Count();
+                int iThreadsCounter = addresses.Length;
 
-                foreach (IPAddress ip in addresses)
+                for (int i = 0; i < addresses.Length; i++)
                 {
+                    IPAddress ip = addresses[i];
                     ThreadPool.QueueUserWorkItem(new WaitCallback((adr) =>
                     {
                         List<SsdpServerInfo> res = discover((IPAddress)adr, searchMessage, strSearchTarget, bLoadDescription);
@@ -518,7 +562,7 @@ namespace MediaPortal.IptvChannels.SSDP
                 if (bLoadDescription)
                 {
                     //Log description for each server
-                    StringBuilder sb = new StringBuilder(1024);
+                    StringBuilder sb = new StringBuilder(2048);
                     result.ForEach(srv =>
                     {
                         try
@@ -647,84 +691,128 @@ namespace MediaPortal.IptvChannels.SSDP
 
         private static SsdpServerInfo parseResponse(string strHeader, Dictionary<string, string> fields)
         {
-            SsdpServerInfo result = null;
-            SsdpServerInfoStatusEnum status;
-            string strSt;
+            bool bNotify;
             if (strHeader.StartsWith("HTTP/1") && strHeader.EndsWith(" 200 OK")) //HTTP/1.1 200 OK
-            {
-                if (!fields.TryGetValue("ST", out strSt))
-                    return null;
-
-                status = SsdpServerInfoStatusEnum.Alive;
-            }
+                bNotify = false;
             else if (strHeader.StartsWith("NOTIFY * HTTP/1.")) //NOTIFY * HTTP/1.1
-            {
-                if (fields.TryGetValue("NT", out strSt) && fields.TryGetValue("NTS", out string strNts))
-                {
-                    switch (strNts)
-                    {
-                        case "ssdp:alive":
-                            status = SsdpServerInfoStatusEnum.Alive;
-                            break;
-
-                        case "ssdp:update":
-                            status = SsdpServerInfoStatusEnum.Updated;
-                            break;
-
-                        case "ssdp:byebye":
-                            status = SsdpServerInfoStatusEnum.Dead;
-                            break;
-
-                        default:
-                            return null;
-                    }
-                }
-                else
-                    return null;
-            }
+                bNotify = true;
             else
                 return null;
 
-            if (fields.TryGetValue("LOCATION", out string strLocation) &&
-                fields.TryGetValue("USN", out string strUSN) &&
-                fields.TryGetValue("SERVER", out string strServer) &&
-                fields.TryGetValue("CACHE-CONTROL", out string strTmp) && strTmp.StartsWith("max-age=") && int.TryParse(strTmp.Substring(8), out int iMaxAge))
+            SsdpServerInfo result = null;
+            SsdpServerInfoStatusEnum status = SsdpServerInfoStatusEnum.Invalid;
+            string strSt = null;
+            string strLocation = null;
+            string strUSN = null;
+            string strServer = null;
+            int i;
+            int iCfgId = -1;
+            int iBootId = -1;
+            int iMaxAge = -1;
+
+            Dictionary<string, string> fieldsEx = new Dictionary<string, string>(); //extra fields
+            for (int iIdx = 0; iIdx < fields.Count; iIdx++)
             {
-                int iCfgId = -1;
-                int iBootId = -1;
-
-                if (strServer.Contains("UPnP/1.1"))
+                KeyValuePair<string, string> pair = fields.ElementAt(iIdx);
+                string strName = pair.Key.ToUpper();
+                switch (strName)
                 {
-                    if (!fields.TryGetValue("BOOTID.UPNP.ORG", out strTmp) || !int.TryParse(strTmp, out iBootId) ||
-                        !fields.TryGetValue("CONFIGID.UPNP.ORG", out strTmp) || !int.TryParse(strTmp, out iCfgId))
-                        return null;
-                }
+                    case "NT":
+                        if (bNotify)
+                            strSt = pair.Value;
+                        break;
 
-
-                //Get UUID first
-                //uuid:<device-UUID>::urn:<domain-name>:device:<deviceType>:<ver>
-                //uuid:<device-UUID>::urn:<domain-name>:service:<serviceType>:<ver>
-                int iIdxStart = strUSN.IndexOf("uuid:");
-                if (iIdxStart >= 0)
-                {
-                    iIdxStart += 5;
-                    int iIdxEnd = strUSN.IndexOf(':', iIdxStart);
-                    if (iIdxEnd > 0)
-                    {
-                        string strUUID = strUSN.Substring(iIdxStart, iIdxEnd - iIdxStart);
-                        iIdxStart = strUSN.IndexOf("::urn:", iIdxEnd);
-                        if (iIdxStart > 0)
+                    case "NTS":
+                        if (bNotify)
                         {
-                            string strDevType = strUSN.Substring(iIdxStart + 2);
-                            if (!string.IsNullOrWhiteSpace(strDevType))
+                            switch (pair.Value)
                             {
-                                //New device detected
-                                result = new SsdpServerInfo(strSt, strLocation, strUSN, strUUID,
-                                    strServer, iCfgId, iBootId, iMaxAge, fields);
+                                case "ssdp:alive":
+                                    status = SsdpServerInfoStatusEnum.Alive;
+                                    break;
+
+                                case "ssdp:update":
+                                    status = SsdpServerInfoStatusEnum.Updated;
+                                    break;
+
+                                case "ssdp:byebye":
+                                    status = SsdpServerInfoStatusEnum.Dead;
+                                    break;
+
+                                default:
+                                    return null;
                             }
+                        }
+                        break;
+
+                    case "ST":
+                        if (!bNotify)
+                        {
+                            strSt = pair.Value;
+                            status = SsdpServerInfoStatusEnum.Alive;
+                        }
+                        break;
+
+                    case "LOCATION":
+                        strLocation = pair.Value;
+                        break;
+
+                    case "USN":
+                        strUSN = pair.Value;
+                        break;
+
+                    case "SERVER":
+                        strServer = pair.Value;
+                        break;
+
+                    case "CACHE-CONTROL":
+                        iMaxAge = pair.Value.StartsWith("max-age=") && int.TryParse(pair.Value.Substring(8), out i) ? i : -1;
+                        break;
+
+                    case "BOOTID.UPNP.ORG":
+                        iBootId = int.TryParse(pair.Value, out i) ? i : -1;
+                        break;
+
+                    case "CONFIGID.UPNP.ORG":
+                        iCfgId = int.TryParse(pair.Value, out i) ? i : -1;
+                        break;
+
+                    default:
+                        fieldsEx.Add(pair.Key, pair.Value);
+                        break;
+                }
+            }
+
+            if (status == SsdpServerInfoStatusEnum.Invalid || iMaxAge < 0 || strLocation == null || strUSN == null || strServer == null)
+                return null;
+
+            if (strServer.Contains("UPnP/1.1") && (iBootId < 0 || iCfgId < 0))
+                return null;
+
+            //Get UUID first
+            //uuid:<device-UUID>::urn:<domain-name>:device:<deviceType>:<ver>
+            //uuid:<device-UUID>::urn:<domain-name>:service:<serviceType>:<ver>
+            int iIdxStart = strUSN.IndexOf("uuid:");
+            if (iIdxStart >= 0)
+            {
+                iIdxStart += 5;
+                int iIdxEnd = strUSN.IndexOf(':', iIdxStart);
+                if (iIdxEnd > 0)
+                {
+                    string strUUID = strUSN.Substring(iIdxStart, iIdxEnd - iIdxStart);
+                    iIdxStart = strUSN.IndexOf("::urn:", iIdxEnd);
+                    if (iIdxStart > 0)
+                    {
+                        string strDevType = strUSN.Substring(iIdxStart + 2);
+                        if (!string.IsNullOrWhiteSpace(strDevType))
+                        {
+                            //New device detected
+                            result = new SsdpServerInfo(strSt, strLocation, strUSN, strUUID,
+                                strServer, iCfgId, iBootId, iMaxAge, fieldsEx);
                         }
                     }
                 }
+
             }
 
             if (result != null)
@@ -769,7 +857,7 @@ namespace MediaPortal.IptvChannels.SSDP
 
                 try
                 {
-                    StringBuilder sb = new StringBuilder(1024);
+                    StringBuilder sb = new StringBuilder(2048);
                     sb.AppendLine("[servereInfoAddOrUpdate] Device discovered:");
                     serverInfo.PrintReport(sb);
                     sb.AppendLine();
@@ -875,7 +963,6 @@ namespace MediaPortal.IptvChannels.SSDP
                                 }
                                 this.initRefreshTimer();
                             }
-
                         }
                     }
                 }

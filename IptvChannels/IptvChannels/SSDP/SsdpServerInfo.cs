@@ -11,6 +11,8 @@ namespace MediaPortal.IptvChannels.SSDP
     public class SsdpServerInfo
     {
         private static Logger _Logger = LogManager.GetCurrentClassLogger();
+        private Dictionary<string, string> _HttpFields;
+        private List<XmlNode> _Nodes = new List<XmlNode>();
 
         /// <summary>
         /// Root device.
@@ -89,17 +91,20 @@ namespace MediaPortal.IptvChannels.SSDP
         /// </summary>
         public bool Parsed { get; private set; } = false;
 
-        #region SatIP specific properties
-        public int SatIpDeviceID { get; private set; } = -1;
-        public int SatIpRtspPort { get; private set; } = -1;
-        public string SatIpChannelListUrl { get; private set; }
-        public string SatIpCapabilities { get; private set; }
-        #endregion
-
         /// <summary>
         /// Current status.
         /// </summary>
         public SsdpServerInfoStatusEnum Status { get; internal set; } = SsdpServerInfoStatusEnum.Invalid;
+
+        /// <summary>
+        /// Extra http fields.
+        /// </summary>
+        public IEnumerable<KeyValuePair<string, string>> HttpFields => this._HttpFields;
+
+        /// <summary>
+        /// Extra description nodes.
+        /// </summary>
+        public IEnumerable<XmlNode> Nodes => this._Nodes;
 
         public bool IsValid
         {
@@ -121,15 +126,7 @@ namespace MediaPortal.IptvChannels.SSDP
             this.BootID = iBootId;
             this.MaxAge = iMaxAge;
             this.RefreshTimeStamp = DateTime.Now;
-
-            //SatIP
-            if (httpFields != null)
-            {
-                if (httpFields.TryGetValue("DEVICEID.SES.COM", out string str) && int.TryParse(str, out int i))
-                    this.SatIpDeviceID = i;
-                else
-                    this.SatIpDeviceID = -1;
-            }
+            this._HttpFields = httpFields;
         }
 
         public StringBuilder PrintReport(StringBuilder sb)
@@ -144,11 +141,16 @@ namespace MediaPortal.IptvChannels.SSDP
             sb.Append("ConfigID: ").Append(this.ConfigID).AppendLine();
             sb.AppendLine("Root:");
             this.RootDevice.PrintReport(sb, " ");
-
-            sb.Append("Sat>IP: Capabilities: ").AppendLine(this.SatIpCapabilities);
-            sb.Append("Sat>IP: ChannelListURL: ").AppendLine(this.SatIpChannelListUrl);
-            sb.Append("Sat>IP: DeviceID: ").Append(this.SatIpDeviceID).AppendLine();
-            sb.Append("Sat>IP: RtspPort: ").Append(this.SatIpRtspPort).AppendLine();
+            if (this._HttpFields?.Count > 0)
+            {
+                for (int i = 0; i < this._HttpFields.Count; i++)
+                {
+                    KeyValuePair<string, string> pair = this._HttpFields.ElementAt(i);
+                    sb.Append(pair.Key).Append(": ").AppendLine(pair.Value);
+                }
+            }
+            if (this._Nodes?.Count > 0)
+                this._Nodes.ForEach(n => sb.Append(n.Name).Append(": ").AppendLine(n.InnerText));
 
             return sb;
         }
@@ -178,10 +180,8 @@ namespace MediaPortal.IptvChannels.SSDP
                 this.SpecVersionMajor = si.SpecVersionMajor;
                 this.SpecVersionMinor = si.SpecVersionMinor;
 
-                this.SatIpCapabilities = si.SatIpCapabilities;
-                this.SatIpChannelListUrl = si.SatIpChannelListUrl;
-                this.SatIpRtspPort = si.SatIpRtspPort;
-                this.SatIpDeviceID = si.SatIpDeviceID;
+                this._HttpFields = si._HttpFields;
+                this._Nodes = si._Nodes;
 
                 this.Status = SsdpServerInfoStatusEnum.Updated;
                 return 1; //updated
@@ -213,7 +213,6 @@ namespace MediaPortal.IptvChannels.SSDP
         private bool parseDescription(XmlDocument xml, Dictionary<string, string> httpFields)
         {
             const string NS = "urn:schemas-upnp-org:device-1-0";
-            const string NS_SATIP = "urn:ses-com:satip";
 
             try
             {
@@ -224,28 +223,32 @@ namespace MediaPortal.IptvChannels.SSDP
                 if (this.ConfigID >= 0 && (!int.TryParse(nodeRoot.Attributes["configId"]?.Value, out int i) || this.ConfigID != i))
                     return false;
 
-                XmlNode nodeRootDev = nodeRoot["device", NS];
-                if (nodeRootDev == null)
-                    return false;
-
-                this.RootDevice = new SsdpServerInfoDevice(nodeRootDev, NS);
-
-                XmlNode nodeVersion = nodeRoot["specVersion", NS];
-                if (nodeVersion != null)
+                for (int iIdx = 0; iIdx < nodeRoot.ChildNodes.Count; iIdx++)
                 {
-                    this.SpecVersionMajor = int.Parse(nodeVersion["major", NS].InnerText);
-                    this.SpecVersionMinor = int.Parse(nodeVersion["minor", NS].InnerText);
+                    XmlNode node = nodeRoot.ChildNodes[iIdx];
+                    switch (node.Name)
+                    {
+                        case "device":
+                            if (node.NamespaceURI == NS)
+                                this.RootDevice = new SsdpServerInfoDevice(node, NS);
+                            break;
+
+                        case "specVersion":
+                            if (node.NamespaceURI == NS)
+                            {
+                                this.SpecVersionMajor = int.Parse(node["major", NS].InnerText);
+                                this.SpecVersionMinor = int.Parse(node["minor", NS].InnerText);
+                            }
+                            break;
+
+                        default:
+                            this._Nodes.Add(node);
+                            break;
+                    }
                 }
 
-                #region SatIP
-                this.SatIpCapabilities = nodeRootDev["X_SATIPCAP", NS_SATIP]?.InnerText;
-                this.SatIpChannelListUrl = nodeRootDev["X_SATIPM3U", NS_SATIP]?.InnerText;
-
-                if (httpFields.TryGetValue("X-SATIP-RTSP-Port", out string str) && int.TryParse(str, out i))
-                    this.SatIpRtspPort = i;
-                else
-                    this.SatIpRtspPort = -1;
-                #endregion
+                if (this.RootDevice == null)
+                    return false;
 
                 this.Parsed = true;
                 return true;
