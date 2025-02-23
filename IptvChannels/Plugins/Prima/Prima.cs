@@ -43,25 +43,15 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #region Overrides
         public override void Initialize(Plugin plugin)
         {
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_family/live_hd",  "p111013" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd",  "p111015" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_max/live_hd",  "p111017" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cool/live_hd",  "p111014" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_love/live_hd", "p111016" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_krimi/live_hd",  "p432829" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cnn/live_hd",  "p650443" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_star/live_hd",  "p846043" } };
-            //"http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_show/live_hd",  "p899572" } };
-
-            //this._ChannelList.Add(new IptvChannel(this, "PRIMA", "p111013", "Prima Web") { Tag = "iPrima" });
-            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd", "Prima ZOOM Web") { Tag = "p111015" });
-            //this._ChannelList.Add(new IptvChannel(this, "MAX", "p111017", "Prima MAX Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "COOL", "p111014", "Prima COOL Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "LOVE", "p111016", "Prima LOVE Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "KRIMI", "p432829", "Prima KRIMI Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "CNN", "p650443", "Prima CNN News Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "SHOW", "p899572", "Prima SHOW Web") { Tag = "iPrima" });
-            //this._ChannelList.Add(new IptvChannel(this, "STAR", "p846043", "Prima STAR Web") { Tag = "iPrima" });
+            this._ChannelList.Add(new IptvChannel(this, "PRIMA", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_family/live_hd", "Prima (Web)") { Tag = "p111013" });
+            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd", "Prima ZOOM (Web)") { Tag = "p111015" });
+            this._ChannelList.Add(new IptvChannel(this, "MAX", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_max/live_hd", "Prima MAX (Web)") { Tag = "p111017" });
+            this._ChannelList.Add(new IptvChannel(this, "COOL", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cool/live_hd", "Prima COOL (Web)") { Tag = "p111014" });
+            this._ChannelList.Add(new IptvChannel(this, "LOVE", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_love/live_hd", "Prima LOVE (Web)") { Tag = "p111016" });
+            this._ChannelList.Add(new IptvChannel(this, "KRIMI", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_krimi/live_hd", "Prima KRIMI (Web)") { Tag = "p432829" });
+            this._ChannelList.Add(new IptvChannel(this, "CNN", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cnn/live_hd", "Prima CNN News (Web)") { Tag = "p650443" });
+            this._ChannelList.Add(new IptvChannel(this, "SHOW", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_show/live_hd", "Prima SHOW (Web)") { Tag = "p899572" });
+            this._ChannelList.Add(new IptvChannel(this, "STAR", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_star/live_hd", "Prima STAR (Web)") { Tag = "p846043" });
 
             //Initialize base
             base.Initialize(plugin);
