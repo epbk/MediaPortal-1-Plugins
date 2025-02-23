@@ -26,6 +26,13 @@ namespace MediaPortal.IptvChannels.Proxy
             Terminate,
         }
 
+        private enum SendDataTypeEnum
+        {
+            Data,
+            Header,
+            HeaderError
+        }
+
         #region Private Fields
 
         private static NLog.Logger _Logger = LogManager.GetCurrentClassLogger();
@@ -61,6 +68,8 @@ namespace MediaPortal.IptvChannels.Proxy
         private Plugin.GetSiteLinkHandler getLinkHandler;
 
         private Dictionary<string, string> _HttpArguments;
+
+        private static Dictionary<string, DateTime> _BlackListUrl = new Dictionary<string, DateTime>();
         #endregion
 
         #region Public Fields
@@ -345,7 +354,7 @@ namespace MediaPortal.IptvChannels.Proxy
 
             bool bHeaderSent = false;
             int iAttempts = 5;
-            string strUrl;
+            string strUrl = null;
             byte[] buffer = null;
             Stream remoteStream = null;
             int iDataSize;
@@ -387,6 +396,13 @@ namespace MediaPortal.IptvChannels.Proxy
                             return;
                         }
 
+                        //Do not process invalid url not older than 60s
+                        if (_BlackListUrl.TryGetValue(strUrl, out DateTime dt) && (DateTime.Now - dt).TotalSeconds < 60)
+                        {
+                            _Logger.Error("[{0}][DoProcess] Blacklisted url: {1}", this._HandlerId, strUrl);
+                            goto ext;
+                        }
+
                         switch (this.StreamType)
                         {
                             case StreamTypeEnum.TransportStrem:
@@ -401,7 +417,7 @@ namespace MediaPortal.IptvChannels.Proxy
                                     if (!bHeaderSent)
                                     {
                                         // Send http OK to the clients
-                                        this.sendToAllClients(null, 0, 0, -1, true, false);
+                                        this.sendToAllClients(null, 0, 0, -1, SendDataTypeEnum.Header, false);
                                         bHeaderSent = true;
                                     }
 
@@ -556,9 +572,11 @@ namespace MediaPortal.IptvChannels.Proxy
                                             }
 
                                             _Logger.Error("[{0}][DoProcess] Unknown stream type.", this._HandlerId);
+                                            rq.Close();
                                             return;
                                         }
                                     }
+                                    rq.Close();
                                 }
                                 catch (Exception ex)
                                 {
@@ -571,7 +589,16 @@ namespace MediaPortal.IptvChannels.Proxy
 
                     Thread.Sleep(500);
                 }
+
+                //Put the url into blacklist
+                if (strUrl != null)
+                    _BlackListUrl[strUrl] = DateTime.Now;
+
+               ext:
+                if (!bHeaderSent)
+                    this.sendToAllClients(null, 0, 0, 0, SendDataTypeEnum.HeaderError, false);
             }
+
             catch (Exception ex)
             {
                 _Logger.Error("[{3}][DoProcess] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace, this._HandlerId);
@@ -635,7 +662,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 startInfo.Arguments = " -re -i " + strUrl + ' ' + (this.Args ?? Database.dbSettings.Instance.FfmpegStreamArguments) + " -f mpegts udp://127.0.0.1:" + udp.Port;
 
                 // Send http OK
-                this.sendToAllClients(null, 0, 0, -1, true, false);
+                this.sendToAllClients(null, 0, 0, -1, SendDataTypeEnum.Header, false);
 
                 if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][ffmpeg][DoProcess] Starting FFmpeg: {1}", this._HandlerId, startInfo.Arguments);
 
@@ -690,7 +717,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 this.Info = "Connecting to VLC ...";
 
                 // Send http OK
-                this.sendToAllClients(null, 0, 0, -1, true, false);
+                this.sendToAllClients(null, 0, 0, -1, SendDataTypeEnum.Header, false);
 
                 //Start VLC streaming
                 int iId = VlcControlManager.Instance.StreamingStart(strUrl, udp.Port);
@@ -897,10 +924,14 @@ namespace MediaPortal.IptvChannels.Proxy
 
         private void sendHttpHeader(RemoteClient client)
         {
+            this.sendHttpHeader(client, createHttpResponse());
+        }
+        private void sendHttpHeader(RemoteClient client, string strResponse)
+        {
             if (!client.HttpResponseSent)
             {
                 //First place into buffer default http response
-                byte[] resp = Encoding.ASCII.GetBytes(this.createHttpResponse(client));
+                byte[] resp = Encoding.ASCII.GetBytes(strResponse);
 
                 client.WriteData(resp, 0, resp.Length);
 
@@ -908,7 +939,7 @@ namespace MediaPortal.IptvChannels.Proxy
             }
         }
 
-        private string createHttpResponse(RemoteClient client)
+        private static string createHttpResponse()
         {
             StringBuilder sb = new StringBuilder(128);
 
@@ -925,6 +956,22 @@ namespace MediaPortal.IptvChannels.Proxy
 
             string strResp = sb.ToString();
             if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[CreateHttpResponse] Response:\r\n" + strResp);
+            return strResp;
+        }
+
+        private static string createHttpErrorResponse()
+        {
+            StringBuilder sb = new StringBuilder(128);
+
+            sb.Append("HTTP/1.1 404 Not Found");
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+
+            sb.Append("Connection: close");
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+            sb.Append(Pbk.Net.Http.HttpHeaderField.EOL);
+
+            string strResp = sb.ToString();
+            if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[CreateHttpErrorResponse] Response:\r\n" + strResp);
             return strResp;
         }
 
@@ -954,11 +1001,11 @@ namespace MediaPortal.IptvChannels.Proxy
 
         private int sendToAllClients(byte[] buffer, int iOffset, int iLength)
         {
-            this.sendToAllClients(buffer, iOffset, iLength, -1, false, true);
+            this.sendToAllClients(buffer, iOffset, iLength, -1, SendDataTypeEnum.Data, true);
 
             return 0;
         }
-        private void sendToAllClients(byte[] buffer, int iOffset, int iLength, int iMinSendLength, bool bHttpHeaderOnly, bool bCount)
+        private void sendToAllClients(byte[] buffer, int iOffset, int iLength, int iMinSendLength, SendDataTypeEnum dataType, bool bCount)
         {
             if (iLength > this._SendPeek)
             {
@@ -972,7 +1019,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 {
                     RemoteClient client = this._ClientList[iIdx];
 
-                    if (bHttpHeaderOnly && client.HttpResponseSent)
+                    if (dataType != SendDataTypeEnum.Data && client.HttpResponseSent)
                         continue;
 
                     int iClientOffset = iOffset;
@@ -984,9 +1031,12 @@ namespace MediaPortal.IptvChannels.Proxy
                         {
                             lock (client)
                             {
-                                if (bHttpHeaderOnly)
+                                if (dataType != SendDataTypeEnum.Data)
                                 {
-                                    this.sendHttpHeader(client);
+                                    if (dataType == SendDataTypeEnum.HeaderError)
+                                        this.sendHttpHeader(client, createHttpErrorResponse());
+                                    else
+                                        this.sendHttpHeader(client);
                                     client.SendTs = DateTime.Now;
                                 }
                                 else
@@ -1052,7 +1102,7 @@ namespace MediaPortal.IptvChannels.Proxy
                 }
             }
 
-            if (!bHttpHeaderOnly && bCount)
+            if (dataType == SendDataTypeEnum.Data && bCount)
                 this._DataCounter += (ulong)iLength;
         }
 
