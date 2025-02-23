@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prima", "Plugins\Prima\Prim
 		{4AD9E867-38C9-4049-9191-429E9EDACB01} = {4AD9E867-38C9-4049-9191-429E9EDACB01}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nova", "Plugins\Nova\Nova.csproj", "{31BB86FB-4882-4118-960A-B9813E1E8916}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,14 @@ Global
 		{5C75DE17-46EF-459F-A601-CA53E8CFC71A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C75DE17-46EF-459F-A601-CA53E8CFC71A}.Release|x86.ActiveCfg = Release|x86
 		{5C75DE17-46EF-459F-A601-CA53E8CFC71A}.Release|x86.Build.0 = Release|x86
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Debug|x86.Build.0 = Debug|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Release|x86.ActiveCfg = Release|Any CPU
+		{31BB86FB-4882-4118-960A-B9813E1E8916}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
