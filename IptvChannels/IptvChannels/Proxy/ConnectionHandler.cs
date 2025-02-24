@@ -6,6 +6,7 @@ using System.Threading;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using System.Linq;
 using NLog;
 
 namespace MediaPortal.IptvChannels.Proxy
@@ -358,6 +359,7 @@ namespace MediaPortal.IptvChannels.Proxy
             byte[] buffer = null;
             Stream remoteStream = null;
             int iDataSize;
+            Pbk.Net.Http.HttpUserWebRequest rq = null;
 
             try
             {
@@ -397,10 +399,21 @@ namespace MediaPortal.IptvChannels.Proxy
                         }
 
                         //Do not process invalid url not older than 60s
-                        if (_BlackListUrl.TryGetValue(strUrl, out DateTime dt) && (DateTime.Now - dt).TotalSeconds < 60)
+                        lock (_BlackListUrl)
                         {
-                            _Logger.Error("[{0}][DoProcess] Blacklisted url: {1}", this._HandlerId, strUrl);
-                            goto ext;
+                            if (_BlackListUrl.TryGetValue(strUrl, out DateTime dt) && (DateTime.Now - dt).TotalSeconds < 60)
+                            {
+                                _Logger.Error("[{0}][DoProcess] Blacklisted url: {1}", this._HandlerId, strUrl);
+                                goto ext;
+                            }
+
+                            //Remove old records
+                            for (int i = _BlackListUrl.Count - 1; i >= 0; i--)
+                            {
+                                KeyValuePair<string, DateTime> pair = _BlackListUrl.ElementAt(i);
+                                if ((DateTime.Now - pair.Value).TotalSeconds >= 60)
+                                    _BlackListUrl.Remove(pair.Key);
+                            }
                         }
 
                         switch (this.StreamType)
@@ -537,7 +550,7 @@ namespace MediaPortal.IptvChannels.Proxy
 
                                 try
                                 {
-                                    Pbk.Net.Http.HttpUserWebRequest rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl, this.HttpArguments);
+                                    rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl, this.HttpArguments);
                                     remoteStream = rq.GetResponseStream();
                                     if (rq.HttpResponseCode == HttpStatusCode.OK)
                                     {
@@ -572,7 +585,6 @@ namespace MediaPortal.IptvChannels.Proxy
                                             }
 
                                             _Logger.Error("[{0}][DoProcess] Unknown stream type.", this._HandlerId);
-                                            rq.Close();
                                             return;
                                         }
                                     }
@@ -592,7 +604,12 @@ namespace MediaPortal.IptvChannels.Proxy
 
                 //Put the url into blacklist
                 if (strUrl != null)
-                    _BlackListUrl[strUrl] = DateTime.Now;
+                {
+                    lock (_BlackListUrl)
+                    {
+                        _BlackListUrl[strUrl] = DateTime.Now;
+                    }
+                }
 
                ext:
                 if (!bHeaderSent)
@@ -605,6 +622,7 @@ namespace MediaPortal.IptvChannels.Proxy
             }
             finally
             {
+                rq?.Close();
                 this.close();
                 if (Log.LogLevel <= LogLevel.Debug) _Logger.Debug("[{0}][DoProcess] Closed.", this._HandlerId);
             }

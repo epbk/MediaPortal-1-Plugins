@@ -24,6 +24,7 @@ namespace MediaPortal.IptvChannels.Proxy
         private Socket _Socket = null;
         private Stream _RemoteStream = null;
         //private IPEndPoint _RemoteEndpoint;
+        private Pbk.Net.Http.HttpUserWebRequest _Request = null;
 
         private SendHandler _ClientDataCallback;
 
@@ -116,15 +117,20 @@ namespace MediaPortal.IptvChannels.Proxy
 
             try
             {
-                Pbk.Net.Http.HttpUserWebRequest rq = new Pbk.Net.Http.HttpUserWebRequest(strUrl);
-                this._RemoteStream = rq.GetResponseStream();
-                if (rq.HttpResponseCode != HttpStatusCode.OK)
+                this._Request = new Pbk.Net.Http.HttpUserWebRequest(strUrl);
+                this._RemoteStream = this._Request.GetResponseStream();
+                if (this._Request.HttpResponseCode != HttpStatusCode.OK)
+                {
                     this._RemoteStream = null;
+                    this._Request.Close();
+                }
             }
             catch (Exception ex)
             {
                 _Logger.Error("[ctor] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
                 this._RemoteStream = null;
+                this._Request.Close();
+                this._Request = null;
             }
         }
 
@@ -166,6 +172,12 @@ namespace MediaPortal.IptvChannels.Proxy
             {
                 this._RemoteStream.Close();
                 this._RemoteStream = null;
+            }
+
+            if (this._Request != null)
+            {
+                this._Request.Close();
+                this._Request = null;
             }
         }
 
