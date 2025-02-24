@@ -34,7 +34,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public Nova()
         {
             //Basics
-            this._Version = "1.0.0";
+            this._Version = "1.0.1";
             this._Author = "Pbk";
             this._Description = "Nova";
         }
@@ -49,6 +49,8 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             this._ChannelList.Add(new IptvChannel(this, "FUN", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova2/live_fullhd", "Nova Fun (Web)") { Tag = "nova-fun" });
             this._ChannelList.Add(new IptvChannel(this, "GOLD", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-gold/live_fullhd", "Nova Gold (Web)") { Tag = "nova-gold" });
             this._ChannelList.Add(new IptvChannel(this, "LADY", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-lady/live_fullhd", "Nova Lady (Web)") { Tag = "nova-lady" });
+            this._ChannelList.Add(new IptvChannel(this, "SPORT1", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-sport1/live_fullhd", "Nova Sport 1 (Web)") { Tag = "nova-sport-1" });
+            this._ChannelList.Add(new IptvChannel(this, "SPORT2", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-sport2/live_fullhd", "Nova Sport 2 (Web)") { Tag = "nova-sport-2" });
             this._ChannelList.Add(new IptvChannel(this, "NEWS", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-news/live_fullhd", "Nova Live News (Web)") { Tag = "nova-news" });
             this._ChannelList.Add(new IptvChannel(this, "SVET", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-aptn/live_fullhd", "Nova Live Svět (Web)") { Tag = "nova-svet" });
             this._ChannelList.Add(new IptvChannel(this, "LIVE3", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/nova-4/live_fullhd", "Nova Live 3 (Web)") { Tag = "nova-live3" });
