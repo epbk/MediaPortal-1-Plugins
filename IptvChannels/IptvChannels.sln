@@ -21,6 +21,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prima", "Plugins\Prima\Prim
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nova", "Plugins\Nova\Nova.csproj", "{31BB86FB-4882-4118-960A-B9813E1E8916}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4AD9E867-38C9-4049-9191-429E9EDACB01} = {4AD9E867-38C9-4049-9191-429E9EDACB01}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
