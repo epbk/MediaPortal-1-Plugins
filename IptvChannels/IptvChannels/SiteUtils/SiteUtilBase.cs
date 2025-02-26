@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.ComponentModel;
 using MediaPortal.Pbk.Cornerstone.Database;
 using System.Web;
@@ -156,14 +157,13 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }
 
-        [Browsable(false)]
-        public IEnumerable<IptvChannel> Channels
-        {
-            get
-            {
-                return this._ChannelList;
-            }
-        }
+        [Category("Channels")]
+        [TypeConverter(typeof(ValueConverter))]
+        [DisplayName("Channel list")]
+        public IptvChannelCollection Channels { get; }
+        
+
+        internal XmlNode ChannelSettings;
         #endregion
 
         #region ctor
@@ -171,6 +171,11 @@ namespace MediaPortal.IptvChannels.SiteUtils
         static SiteUtilBase()
         {
             //LoadDll.InitDll();
+        }
+
+        public SiteUtilBase()
+        {
+            this.Channels = new IptvChannelCollection(this._ChannelList);
         }
 
         #endregion
@@ -187,6 +192,21 @@ namespace MediaPortal.IptvChannels.SiteUtils
             //this.Logger.Info(string.Format("Plugin has starded. Version " + assembly.GetName().Version.ToString() + " ."));
             this._Logger.Info(string.Format("Plugin has started. Version " + this._Version));
             this._ParentPlugin = plugin;
+
+            //Init channel settings
+            if (this.ChannelSettings != null)
+            {
+                this.Channels.ForEach(ch =>
+                {
+                    XmlNode n = this.ChannelSettings.SelectSingleNode("./Channel[@id='" + ch.Id + "']");
+                    if (n != null)
+                    {
+                        ch.Enabled = n.Attributes["enabled"].Value.Equals("true", StringComparison.OrdinalIgnoreCase);
+                        ch.GrabEPG = n.Attributes["grabEpg"].Value.Equals("true", StringComparison.OrdinalIgnoreCase);
+                    }
+                });
+            }
+
             this._Initialized = true;
         }
 
@@ -210,6 +230,19 @@ namespace MediaPortal.IptvChannels.SiteUtils
             return false; 
         }
 
+        #endregion
+
+        #region Public methods
+        internal void ExportChannels(XmlDocument xml, XmlNode node)
+        {
+            this.Channels.ForEach(ch =>
+            {
+                XmlNode n = node.AppendChild(xml.CreateElement("Channel"));
+                n.Attributes.Append(xml.CreateAttribute("id")).Value = ch.Id;
+                n.Attributes.Append(xml.CreateAttribute("enabled")).Value = ch.Enabled.ToString();
+                n.Attributes.Append(xml.CreateAttribute("grabEpg")).Value = ch.GrabEPG.ToString();
+            });
+        }
         #endregion
 
         #region Overrides

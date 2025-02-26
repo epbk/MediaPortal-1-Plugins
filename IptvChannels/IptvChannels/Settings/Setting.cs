@@ -83,6 +83,8 @@ namespace MediaPortal.IptvChannels.Settings
                                     }
                                 }
 
+                                site.ChannelSettings = siteNode.SelectSingleNode("./ChannelList");
+
                                 //Next site
                                 break;
                             }
@@ -148,6 +150,9 @@ namespace MediaPortal.IptvChannels.Settings
                             }
                         }
                     }
+
+                    //Export channel's settings
+                    site.ExportChannels(xmldoc, siteNode.AppendChild(xmldoc.CreateElement("ChannelList")));
                 }
 
                 xmldoc.Save(GetConfigPath());

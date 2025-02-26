@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TvDatabase;
+using System.ComponentModel;
 
 namespace MediaPortal.IptvChannels.SiteUtils
 {
+    [TypeConverter(typeof(ValueConverter))]
     public class IptvChannel
     {
         #region Variables
-        public bool Enabled = true;
         public Channel Channel = null;
         public ProgramList EpgProgramList = null;
 
@@ -21,11 +22,15 @@ namespace MediaPortal.IptvChannels.SiteUtils
         public int ServiceID = -1;
         public int NetworkID = -1;
         public int PmtID = -1;
-
+        public int Identifier = -1;
         public object Tag;
         #endregion
 
         #region Properties
+        [Description("True to add the channel to TV Server channel list.")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public bool Enabled { get; set; } = true;
+
         public string Id
         {
             get
@@ -33,6 +38,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
                 return this._Id;
             }
         }private readonly string _Id;
+
+        [Browsable(false)]
         public string Name
         {
             get
@@ -40,6 +47,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
                 return this._Name;
             }
         }private readonly string _Name;
+
+        [Browsable(false)]
         public string Url
         {
             get
@@ -47,6 +56,8 @@ namespace MediaPortal.IptvChannels.SiteUtils
                 return this._Url;
             }
         }private readonly string _Url;
+
+        [Browsable(false)]
         public string TvServerLink
         {
             get
@@ -90,7 +101,7 @@ namespace MediaPortal.IptvChannels.SiteUtils
             }
         }private string _TvServerLink = null;
 
-
+        [Browsable(false)]
         public SiteUtilBase SiteUtil
         {
             get
@@ -98,14 +109,19 @@ namespace MediaPortal.IptvChannels.SiteUtils
                 return this._SiteUtil;
             }
         }private readonly SiteUtilBase _SiteUtil;
+
+        [Description("True to allow grab the EPG for this channel by the plugin.")]
+        [DisplayName("Grab EPG")]
+        [Editor(typeof(Pbk.Controls.UIEditor.CheckBoxUIEditor), typeof(System.Drawing.Design.UITypeEditor))]
+        public bool GrabEPG { get; set; } = true;
         #endregion
 
         #region ctor
-        public IptvChannel(SiteUtilBase site, string strId, string strUrl, string StrName, string strTvServerLink = null)
+        public IptvChannel(SiteUtilBase site, string strId, string strUrl, string strName, string strTvServerLink = null)
         {
             this._SiteUtil = site;
             this._Id = strId;
-            this._Name = StrName;
+            this._Name = strName;
             this._Url = strUrl;
             this._TvServerLink = strTvServerLink;
         }

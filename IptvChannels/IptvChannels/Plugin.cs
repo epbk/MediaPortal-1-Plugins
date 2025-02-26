@@ -393,7 +393,7 @@ namespace MediaPortal.IptvChannels
                         //Insert ProgrammList into TV channel
                         foreach (SiteUtils.IptvChannel channel in util.Channels)
                         {
-                            if (!channel.Enabled)
+                            if (!channel.Enabled || !channel.GrabEPG)
                                 continue;
 
                             if (channel.Channel != null && channel.EpgProgramList != null)

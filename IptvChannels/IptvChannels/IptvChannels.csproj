@@ -135,6 +135,9 @@
     <Compile Include="Controls\DataGridViewDropEventHandler.cs" />
     <Compile Include="Controls\DataGridViewRowTypeEnum.cs" />
     <Compile Include="Controls\UIEditor\StreamingEngineConverter.cs" />
+    <Compile Include="SiteUtils\IptvChannelCollection.cs" />
+    <Compile Include="SiteUtils\IptvChannelPropertyDescriptor.cs" />
+    <Compile Include="SiteUtils\ValueConverter.cs" />
     <Compile Include="Database\dbContentProtectionBox.cs" />
     <Compile Include="Database\dbContentProtectionKey.cs" />
     <Compile Include="GenerateLinkConfiguration.cs" />
