@@ -34,7 +34,7 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         public Prima()
         {
             //Basics
-            this._Version = "1.0.0";
+            this._Version = "1.1.0";
             this._Author = "Pbk";
             this._Description = "Prima";
         }
@@ -43,15 +43,15 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
         #region Overrides
         public override void Initialize(Plugin plugin)
         {
-            this._ChannelList.Add(new IptvChannel(this, "PRIMA", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_family/live_hd", "Prima (Web)") { Tag = "p111013" });
-            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd", "Prima ZOOM (Web)") { Tag = "p111015" });
-            this._ChannelList.Add(new IptvChannel(this, "MAX", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_max/live_hd", "Prima MAX (Web)") { Tag = "p111017" });
-            this._ChannelList.Add(new IptvChannel(this, "COOL", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cool/live_hd", "Prima COOL (Web)") { Tag = "p111014" });
-            this._ChannelList.Add(new IptvChannel(this, "LOVE", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_love/live_hd", "Prima LOVE (Web)") { Tag = "p111016" });
-            this._ChannelList.Add(new IptvChannel(this, "KRIMI", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_krimi/live_hd", "Prima KRIMI (Web)") { Tag = "p432829" });
-            this._ChannelList.Add(new IptvChannel(this, "CNN", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cnn/live_hd", "Prima CNN News (Web)") { Tag = "p650443" });
-            this._ChannelList.Add(new IptvChannel(this, "SHOW", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_show/live_hd", "Prima SHOW (Web)") { Tag = "p899572" });
-            this._ChannelList.Add(new IptvChannel(this, "STAR", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_star/live_hd", "Prima STAR (Web)") { Tag = "p846043" });
+            this._ChannelList.Add(new IptvChannel(this, "PRIMA", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_family/live_hd", "Prima") { Tag = "p111013" });
+            this._ChannelList.Add(new IptvChannel(this, "ZOOM" , "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_zoom/live_hd", "Prima ZOOM") { Tag = "p111015" });
+            this._ChannelList.Add(new IptvChannel(this, "MAX", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_max/live_hd", "Prima MAX") { Tag = "p111017" });
+            this._ChannelList.Add(new IptvChannel(this, "COOL", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cool/live_hd", "Prima COOL") { Tag = "p111014" });
+            this._ChannelList.Add(new IptvChannel(this, "LOVE", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_love/live_hd", "Prima LOVE") { Tag = "p111016" });
+            this._ChannelList.Add(new IptvChannel(this, "KRIMI", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_krimi/live_hd", "Prima KRIMI") { Tag = "p432829" });
+            this._ChannelList.Add(new IptvChannel(this, "CNN", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_cnn/live_hd", "CNN Prima News") { Tag = "p650443" });
+            this._ChannelList.Add(new IptvChannel(this, "SHOW", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_show/live_hd", "Prima SHOW") { Tag = "p899572" });
+            this._ChannelList.Add(new IptvChannel(this, "STAR", "http://rpprod.hbbtv.cdn.cra.cz:8080/hbbTV/prima_star/live_hd", "Prima STAR") { Tag = "p846043" });
 
             //Initialize base
             base.Initialize(plugin);
@@ -67,6 +67,64 @@ namespace MediaPortal.IptvChannels.SiteUtils.Sites
             }
         }
 
+        public override bool RefreshEpg()
+        {
+            this._Logger.Debug("[RefreshEpg] RefreshEpg started...");
+            try
+            {
+                DateTime dt = DateTime.Today;
+                for (int i = 0; i < 3; i++)
+                {
+                    JToken jEpg = Pbk.Net.Http.HttpUserWebRequest.Download<JToken>("http://dispatcher.hybridtv.cra.cz/prima-json-rpc/",
+                        post: Encoding.ASCII.GetBytes("{\"jsonrpc\":\"2.0\",\"method\":\"epg.program.bulk.list\",\"params\":{\"channelIds\":[\"prima\",\"cnn_prima_news\",\"prima_cool\",\"prima_max\",\"prima_krimi\",\"prima_love\",\"prima_zoom\",\"prima_show\",\"prima_star\"],\"from\":null,\"to\":null,\"date\":{\"date\":\"" + dt.ToString("yyyy-MM-dd") + "\"}},\"id\":\"1\"}"),
+                        strContentType: Pbk.Net.Http.HttpHeaderField.HTTP_CONTENT_TYPE_APPLICATION_JSON);
+
+                    dt = dt.AddDays(1);
+
+                    this._ChannelList.ForEach(channel =>
+                    {
+                        if (!channel.Enabled || !channel.GrabEPG)
+                            return;
+
+                        if (channel.EpgProgramList == null)
+                            channel.EpgProgramList = new ProgramList();
+                        else
+                            channel.EpgProgramList.Clear();
+
+                        foreach (JToken j in jEpg.SelectTokens("$.result.data[?(@.playId=='" + (string)channel.Tag + "')].items[*]"))
+                        {
+                            string strGenre = j["type"]?.Value<string>();
+                            if (strGenre != null && strGenre.Equals("movie", StringComparison.OrdinalIgnoreCase))
+                                strGenre = "Film";
+                            else
+                            {
+                                JToken jGenre = j["genres"]?.First;
+                                if (jGenre != null)
+                                    strGenre = (string)jGenre;
+                                else
+                                    strGenre = string.Empty;
+                            }
+
+                            channel.EpgProgramList.Add(new Program(
+                                channel.Channel.IdChannel,
+                                (DateTime)j["programStartTime"],
+                                (DateTime)j["programEndTime"],
+                                (string)j["title"],(string)j["description"], strGenre,
+                                Program.ProgramState.None, System.Data.SqlTypes.SqlDateTime.MinValue.Value, string.Empty, string.Empty,
+                                string.Empty, string.Empty, 0, string.Empty, 0
+                                ));
+                        }
+                    });
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                this._Logger.Error("[RefreshEpg] Error: {0} {1} {2}", ex.Message, ex.Source, ex.StackTrace);
+                return false;
+            }
+        }
         #endregion
 
         #region Private methods
